@@ -25,3 +25,10 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Aturan AI Agent (Khusus Lokal)
+rulespjbl.md
+/amunisi/
+/.claude/
+CLAUDE.md
+AGENTS.md
+
