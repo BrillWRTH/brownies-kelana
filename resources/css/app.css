@@ -2,8 +2,62 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Playfair Display', Georgia, Cambria, serif;
+
+    --color-cocoa-950: #28211c;
+    --color-cocoa-900: #492d1a;
+    --color-cocoa-800: #52311a;
+    --color-cocoa-700: #67442f;
+    --color-cocoa-600: #7d563c;
+    --color-cocoa-500: #936b49;
+    --color-caramel-500: #b18950;
+    --color-caramel-400: #c7a26d;
+    --color-cream-50: #fdfbf6;
+    --color-cream-100: #f9eddd;
+    --color-cream-200: #f2e4cd;
+    --color-cream-300: #e9dcc7;
+    --color-cream-400: #dfc8ab;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: #fdfbf6;
+        color: #28211c;
+        font-family: var(--font-sans);
+    }
+}
+
+/* Gaya tombol dan kartu khas Brownies Kelana */
+.btn-kelana-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#52311a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#492d1a] focus:outline-none focus:ring-2 focus:ring-[#b18950]/50 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-kelana-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#52311a] bg-white px-5 py-2.5 text-sm font-semibold text-[#52311a] transition hover:bg-[#f9eddd] focus:outline-none focus:ring-2 focus:ring-[#b18950]/40;
+}
+
+.kelana-input {
+    @apply w-full rounded-lg border border-[#d6c5b3] bg-white px-3.5 py-2.5 text-sm text-[#28211c] placeholder-[#a09083] transition focus:border-[#52311a] focus:outline-none focus:ring-2 focus:ring-[#b18950]/30;
+}
+
+.kelana-label {
+    @apply mb-1.5 block text-xs font-semibold tracking-wide text-[#52311a];
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+    }
 }
