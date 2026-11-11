@@ -46,8 +46,11 @@
                 <a href="{{ route('admin.orders.edit', $order) }}" class="btn-kelana-outline px-3 py-2 text-xs">Edit Detail</a>
                 <a href="{{ route('admin.orders.receipt', $order) }}" class="btn-kelana-outline px-3 py-2 text-xs">Cetak Nota</a>
                 <a href="{{ $customerWhatsappUrl }}" target="_blank" rel="noopener"
-                    class="inline-flex items-center rounded-lg bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-800">
-                    Chat WhatsApp &nearr;
+                    class="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-800">
+                    <span>Chat WhatsApp</span>
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -158,8 +161,11 @@
                                     </p>
                                 @endif
                                 @if($order->maps_url)
-                                    <a href="{{ $order->maps_url }}" target="_blank" rel="noopener" class="mt-1 inline-block font-bold text-[#52311a] hover:underline">
-                                        Buka Titik di Maps &nearr;
+                                    <a href="{{ $order->maps_url }}" target="_blank" rel="noopener" class="mt-1 inline-flex items-center gap-1 font-bold text-[#52311a] hover:underline">
+                                        <span>Buka Titik di Maps</span>
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                                        </svg>
                                     </a>
                                 @endif
                             @endif

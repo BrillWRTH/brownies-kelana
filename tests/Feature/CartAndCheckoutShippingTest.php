@@ -12,6 +12,8 @@ use App\Models\StoreSetting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CartAndCheckoutShippingTest extends TestCase
@@ -205,6 +207,86 @@ class CartAndCheckoutShippingTest extends TestCase
             'distance_km' => 30.5,
         ])->assertOk()
             ->assertJsonPath('shipping.within_range', false);
+    }
+
+    /**
+     * Memastikan server mengabaikan manipulasi jarak frontend, menolak varian habis, dan menolak zona/pickup nonaktif.
+     */
+    public function test_checkout_ignores_tampered_distance_and_rejects_unavailable_variants_or_inactive_shipping(): void
+    {
+        Config::set('services.midtrans.server_key', 'SB-Mid-server-TESTKEY');
+        Http::fake([
+            'https://app.sandbox.midtrans.com/snap/v1/transactions' => Http::response([
+                'token' => 'snap-token-security-test',
+                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v4/redirection/snap-token-security-test',
+            ], 201),
+        ]);
+
+        $customer = User::query()->where('email', 'sinta@example.com')->firstOrFail();
+        $product = Product::query()->where('slug', 'brownies-original')->with('variants')->firstOrFail();
+        $variant = $product->variants->first();
+        $storeSetting = StoreSetting::current();
+        $openDate = $this->findFirstAvailableDate($storeSetting);
+
+        $this->actingAs($customer);
+
+        // 1. Varian yang tidak tersedia ditolak masuk keranjang
+        $variant->update(['is_available' => false]);
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ])->assertRedirect()
+            ->assertSessionHas('error');
+
+        $variant->update(['is_available' => true]);
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ])->assertRedirect();
+
+        // 2. Mode ongkir jarak: kirim koordinat jauh (Malang ~80 km) dengan manipulasi delivery_distance_km = 0.5 => wajib ditolak!
+        $storeSetting->update([
+            'shipping_method' => 'distance',
+            'distance_base_km' => 3.0,
+            'distance_base_fee' => 10000,
+            'distance_per_km_fee' => 2500,
+            'distance_max_km' => 25.0,
+        ]);
+
+        $this->post(route('checkout.store'), [
+            'customer_name' => $customer->name,
+            'customer_email' => $customer->email,
+            'customer_phone' => '081234567890',
+            'delivery_type' => 'delivery',
+            'recipient_name' => $customer->name,
+            'recipient_phone' => '081234567890',
+            'delivery_address' => 'Alun-alun Malang',
+            'delivery_latitude' => -7.9826,
+            'delivery_longitude' => 112.6308,
+            'delivery_distance_km' => 0.5,
+            'scheduled_date' => $openDate,
+            'scheduled_time_slot' => '09.00-11.00 WIB',
+            'payment_method' => 'midtrans_snap',
+        ])->assertSessionHasErrors('delivery_address');
+
+        // 3. Pickup nonaktif ditolak
+        $pickup = PickupLocation::query()->where('is_active', true)->firstOrFail();
+        $pickup->update(['is_active' => false]);
+
+        $this->post(route('checkout.store'), [
+            'customer_name' => $customer->name,
+            'customer_email' => $customer->email,
+            'customer_phone' => '081234567890',
+            'delivery_type' => 'pickup',
+            'pickup_location_id' => $pickup->id,
+            'recipient_name' => $customer->name,
+            'recipient_phone' => '081234567890',
+            'scheduled_date' => $openDate,
+            'scheduled_time_slot' => '09.00-11.00 WIB',
+            'payment_method' => 'midtrans_snap',
+        ])->assertSessionHasErrors('pickup_location_id');
     }
 
     /**

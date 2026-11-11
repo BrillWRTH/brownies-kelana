@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Notifications\OrderLifecycleNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class Order extends Model
 {
@@ -159,20 +164,36 @@ class Order extends Model
     }
 
     /**
-     * Memeriksa apakah batas waktu pembayaran telah terlewati tanpa pelunasan.
+     * Memeriksa batas waktu pembayaran secara atomik agar aman terhadap eksekusi paralel.
      */
     public function expireIfPastDeadline(): bool
     {
         if (
-            $this->order_status === 'menunggu_pembayaran'
-            && $this->payment_status === 'belum_dibayar'
-            && $this->payment_deadline_at
-            && now()->gt($this->payment_deadline_at)
+            $this->order_status !== 'menunggu_pembayaran'
+            || $this->payment_status !== 'belum_dibayar'
+            || ! $this->payment_deadline_at
+            || ! now()->gt($this->payment_deadline_at)
         ) {
+            return false;
+        }
+
+        $expiredOrder = DB::transaction(function (): ?self {
+            $lockedOrder = static::query()->lockForUpdate()->find($this->id);
+
+            if (
+                ! $lockedOrder
+                || $lockedOrder->order_status !== 'menunggu_pembayaran'
+                || $lockedOrder->payment_status !== 'belum_dibayar'
+                || ! $lockedOrder->payment_deadline_at
+                || ! now()->gt($lockedOrder->payment_deadline_at)
+            ) {
+                return null;
+            }
+
             $setting = StoreSetting::current();
             $expiredOrderStatus = $setting->auto_cancel_status === 'dibatalkan' ? 'dibatalkan' : 'kedaluwarsa';
 
-            $this->update([
+            $lockedOrder->update([
                 'order_status' => $expiredOrderStatus,
                 'payment_status' => 'kedaluwarsa',
                 'cancelled_at' => now(),
@@ -180,47 +201,70 @@ class Order extends Model
                 'cancellation_reason' => 'Batas waktu pembayaran telah berakhir.',
             ]);
 
-            if ($latestPayment = $this->latestPayment) {
+            if ($latestPayment = $lockedOrder->latestPayment) {
                 $latestPayment->update(['status' => 'expire']);
             }
 
-            $this->logs()->create([
+            $lockedOrder->logs()->create([
                 'actor_name' => 'Sistem',
                 'event_type' => 'status_changed',
                 'title' => 'Pesanan Kedaluwarsa Otomatis',
                 'description' => 'Batas waktu pembayaran berakhir tanpa pembayaran terkonfirmasi.',
             ]);
 
-            if ($this->user_id) {
+            if ($lockedOrder->user_id) {
                 UserNotification::create([
-                    'user_id' => $this->user_id,
-                    'order_id' => $this->id,
+                    'user_id' => $lockedOrder->user_id,
+                    'order_id' => $lockedOrder->id,
                     'audience' => 'customer',
                     'category' => 'pesanan',
                     'channel' => 'dashboard',
                     'title' => 'Pesanan Kedaluwarsa',
-                    'message' => 'Pesanan '.$this->order_number.' melewati batas pembayaran 30 menit dan ditutup otomatis.',
+                    'message' => 'Pesanan '.$lockedOrder->order_number.' melewati batas pembayaran dan ditutup otomatis.',
                     'delivery_status' => 'terkirim',
-                    'action_url' => route('orders.show', $this->order_number),
+                    'action_url' => route('orders.show', $lockedOrder->order_number),
                 ]);
             }
 
             UserNotification::create([
                 'user_id' => null,
-                'order_id' => $this->id,
+                'order_id' => $lockedOrder->id,
                 'audience' => 'admin',
                 'category' => 'pesanan',
                 'channel' => 'dashboard',
                 'title' => 'Pesanan Kedaluwarsa Otomatis',
-                'message' => $this->order_number.' · '.$this->customer_name.' melewati batas bayar dan dibatalkan otomatis oleh sistem.',
+                'message' => $lockedOrder->order_number.' · '.$lockedOrder->customer_name.' melewati batas bayar dan dibatalkan otomatis oleh sistem.',
                 'delivery_status' => 'terkirim',
-                'action_url' => route('admin.orders.show', $this),
+                'action_url' => route('admin.orders.show', $lockedOrder),
             ]);
 
-            return true;
+            return $lockedOrder;
+        });
+
+        if (! $expiredOrder) {
+            return false;
         }
 
-        return false;
+        $this->refresh();
+
+        if (! empty($expiredOrder->customer_email)) {
+            try {
+                Notification::route('mail', $expiredOrder->customer_email)->notify(
+                    new OrderLifecycleNotification(
+                        $expiredOrder,
+                        'Pesanan '.$expiredOrder->order_number.' Kedaluwarsa — Brownies Kelana',
+                        'Batas waktu pembayaran untuk pesanan ini telah berakhir.',
+                        'Pesanan Anda ditutup otomatis karena tidak ada pembayaran terkonfirmasi sebelum tenggat waktu. Anda dapat membuat pesanan baru kapan saja melalui katalog kami.',
+                        'Lihat Detail Pesanan',
+                        route('orders.show', $expiredOrder->order_number)
+                    )
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Gagal mengirim email kedaluwarsa pesanan '.$expiredOrder->order_number.': '.$exception->getMessage());
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -259,17 +303,21 @@ class Order extends Model
     }
 
     /**
-     * Menghasilkan nomor pesanan berurutan dengan format BC-XXXX.
+     * Menghasilkan nomor pesanan berurutan yang aman dari duplikasi dengan format BC-XXXX.
      */
     public static function generateOrderNumber(): string
     {
-        $lastOrder = static::query()->orderByDesc('id')->first();
+        $lastOrder = static::query()->lockForUpdate()->orderByDesc('id')->first();
         $nextNumber = 1040;
 
         if ($lastOrder && preg_match('/(\d+)$/', $lastOrder->order_number, $matches)) {
             $nextNumber = max(1040, ((int) $matches[1]) + 1);
         } elseif ($lastOrder) {
             $nextNumber = 1040 + $lastOrder->id;
+        }
+
+        while (static::query()->where('order_number', 'BC-'.$nextNumber)->exists()) {
+            $nextNumber++;
         }
 
         return 'BC-'.$nextNumber;

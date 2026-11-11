@@ -11,7 +11,12 @@
                 <h1 class="text-xl font-bold text-[#28211c]">Edit Produk: {{ $product->name }}</h1>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('products.show', $product) }}" target="_blank" class="btn-kelana-outline px-3 py-2 text-xs">Lihat di Toko &nearr;</a>
+                <a href="{{ route('products.show', $product) }}" target="_blank" class="btn-kelana-outline inline-flex items-center gap-1 px-3 py-2 text-xs">
+                    <span>Lihat di Toko</span>
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                    </svg>
+                </a>
                 <a href="{{ route('admin.products.index') }}" class="btn-kelana-outline px-4 py-2 text-xs">&larr; Daftar Produk</a>
             </div>
         </div>

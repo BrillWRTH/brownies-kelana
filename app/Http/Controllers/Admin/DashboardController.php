@@ -210,22 +210,22 @@ class DashboardController extends Controller
                     : ($order->delivery_address ?? '-');
 
                 fputcsv($handle, [
-                    $order->order_number,
-                    $order->created_at?->format('Y-m-d H:i'),
-                    $order->source === 'whatsapp' ? 'WhatsApp Manual' : 'Website',
-                    $order->customer_name,
-                    $order->customer_phone,
-                    $order->delivery_type === 'pickup' ? 'Pickup' : 'Pengiriman',
-                    $location,
-                    $order->scheduled_date?->format('Y-m-d'),
-                    $order->scheduled_time_slot,
-                    $itemsText,
+                    $this->sanitizeCsvCell($order->order_number),
+                    $this->sanitizeCsvCell($order->created_at?->format('Y-m-d H:i')),
+                    $this->sanitizeCsvCell($order->source === 'whatsapp' ? 'WhatsApp Manual' : 'Website'),
+                    $this->sanitizeCsvCell($order->customer_name),
+                    $this->sanitizeCsvCell($order->customer_phone),
+                    $this->sanitizeCsvCell($order->delivery_type === 'pickup' ? 'Pickup' : 'Pengiriman'),
+                    $this->sanitizeCsvCell($location),
+                    $this->sanitizeCsvCell($order->scheduled_date?->format('Y-m-d')),
+                    $this->sanitizeCsvCell($order->scheduled_time_slot),
+                    $this->sanitizeCsvCell($itemsText),
                     $order->subtotal,
                     $order->shipping_fee,
                     $order->total_amount,
-                    $order->paymentStatusLabel(),
-                    $order->latestPayment?->channel_label ?? '-',
-                    $order->orderStatusLabel(),
+                    $this->sanitizeCsvCell($order->paymentStatusLabel()),
+                    $this->sanitizeCsvCell($order->latestPayment?->channel_label ?? '-'),
+                    $this->sanitizeCsvCell($order->orderStatusLabel()),
                 ]);
             }
 
@@ -233,5 +233,18 @@ class DashboardController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Mencegah eksekusi formula Excel/spreadsheet pada sel teks hasil ekspor CSV.
+     */
+    protected function sanitizeCsvCell(?string $value): string
+    {
+        $text = (string) ($value ?? '');
+        if ($text !== '' && preg_match('/^[=+\-@\t\r]/', $text) === 1) {
+            return "'".$text;
+        }
+
+        return $text;
     }
 }

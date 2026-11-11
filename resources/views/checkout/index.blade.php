@@ -431,7 +431,7 @@
 
                 const formatRp = (num) => 'Rp ' + parseInt(num || 0, 10).toLocaleString('id-ID');
 
-                const updateShippingSummary = async (overrideDistanceKm = null) => {
+                const updateShippingSummary = async () => {
                     const deliveryType = document.querySelector('.delivery-type-radio:checked')?.value || 'delivery';
                     const zoneSelect = document.getElementById('shipping_zone_id');
                     const payload = {
@@ -439,7 +439,6 @@
                         shipping_zone_id: zoneSelect ? zoneSelect.value : null,
                         latitude: latInput ? latInput.value : null,
                         longitude: lngInput ? lngInput.value : null,
-                        distance_km: overrideDistanceKm !== null ? overrideDistanceKm : (distInput.value || null),
                     };
 
                     try {
@@ -455,6 +454,15 @@
                         const data = await res.json();
                         if (!data.shipping) {
                             return;
+                        }
+
+                        if (distInput) {
+                            distInput.value = data.shipping.distance_km ?? '';
+                        }
+                        if (distanceBadge) {
+                            distanceBadge.textContent = data.shipping.distance_km
+                                ? `Jarak estimasi server: ${data.shipping.distance_km} km`
+                                : (shippingMethod === 'distance' ? 'Estimasi jarak otomatis' : 'Titik lokasi tersimpan');
                         }
 
                         const formattedTotal = formatRp(subtotal + data.shipping.fee);
@@ -551,37 +559,14 @@
                     // Marker Tujuan Pengiriman (Draggable)
                     const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
 
-                    const onCoordinateChanged = async (lat, lng) => {
+                    const onCoordinateChanged = (lat, lng) => {
                         const roundedLat = parseFloat(lat).toFixed(6);
                         const roundedLng = parseFloat(lng).toFixed(6);
                         latInput.value = roundedLat;
                         lngInput.value = roundedLng;
                         coordPreview.textContent = `Koordinat: ${roundedLat}, ${roundedLng}`;
                         mapsPreviewLink.href = `https://maps.google.com/?q=${roundedLat},${roundedLng}`;
-
-                        let roadKm = null;
-                        if (shippingMethod === 'distance') {
-                            distanceBadge.textContent = 'Menghitung rute OSRM...';
-                            try {
-                                const osrmRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${storeLng},${storeLat};${roundedLng},${roundedLat}?overview=false`);
-                                const osrmJson = await osrmRes.json();
-                                if (osrmJson.routes && osrmJson.routes.length > 0) {
-                                    roadKm = (osrmJson.routes[0].distance / 1000).toFixed(2);
-                                }
-                            } catch (e) {
-                                roadKm = null;
-                            }
-                        }
-
-                        if (roadKm !== null) {
-                            distInput.value = roadKm;
-                            distanceBadge.textContent = `Estimasi jarak rute: ${roadKm} km`;
-                            updateShippingSummary(roadKm);
-                        } else {
-                            distInput.value = '';
-                            distanceBadge.textContent = shippingMethod === 'distance' ? 'Estimasi jarak otomatis' : 'Titik tersimpan';
-                            updateShippingSummary(null);
-                        }
+                        updateShippingSummary();
                     };
 
                     marker.on('dragend', () => {

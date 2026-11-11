@@ -263,7 +263,7 @@
                 </div>
 
                 <div class="rounded-xl border border-[#efe7dc] bg-[#fdfbf6] p-4 space-y-3">
-                    <p class="text-xs font-bold text-[#52311a]">Rumus Tarif Jarak Pengiriman (Peta Leaflet + OSRM)</p>
+                    <p class="text-xs font-bold text-[#52311a]">Rumus Tarif Jarak Pengiriman (Peta Leaflet + Haversine Server)</p>
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
                             <label for="distance_base_km" class="kelana-label">Jarak Dasar Termasuk (Km) *</label>

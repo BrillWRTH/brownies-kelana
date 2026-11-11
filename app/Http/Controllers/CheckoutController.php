@@ -10,6 +10,7 @@ use App\Models\PickupLocation;
 use App\Models\ShippingZone;
 use App\Models\StoreSetting;
 use App\Models\UserNotification;
+use App\Notifications\OrderLifecycleNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
+use RuntimeException;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -26,7 +31,7 @@ class CheckoutController extends Controller
      */
     public function index(Request $request): View|RedirectResponse
     {
-        // 1. Ambil keranjang pengguna dan pastikan tidak kosong
+        // 1. Ambil keranjang pengguna dan pastikan tidak kosong serta item masih tersedia
         $user = Auth::user();
         $cart = Cart::query()
             ->with(['items.product.images', 'items.variant'])
@@ -36,6 +41,20 @@ class CheckoutController extends Controller
         if (! $cart || $cart->items->isEmpty()) {
             return redirect()->route('products.index')
                 ->with('error', 'Keranjang belanja kamu masih kosong. Pilih produk terlebih dahulu.');
+        }
+
+        foreach ($cart->items as $cartItem) {
+            if (
+                ! $cartItem->product
+                || ! $cartItem->product->is_active
+                || ! $cartItem->product->is_available
+                || ($cartItem->product_variant_id && (! $cartItem->variant || ! $cartItem->variant->is_available))
+            ) {
+                $productTitle = $cartItem->product?->name ?? 'Salah satu produk';
+
+                return redirect()->route('cart.index')
+                    ->with('error', $productTitle.' di keranjangmu sedang habis atau dinonaktifkan. Perbarui keranjang sebelum checkout.');
+            }
         }
 
         // 2. Muat pengaturan toko, lokasi pickup aktif, zona ongkir, dan kalender H-1
@@ -52,7 +71,13 @@ class CheckoutController extends Controller
         // 3. Susun data kalender untuk bulan berjalan dan bulan depan beserta kuota H-1
         $calendarDays = $this->buildCalendarDays($storeSetting);
         $defaultAvailableDay = collect($calendarDays)->firstWhere('available', true);
-        $initialShipping = $storeSetting->calculateShippingFee('delivery', $shippingZones->first()?->id);
+        $defaultLat = (float) ($user->saved_latitude ?? -7.3318500);
+        $defaultLng = (float) ($user->saved_longitude ?? 112.7244100);
+        $defaultDistance = $storeSetting->shipping_method === 'distance'
+            ? $storeSetting->calculateDistanceKm($defaultLat, $defaultLng)
+            : null;
+
+        $initialShipping = $storeSetting->calculateShippingFee('delivery', $shippingZones->first()?->id, $defaultDistance);
 
         return view('checkout.index', compact(
             'user',
@@ -75,24 +100,27 @@ class CheckoutController extends Controller
         $validated = $request->validate([
             'delivery_type' => ['required', 'in:delivery,pickup'],
             'shipping_zone_id' => ['nullable', 'integer'],
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'distance_km' => ['nullable', 'numeric', 'min:0'],
             'scheduled_date' => ['nullable', 'date'],
         ]);
 
-        // 2. Hitung jarak apabila metode ongkir toko adalah jarak dan koordinat tersedia
+        // 2. Hitung jarak otoritatif dari koordinat lat/lng apabila tersedia (fallback distance_km hanya jika koordinat tidak dikirim)
         $storeSetting = StoreSetting::current();
-        $distanceKm = isset($validated['distance_km']) ? (float) $validated['distance_km'] : null;
+        $distanceKm = null;
         if (
-            $distanceKm === null
-            && $validated['delivery_type'] === 'delivery'
+            $validated['delivery_type'] === 'delivery'
             && isset($validated['latitude'], $validated['longitude'])
+            && $validated['latitude'] !== ''
+            && $validated['longitude'] !== ''
         ) {
             $distanceKm = $storeSetting->calculateDistanceKm(
                 (float) $validated['latitude'],
                 (float) $validated['longitude']
             );
+        } elseif (isset($validated['distance_km']) && $validated['distance_km'] !== '') {
+            $distanceKm = (float) $validated['distance_km'];
         }
 
         // 3. Hitung ongkos kirim dan ketersediaan jadwal tanggal
@@ -114,20 +142,20 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Memvalidasi checkout, membuat pesanan, dan menyiapkan sesi pembayaran Midtrans.
+     * Memvalidasi checkout, menghitung tarif otoritatif di server, membuat pesanan, dan meminta token Midtrans Snap asli.
      */
     public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $storeSetting = StoreSetting::current();
 
-        // 1. Pastikan keranjang belanja memiliki item yang aktif
-        $cart = Cart::query()
-            ->with(['items.product', 'items.variant'])
+        // 1. Pastikan keranjang belanja memiliki item
+        $cartExists = Cart::query()
             ->where('user_id', $user->id)
-            ->first();
+            ->whereHas('items')
+            ->exists();
 
-        if (! $cart || $cart->items->isEmpty()) {
+        if (! $cartExists) {
             return redirect()->route('products.index')
                 ->with('error', 'Keranjang belanja kamu kosong.');
         }
@@ -145,9 +173,8 @@ class CheckoutController extends Controller
             'recipient_secondary_phone' => ['nullable', 'string', 'max:25'],
             'delivery_address' => ['required_if:delivery_type,delivery', 'nullable', 'string', 'max:1000'],
             'delivery_address_detail' => ['nullable', 'string', 'max:500'],
-            'delivery_latitude' => ['nullable', 'numeric'],
-            'delivery_longitude' => ['nullable', 'numeric'],
-            'delivery_distance_km' => ['nullable', 'numeric', 'min:0'],
+            'delivery_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'delivery_longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'shipping_zone_id' => ['nullable', 'exists:shipping_zones,id'],
             'scheduled_date' => ['required', 'date'],
             'scheduled_time_slot' => ['required', 'string', 'max:50'],
@@ -160,28 +187,76 @@ class CheckoutController extends Controller
             'recipient_name.required' => 'Nama penerima atau pengambil wajib diisi.',
             'recipient_phone.required' => 'Nomor telepon penerima/pengambil wajib diisi.',
             'delivery_address.required_if' => 'Alamat pengiriman wajib diisi.',
+            'delivery_latitude.between' => 'Koordinat lintang pengiriman tidak valid.',
+            'delivery_longitude.between' => 'Koordinat bujur pengiriman tidak valid.',
             'scheduled_date.required' => 'Pilih tanggal pengiriman atau pengambilan.',
             'payment_method.required' => 'Pilih metode pembayaran Midtrans.',
         ]);
 
-        // 3. Periksa aturan jadwal H-1, hari libur, jam buka, dan kuota harian
-        $scheduleCheck = $storeSetting->checkScheduleDate($validated['scheduled_date']);
-        if (! $scheduleCheck['available']) {
-            return back()->withInput()->withErrors(['scheduled_date' => $scheduleCheck['reason']]);
+        // 3. Periksa kredensial Midtrans Snap sebelum memproses transaksi
+        $serverKey = (string) config('services.midtrans.server_key');
+        if (trim($serverKey) === '') {
+            return back()->withInput()->with('error', 'Konfigurasi gateway pembayaran Midtrans belum aktif. Hubungi admin toko.');
         }
 
-        // 4. Hitung subtotal produk dan ongkos kirim secara akurat di server
-        $subtotal = $cart->subtotalAmount();
-        $distanceKm = isset($validated['delivery_distance_km']) && $validated['delivery_distance_km'] !== ''
-            ? (float) $validated['delivery_distance_km']
-            : null;
+        // 4. Periksa lokasi pickup aktif, zona ongkir aktif, serta slot waktu operasional
+        $pickupLocation = null;
+        if ($validated['delivery_type'] === 'pickup') {
+            $pickupLocation = PickupLocation::query()
+                ->where('is_active', true)
+                ->find($validated['pickup_location_id'] ?? 0);
 
-        if (
-            $distanceKm === null
-            && $validated['delivery_type'] === 'delivery'
-            && ! empty($validated['delivery_latitude'])
-            && ! empty($validated['delivery_longitude'])
-        ) {
+            if (! $pickupLocation) {
+                return back()->withInput()->withErrors([
+                    'pickup_location_id' => 'Lokasi pengambilan yang dipilih sudah tidak aktif.',
+                ]);
+            }
+        }
+
+        $selectedZoneId = null;
+        if ($validated['delivery_type'] === 'delivery' && $storeSetting->shipping_method === 'zone') {
+            if (! empty($validated['shipping_zone_id'])) {
+                $zone = ShippingZone::query()
+                    ->where('is_active', true)
+                    ->find((int) $validated['shipping_zone_id']);
+
+                if (! $zone) {
+                    return back()->withInput()->withErrors([
+                        'shipping_zone_id' => 'Zona pengiriman yang dipilih sudah tidak aktif.',
+                    ]);
+                }
+                $selectedZoneId = $zone->id;
+            } else {
+                $defaultZone = ShippingZone::query()->where('is_active', true)->orderBy('fee')->first();
+                if (! $defaultZone) {
+                    return back()->withInput()->withErrors([
+                        'shipping_zone_id' => 'Belum ada zona pengiriman aktif yang tersedia.',
+                    ]);
+                }
+                $selectedZoneId = $defaultZone->id;
+            }
+        }
+
+        $allowedSlots = $storeSetting->delivery_slots ?? ['09.00-11.00 WIB', '13.00-15.00 WIB'];
+        if (! in_array($validated['scheduled_time_slot'], $allowedSlots, true)) {
+            return back()->withInput()->withErrors([
+                'scheduled_time_slot' => 'Slot waktu pengiriman/pengambilan yang dipilih tidak tersedia.',
+            ]);
+        }
+
+        // 5. Hitung jarak otoritatif di backend (abaikan delivery_distance_km dari frontend agar tidak dapat dimanipulasi)
+        $distanceKm = null;
+        if ($validated['delivery_type'] === 'delivery' && $storeSetting->shipping_method === 'distance') {
+            if (
+                ! isset($validated['delivery_latitude'], $validated['delivery_longitude'])
+                || $validated['delivery_latitude'] === ''
+                || $validated['delivery_longitude'] === ''
+            ) {
+                return back()->withInput()->withErrors([
+                    'delivery_address' => 'Tentukan titik koordinat alamat di peta terlebih dahulu untuk menghitung ongkir jarak.',
+                ]);
+            }
+
             $distanceKm = $storeSetting->calculateDistanceKm(
                 (float) $validated['delivery_latitude'],
                 (float) $validated['delivery_longitude']
@@ -190,7 +265,7 @@ class CheckoutController extends Controller
 
         $shipping = $storeSetting->calculateShippingFee(
             $validated['delivery_type'],
-            isset($validated['shipping_zone_id']) ? (int) $validated['shipping_zone_id'] : null,
+            $selectedZoneId,
             $distanceKm
         );
 
@@ -200,115 +275,159 @@ class CheckoutController extends Controller
             ]);
         }
 
-        $totalAmount = $subtotal + $shipping['fee'];
         $mapsUrl = null;
-        if ($validated['delivery_type'] === 'pickup' && ! empty($validated['pickup_location_id'])) {
-            $pickupLocation = PickupLocation::find($validated['pickup_location_id']);
-            $mapsUrl = $pickupLocation?->maps_url;
+        if ($validated['delivery_type'] === 'pickup' && $pickupLocation) {
+            $mapsUrl = $pickupLocation->maps_url;
         } elseif (! empty($validated['delivery_latitude']) && ! empty($validated['delivery_longitude'])) {
             $mapsUrl = 'https://maps.google.com/?q='.$validated['delivery_latitude'].','.$validated['delivery_longitude'];
         } elseif (! empty($validated['delivery_address'])) {
             $mapsUrl = 'https://maps.google.com/?q='.urlencode($validated['delivery_address']);
         }
 
-        // 5. Simpan pesanan, rincian item, log awal, transaksi Midtrans, dan kosongkan keranjang dalam transaksi DB
-        $order = DB::transaction(function () use ($user, $cart, $validated, $storeSetting, $subtotal, $shipping, $totalAmount, $mapsUrl): Order {
-            $orderNumber = Order::generateOrderNumber();
-            $deadline = now()->addMinutes((int) $storeSetting->payment_timeout_minutes);
+        // 6. Simpan pesanan, rincian item, log awal, panggil API Midtrans Snap asli, dan kosongkan keranjang secara atomik
+        try {
+            $order = DB::transaction(function () use (
+                $user,
+                $validated,
+                $storeSetting,
+                $shipping,
+                $selectedZoneId,
+                $mapsUrl,
+                $serverKey
+            ): Order {
+                $lockedCart = Cart::query()
+                    ->with(['items.product', 'items.variant'])
+                    ->where('user_id', $user->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            $createdOrder = Order::create([
-                'order_number' => $orderNumber,
-                'user_id' => $user->id,
-                'source' => 'website',
-                'customer_name' => $validated['customer_name'],
-                'customer_email' => $validated['customer_email'] ?: $user->email,
-                'customer_phone' => $validated['customer_phone'],
-                'customer_secondary_phone' => $validated['customer_secondary_phone'] ?? null,
-                'delivery_type' => $validated['delivery_type'],
-                'pickup_location_id' => $validated['delivery_type'] === 'pickup' ? $validated['pickup_location_id'] : null,
-                'recipient_name' => $validated['recipient_name'],
-                'recipient_phone' => $validated['recipient_phone'],
-                'recipient_secondary_phone' => $validated['recipient_secondary_phone'] ?? null,
-                'delivery_address' => $validated['delivery_type'] === 'delivery' ? $validated['delivery_address'] : null,
-                'delivery_address_detail' => $validated['delivery_type'] === 'delivery' ? ($validated['delivery_address_detail'] ?? null) : null,
-                'delivery_latitude' => $validated['delivery_latitude'] ?? null,
-                'delivery_longitude' => $validated['delivery_longitude'] ?? null,
-                'delivery_distance_km' => $shipping['distance_km'],
-                'shipping_zone_id' => $validated['delivery_type'] === 'delivery' && $shipping['method'] === 'zone' ? ($validated['shipping_zone_id'] ?? null) : null,
-                'shipping_method_snapshot' => $shipping['method'],
-                'maps_url' => $mapsUrl,
-                'scheduled_date' => $validated['scheduled_date'],
-                'scheduled_time_slot' => $validated['scheduled_time_slot'],
-                'subtotal' => $subtotal,
-                'shipping_fee' => $shipping['fee'],
-                'total_amount' => $totalAmount,
-                'customer_note' => trim((string) ($validated['customer_note'] ?? $cart->order_note ?? '')) ?: null,
-                'order_status' => 'menunggu_pembayaran',
-                'payment_status' => 'belum_dibayar',
-                'payment_deadline_at' => $deadline,
-            ]);
+                if (! $lockedCart || $lockedCart->items->isEmpty()) {
+                    throw new RuntimeException('CART_EMPTY');
+                }
 
-            foreach ($cart->items as $cartItem) {
-                $unitPrice = $cartItem->unitPrice();
-                OrderItem::create([
-                    'order_id' => $createdOrder->id,
-                    'product_id' => $cartItem->product_id,
-                    'product_variant_id' => $cartItem->product_variant_id,
-                    'product_name' => $cartItem->product->name,
-                    'variant_name' => $cartItem->variant?->name,
-                    'unit_price' => $unitPrice,
-                    'quantity' => $cartItem->quantity,
-                    'subtotal' => $unitPrice * $cartItem->quantity,
-                    'custom_note' => $cartItem->custom_note,
+                // Periksa ulang ketersediaan setiap item & varian secara langsung dari database
+                $subtotal = 0;
+                $itemDetails = [];
+                foreach ($lockedCart->items as $cartItem) {
+                    $product = $cartItem->product;
+                    $variant = $cartItem->variant;
+
+                    if (
+                        ! $product
+                        || ! $product->is_active
+                        || ! $product->is_available
+                        || ($cartItem->product_variant_id && (! $variant || $variant->product_id !== $product->id || ! $variant->is_available))
+                    ) {
+                        $itemLabel = $product?->name ?? 'Produk';
+                        throw new RuntimeException('UNAVAILABLE_ITEM:'.$itemLabel);
+                    }
+
+                    $unitPrice = $cartItem->unitPrice();
+                    $lineTotal = $unitPrice * (int) $cartItem->quantity;
+                    $subtotal += $lineTotal;
+
+                    $itemDetails[] = [
+                        'id' => $variant ? 'PRD-'.$product->id.'-V'.$variant->id : 'PRD-'.$product->id,
+                        'price' => $unitPrice,
+                        'quantity' => (int) $cartItem->quantity,
+                        'name' => mb_substr($product->name.($variant ? ' - '.$variant->name : ''), 0, 50),
+                    ];
+                }
+
+                // Periksa kembali aturan H-1 dan kuota harian di dalam transaksi agar bebas kondisi balapan
+                $scheduleCheck = $storeSetting->checkScheduleDate($validated['scheduled_date']);
+                if (! $scheduleCheck['available']) {
+                    throw new RuntimeException('SCHEDULE_INVALID:'.$scheduleCheck['reason']);
+                }
+
+                if ($shipping['fee'] > 0) {
+                    $itemDetails[] = [
+                        'id' => 'SHIPPING',
+                        'price' => (int) $shipping['fee'],
+                        'quantity' => 1,
+                        'name' => mb_substr($shipping['label'], 0, 50),
+                    ];
+                }
+
+                $totalAmount = $subtotal + (int) $shipping['fee'];
+                $orderNumber = Order::generateOrderNumber();
+                $deadline = now()->addMinutes((int) $storeSetting->payment_timeout_minutes);
+                $customerEmail = trim((string) ($validated['customer_email'] ?: $user->email));
+
+                $createdOrder = Order::create([
+                    'order_number' => $orderNumber,
+                    'user_id' => $user->id,
+                    'source' => 'website',
+                    'customer_name' => $validated['customer_name'],
+                    'customer_email' => $customerEmail,
+                    'customer_phone' => $validated['customer_phone'],
+                    'customer_secondary_phone' => $validated['customer_secondary_phone'] ?? null,
+                    'delivery_type' => $validated['delivery_type'],
+                    'pickup_location_id' => $validated['delivery_type'] === 'pickup' ? $validated['pickup_location_id'] : null,
+                    'recipient_name' => $validated['recipient_name'],
+                    'recipient_phone' => $validated['recipient_phone'],
+                    'recipient_secondary_phone' => $validated['recipient_secondary_phone'] ?? null,
+                    'delivery_address' => $validated['delivery_type'] === 'delivery' ? $validated['delivery_address'] : null,
+                    'delivery_address_detail' => $validated['delivery_type'] === 'delivery' ? ($validated['delivery_address_detail'] ?? null) : null,
+                    'delivery_latitude' => $validated['delivery_latitude'] ?? null,
+                    'delivery_longitude' => $validated['delivery_longitude'] ?? null,
+                    'delivery_distance_km' => $shipping['distance_km'],
+                    'shipping_zone_id' => $validated['delivery_type'] === 'delivery' && $shipping['method'] === 'zone' ? $selectedZoneId : null,
+                    'shipping_method_snapshot' => $shipping['method'],
+                    'maps_url' => $mapsUrl,
+                    'scheduled_date' => $validated['scheduled_date'],
+                    'scheduled_time_slot' => $validated['scheduled_time_slot'],
+                    'subtotal' => $subtotal,
+                    'shipping_fee' => (int) $shipping['fee'],
+                    'total_amount' => $totalAmount,
+                    'customer_note' => trim((string) ($validated['customer_note'] ?? $lockedCart->order_note ?? '')) ?: null,
+                    'order_status' => 'menunggu_pembayaran',
+                    'payment_status' => 'belum_dibayar',
+                    'payment_deadline_at' => $deadline,
                 ]);
-            }
 
-            $createdOrder->logs()->create([
-                'user_id' => $user->id,
-                'actor_name' => $user->name,
-                'event_type' => 'created',
-                'title' => 'Pesanan Dibuat',
-                'description' => 'Pesanan dibuat melalui checkout website. Batas pembayaran '.(int) $storeSetting->payment_timeout_minutes.' menit.',
-            ]);
+                foreach ($lockedCart->items as $cartItem) {
+                    $unitPrice = $cartItem->unitPrice();
+                    OrderItem::create([
+                        'order_id' => $createdOrder->id,
+                        'product_id' => $cartItem->product_id,
+                        'product_variant_id' => $cartItem->product_variant_id,
+                        'product_name' => $cartItem->product->name,
+                        'variant_name' => $cartItem->variant?->name,
+                        'unit_price' => $unitPrice,
+                        'quantity' => $cartItem->quantity,
+                        'subtotal' => $unitPrice * $cartItem->quantity,
+                        'custom_note' => $cartItem->custom_note,
+                    ]);
+                }
 
-            // Buat data transaksi Midtrans (Snap API jika server_key diisi, atau simulasi VA/QRIS lokal)
-            $midtransOrderId = $orderNumber.'-'.now()->format('His');
-            $channelLabels = [
-                'midtrans_snap' => 'Midtrans Snap',
-                'qris' => 'Midtrans · QRIS',
-                'credit_card' => 'Midtrans · Kartu Kredit/Debit',
-                'mandiri_va' => 'Midtrans · Mandiri Virtual Account',
-                'bca_va' => 'Midtrans · BCA Virtual Account',
-                'gopay' => 'Midtrans · GoPay',
-            ];
+                $createdOrder->logs()->create([
+                    'user_id' => $user->id,
+                    'actor_name' => $user->name,
+                    'event_type' => 'created',
+                    'title' => 'Pesanan Dibuat',
+                    'description' => 'Pesanan dibuat melalui checkout website. Batas pembayaran '.(int) $storeSetting->payment_timeout_minutes.' menit.',
+                ]);
 
-            $paymentData = [
-                'order_id' => $createdOrder->id,
-                'gateway' => 'midtrans',
-                'payment_method' => $validated['payment_method'],
-                'channel_label' => $channelLabels[$validated['payment_method']] ?? 'Midtrans Snap',
-                'midtrans_order_id' => $midtransOrderId,
-                'amount' => $totalAmount,
-                'status' => 'pending',
-                'expires_at' => $deadline,
-            ];
+                // 7. Minta Snap Token resmi langsung dari Midtrans Snap API (tanpa simulasi/generator lokal)
+                $midtransOrderId = $orderNumber.'-'.now()->format('His');
+                $channelLabels = [
+                    'midtrans_snap' => 'Midtrans Snap',
+                    'qris' => 'Midtrans · QRIS',
+                    'credit_card' => 'Midtrans · Kartu Kredit/Debit',
+                    'mandiri_va' => 'Midtrans · Mandiri Virtual Account',
+                    'bca_va' => 'Midtrans · BCA Virtual Account',
+                    'gopay' => 'Midtrans · GoPay',
+                ];
 
-            if ($validated['payment_method'] === 'mandiri_va') {
-                $numericPart = str_pad((string) $createdOrder->id, 7, '0', STR_PAD_LEFT);
-                $paymentData['va_bank'] = 'mandiri';
-                $paymentData['biller_code'] = '70012';
-                $paymentData['bill_key'] = $numericPart.'2026';
-                $paymentData['va_number'] = '70012'.$numericPart.'2026';
-            } elseif ($validated['payment_method'] === 'bca_va') {
-                $numericPart = str_pad((string) $createdOrder->id, 8, '0', STR_PAD_LEFT);
-                $paymentData['va_bank'] = 'bca';
-                $paymentData['va_number'] = '80777081'.$numericPart;
-            } elseif ($validated['payment_method'] === 'qris') {
-                $paymentData['qris_string'] = '00020101021226620015ID.CO.MIDTRANS.WWW0118936009120000000000520454995303360540'.strlen((string) $totalAmount).$totalAmount.'5802ID5915BROWNIES KELANA6008SIDOARJO6304BC10';
-            }
+                $enabledPaymentsMap = [
+                    'qris' => ['other_qris', 'gopay'],
+                    'credit_card' => ['credit_card'],
+                    'mandiri_va' => ['echannel'],
+                    'bca_va' => ['bca_va'],
+                    'gopay' => ['gopay'],
+                ];
 
-            $serverKey = config('services.midtrans.server_key');
-            if (! empty($serverKey)) {
                 $snapBaseUrl = config('services.midtrans.is_production')
                     ? 'https://app.midtrans.com/snap/v1/transactions'
                     : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
@@ -318,65 +437,137 @@ class CheckoutController extends Controller
                         'order_id' => $midtransOrderId,
                         'gross_amount' => $totalAmount,
                     ],
+                    'item_details' => $itemDetails,
                     'customer_details' => [
                         'first_name' => $validated['customer_name'],
-                        'email' => $validated['customer_email'] ?: $user->email,
+                        'email' => $customerEmail,
                         'phone' => $validated['customer_phone'],
+                    ],
+                    'credit_card' => [
+                        'secure' => (bool) config('services.midtrans.is_3ds', true),
                     ],
                     'expiry' => [
                         'unit' => 'minutes',
                         'duration' => (int) $storeSetting->payment_timeout_minutes,
                     ],
+                    'callbacks' => [
+                        'finish' => route('payments.result', ['order' => $createdOrder, 'state' => 'pending']),
+                    ],
                 ];
 
-                $response = Http::withBasicAuth($serverKey, '')
+                if (isset($enabledPaymentsMap[$validated['payment_method']])) {
+                    $snapPayload['enabled_payments'] = $enabledPaymentsMap[$validated['payment_method']];
+                }
+
+                $response = Http::timeout(15)
+                    ->withBasicAuth($serverKey, '')
                     ->acceptJson()
                     ->post($snapBaseUrl, $snapPayload);
 
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $paymentData['snap_token'] = $json['token'] ?? null;
-                    $paymentData['snap_redirect_url'] = $json['redirect_url'] ?? null;
-                    $paymentData['raw_response'] = $json;
+                $json = $response->json();
+                if (! $response->successful() || empty($json['token'])) {
+                    Log::error('Midtrans Snap gagal membuat transaksi.', [
+                        'order_number' => $orderNumber,
+                        'midtrans_order_id' => $midtransOrderId,
+                        'http_status' => $response->status(),
+                        'error_messages' => $json['error_messages'] ?? null,
+                    ]);
+                    throw new RuntimeException('MIDTRANS_FAILED');
                 }
+
+                Payment::create([
+                    'order_id' => $createdOrder->id,
+                    'gateway' => 'midtrans',
+                    'payment_method' => $validated['payment_method'],
+                    'channel_label' => $channelLabels[$validated['payment_method']] ?? 'Midtrans Snap',
+                    'midtrans_order_id' => $midtransOrderId,
+                    'snap_token' => $json['token'],
+                    'snap_redirect_url' => $json['redirect_url'] ?? null,
+                    'amount' => $totalAmount,
+                    'status' => 'pending',
+                    'expires_at' => $deadline,
+                    'raw_response' => $json,
+                ]);
+
+                // 8. Kirim notifikasi ke dashboard pelanggan & inbox admin
+                UserNotification::create([
+                    'user_id' => $user->id,
+                    'order_id' => $createdOrder->id,
+                    'audience' => 'customer',
+                    'category' => 'pesanan',
+                    'channel' => 'dashboard',
+                    'title' => 'Menunggu Pembayaran',
+                    'message' => 'Pesanan '.$orderNumber.' berhasil dibuat. Selesaikan pembayaran Midtrans dalam '.(int) $storeSetting->payment_timeout_minutes.' menit.',
+                    'delivery_status' => 'terkirim',
+                    'action_url' => route('payments.show', $createdOrder),
+                ]);
+
+                UserNotification::create([
+                    'user_id' => null,
+                    'order_id' => $createdOrder->id,
+                    'audience' => 'admin',
+                    'category' => 'pesanan',
+                    'channel' => 'dashboard',
+                    'title' => 'Pesanan Baru Masuk',
+                    'message' => $orderNumber.' · '.$createdOrder->customer_name.' · Rp '.number_format($totalAmount, 0, ',', '.').' via Checkout Website.',
+                    'delivery_status' => 'terkirim',
+                    'action_url' => route('admin.orders.show', $createdOrder),
+                ]);
+
+                // 9. Kosongkan keranjang belanja setelah order dan token Snap tersimpan
+                $lockedCart->items()->delete();
+                $lockedCart->update(['order_note' => null]);
+
+                return $createdOrder;
+            });
+        } catch (RuntimeException $exception) {
+            $msg = $exception->getMessage();
+
+            if ($msg === 'CART_EMPTY') {
+                return redirect()->route('products.index')
+                    ->with('error', 'Keranjang belanja kamu kosong.');
             }
 
-            Payment::create($paymentData);
+            if (str_starts_with($msg, 'UNAVAILABLE_ITEM:')) {
+                $itemName = substr($msg, strlen('UNAVAILABLE_ITEM:'));
 
-            // Kirim notifikasi ke dashboard pelanggan & inbox admin
-            UserNotification::create([
-                'user_id' => $user->id,
-                'order_id' => $createdOrder->id,
-                'audience' => 'customer',
-                'category' => 'pesanan',
-                'channel' => 'dashboard',
-                'title' => 'Menunggu Pembayaran',
-                'message' => 'Pesanan '.$orderNumber.' berhasil dibuat. Selesaikan pembayaran Midtrans dalam '.(int) $storeSetting->payment_timeout_minutes.' menit.',
-                'delivery_status' => 'terkirim',
-                'action_url' => route('payments.show', $createdOrder),
-            ]);
+                return redirect()->route('cart.index')
+                    ->with('error', $itemName.' atau variannya sedang habis/nonaktif. Perbarui keranjang sebelum checkout.');
+            }
 
-            UserNotification::create([
-                'user_id' => null,
-                'order_id' => $createdOrder->id,
-                'audience' => 'admin',
-                'category' => 'pesanan',
-                'channel' => 'dashboard',
-                'title' => 'Pesanan Baru Masuk',
-                'message' => $orderNumber.' · '.$createdOrder->customer_name.' · Rp '.number_format($totalAmount, 0, ',', '.').' via Checkout Website.',
-                'delivery_status' => 'terkirim',
-                'action_url' => route('admin.orders.show', $createdOrder),
-            ]);
+            if (str_starts_with($msg, 'SCHEDULE_INVALID:')) {
+                return back()->withInput()->withErrors([
+                    'scheduled_date' => substr($msg, strlen('SCHEDULE_INVALID:')),
+                ]);
+            }
 
-            // Kosongkan keranjang belanja setelah order tersimpan
-            $cart->items()->delete();
-            $cart->update(['order_note' => null]);
+            if ($msg === 'MIDTRANS_FAILED') {
+                return back()->withInput()->with('error', 'Gagal memulai sesi pembayaran Midtrans. Periksa koneksi atau coba beberapa saat lagi.');
+            }
 
-            return $createdOrder;
-        });
+            throw $exception;
+        }
+
+        // 10. Kirim email konfirmasi pesanan dibuat tanpa mengganggu redirect checkout
+        if (! empty($order->customer_email)) {
+            try {
+                Notification::route('mail', $order->customer_email)->notify(
+                    new OrderLifecycleNotification(
+                        $order,
+                        'Pesanan '.$order->order_number.' Menunggu Pembayaran — Brownies Kelana',
+                        'Pesanan Anda berhasil dibuat dan menunggu pembayaran melalui Midtrans.',
+                        'Silakan selesaikan pembayaran dalam '.(int) $storeSetting->payment_timeout_minutes.' menit sebelum pesanan kedaluwarsa otomatis.',
+                        'Lanjutkan Pembayaran Midtrans',
+                        route('payments.show', $order)
+                    )
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Gagal mengirim email konfirmasi checkout '.$order->order_number.': '.$exception->getMessage());
+            }
+        }
 
         return redirect()->route('payments.show', $order)
-            ->with('success', 'Pesanan '.$order->order_number.' berhasil dibuat! Silakan selesaikan pembayaran.');
+            ->with('success', 'Pesanan '.$order->order_number.' berhasil dibuat! Silakan selesaikan pembayaran melalui Midtrans.');
     }
 
     /**

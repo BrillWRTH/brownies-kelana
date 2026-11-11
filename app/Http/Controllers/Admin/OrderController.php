@@ -13,13 +13,17 @@ use App\Models\ShippingZone;
 use App\Models\StoreSetting;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Notifications\OrderLifecycleNotification;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -377,6 +381,11 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order): RedirectResponse
     {
+        // 0. Cegah perubahan data pada pesanan yang sudah dibatalkan atau kedaluwarsa
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan berstatus Dibatalkan atau Kedaluwarsa tidak dapat diubah kembali.');
+        }
+
         // 1. Validasi data perubahan penerima, jadwal, alamat, dan biaya kirim
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
@@ -488,6 +497,11 @@ class OrderController extends Controller
      */
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
+        // 0. Tolak perubahan progres untuk pesanan yang sudah dibatalkan atau kedaluwarsa
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan yang sudah dibatalkan atau kedaluwarsa tidak dapat diubah statusnya.');
+        }
+
         // 1. Validasi status target yang dikirim admin
         $validated = $request->validate([
             'order_status' => ['required', 'in:menunggu_pembayaran,diproses,dikemas,dalam_pengiriman,siap_diambil,sampai_tujuan,sudah_diambil'],
@@ -546,6 +560,15 @@ class OrderController extends Controller
      */
     public function updateCourier(Request $request, Order $order): RedirectResponse
     {
+        // 0. Pastikan pesanan masih aktif dan pelunasan terpenuhi apabila mengubah status pengiriman
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan yang sudah dibatalkan atau kedaluwarsa tidak dapat diperbarui info kurirnya.');
+        }
+
+        if (($request->boolean('mark_delivered') || $request->boolean('mark_in_delivery')) && $order->payment_status !== 'lunas') {
+            return back()->with('error', 'Pesanan belum lunas. Selesaikan pembayaran sebelum mengirim atau menandai pesanan selesai.');
+        }
+
         // 1. Validasi data pengemudi, penerima, dan file foto bukti pengiriman
         $validated = $request->validate([
             'courier_name' => ['required', 'string', 'max:150'],
@@ -615,6 +638,11 @@ class OrderController extends Controller
      */
     public function cancelOrder(Request $request, Order $order): RedirectResponse
     {
+        // 0. Pastikan pesanan belum berstatus ditutup sebelumnya
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan ini sudah ditutup ('.$order->orderStatusLabel().').');
+        }
+
         // 1. Validasi alasan pembatalan wajib dan opsi penandaan refund
         $validated = $request->validate([
             'cancellation_reason' => ['required', 'string', 'min:4', 'max:255'],
@@ -668,9 +696,13 @@ class OrderController extends Controller
      */
     public function markManualPaid(Order $order): RedirectResponse
     {
-        // 1. Cegah aksi berulang apabila pesanan sudah berstatus lunas
+        // 1. Cegah aksi pada pesanan yang sudah lunas atau sudah dibatalkan/kedaluwarsa
         if ($order->payment_status === 'lunas') {
             return back()->with('error', 'Pesanan ini sudah tercatat Lunas.');
+        }
+
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan yang sudah dibatalkan atau kedaluwarsa tidak dapat ditandai Lunas.');
         }
 
         // 2. Tandai pesanan lunas dan majukan status menunggu pembayaran menjadi diproses
@@ -804,14 +836,10 @@ class OrderController extends Controller
     }
 
     /**
-     * Mengirim notifikasi dashboard pelanggan menggunakan template notifikasi aktif.
+     * Mengirim notifikasi dashboard dan email pelanggan menggunakan template notifikasi aktif.
      */
     protected function notifyCustomerFromTemplate(Order $order, string $triggerKey, string $fallbackTitle, string $fallbackMessage): void
     {
-        if (! $order->user_id) {
-            return;
-        }
-
         $template = NotificationTemplate::query()
             ->where('trigger_key', $triggerKey)
             ->where('is_active', true)
@@ -827,16 +855,35 @@ class OrderController extends Controller
             ])
             : $fallbackMessage;
 
-        UserNotification::create([
-            'user_id' => $order->user_id,
-            'order_id' => $order->id,
-            'audience' => 'customer',
-            'category' => 'pesanan',
-            'channel' => 'dashboard',
-            'title' => $title,
-            'message' => $message,
-            'delivery_status' => 'terkirim',
-            'action_url' => route('orders.show', $order->order_number),
-        ]);
+        if ($order->user_id) {
+            UserNotification::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order->id,
+                'audience' => 'customer',
+                'category' => 'pesanan',
+                'channel' => 'dashboard',
+                'title' => $title,
+                'message' => $message,
+                'delivery_status' => 'terkirim',
+                'action_url' => route('orders.show', $order->order_number),
+            ]);
+        }
+
+        if (! empty($order->customer_email)) {
+            try {
+                Notification::route('mail', $order->customer_email)->notify(
+                    new OrderLifecycleNotification(
+                        $order,
+                        $title.' ('.$order->order_number.') — Brownies Kelana',
+                        $title,
+                        $message,
+                        'Lihat Detail Pesanan',
+                        route('orders.show', $order->order_number)
+                    )
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Gagal mengirim email status admin '.$order->order_number.': '.$exception->getMessage());
+            }
+        }
     }
 }

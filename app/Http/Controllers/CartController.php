@@ -53,11 +53,20 @@ class CartController extends Controller
             return back()->with('error', 'Maaf, produk ini sedang habis atau tidak tersedia.');
         }
 
-        // 3. Tentukan varian yang dipakai (varian terpilih atau varian pertama produk)
-        $variantId = $validated['product_variant_id'] ?? $product->variants->first()?->id;
-        if ($variantId && ! $product->variants->contains('id', $variantId)) {
-            $variantId = $product->variants->first()?->id;
+        // 3. Validasi varian produk harus milik produk terkait dan berstatus tersedia
+        $variant = null;
+        if (! empty($validated['product_variant_id'])) {
+            $variant = $product->variants->firstWhere('id', (int) $validated['product_variant_id']);
+            if (! $variant || ! $variant->is_available) {
+                return back()->with('error', 'Varian produk yang dipilih sedang habis atau tidak tersedia.');
+            }
+        } elseif ($product->variants->isNotEmpty()) {
+            $variant = $product->variants->firstWhere('is_available', true);
+            if (! $variant) {
+                return back()->with('error', 'Semua varian untuk produk ini sedang habis.');
+            }
         }
+        $variantId = $variant?->id;
 
         // 4. Batasi panjang tulisan khusus sesuai pengaturan produk
         $customNote = trim((string) ($validated['custom_note'] ?? ''));
@@ -123,11 +132,21 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:0', 'max:50'],
         ]);
 
-        // 3. Hapus item apabila kuantitas bernilai 0, atau simpan jumlah baru
+        // 3. Hapus item apabila kuantitas bernilai 0, atau simpan jumlah baru jika masih tersedia
         if ((int) $validated['quantity'] === 0) {
             $cartItem->delete();
 
             return back()->with('success', 'Item dihapus dari keranjang.');
+        }
+
+        $cartItem->loadMissing(['product', 'variant']);
+        if (
+            ! $cartItem->product
+            || ! $cartItem->product->is_active
+            || ! $cartItem->product->is_available
+            || ($cartItem->variant && ! $cartItem->variant->is_available)
+        ) {
+            return back()->with('error', 'Produk atau varian pada item ini sedang habis/nonaktif. Silakan hapus item dari keranjang.');
         }
 
         $cartItem->update([

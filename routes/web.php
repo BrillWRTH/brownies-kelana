@@ -53,15 +53,15 @@ Route::post('/midtrans/callback', [PaymentController::class, 'callback'])->name(
 */
 Route::middleware('guest')->group(function (): void {
     Route::get('/masuk', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/masuk', [AuthController::class, 'login'])->name('login.attempt');
+    Route::post('/masuk', [AuthController::class, 'login'])->middleware('throttle:15,1')->name('login.attempt');
     Route::get('/daftar', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/daftar', [AuthController::class, 'register'])->name('register.store');
+    Route::post('/daftar', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.store');
 
     Route::get('/lupa-password', [PasswordResetController::class, 'requestForm'])->name('password.request');
-    Route::post('/lupa-password', [PasswordResetController::class, 'sendLink'])->name('password.email');
+    Route::post('/lupa-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:10,1')->name('password.email');
     Route::get('/email-reset-terkirim', [PasswordResetController::class, 'sentNotice'])->name('password.sent');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:10,1')->name('password.update');
     Route::get('/reset-berhasil', [PasswordResetController::class, 'successNotice'])->name('password.success');
 });
 
@@ -89,12 +89,11 @@ Route::middleware('auth')->group(function (): void {
 */
 Route::middleware(['auth', 'active'])->group(function (): void {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/cek-ongkir', [CheckoutController::class, 'checkShipping'])->name('checkout.check-shipping');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/checkout/cek-ongkir', [CheckoutController::class, 'checkShipping'])->middleware('throttle:45,1')->name('checkout.check-shipping');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:15,1')->name('checkout.store');
 
     Route::get('/pembayaran/{order}', [PaymentController::class, 'show'])->name('payments.show');
-    Route::post('/pembayaran/{order}/cek-status', [PaymentController::class, 'checkStatus'])->name('payments.check-status');
-    Route::post('/pembayaran/{order}/simulasi', [PaymentController::class, 'simulate'])->name('payments.simulate');
+    Route::post('/pembayaran/{order}/cek-status', [PaymentController::class, 'checkStatus'])->middleware('throttle:20,1')->name('payments.check-status');
     Route::get('/pembayaran/{order}/status/{state}', [PaymentController::class, 'result'])->name('payments.result');
 
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
@@ -118,7 +117,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 */
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.attempt');
+    Route::post('/login', [AdminAuthController::class, 'login'])->middleware('throttle:15,1')->name('login.attempt');
 
     Route::middleware(['auth', 'admin'])->group(function (): void {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');

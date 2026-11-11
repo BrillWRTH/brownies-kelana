@@ -49,9 +49,16 @@ class AdminPanelTest extends TestCase
             ->assertOk()
             ->assertSee('Ringkasan Toko');
 
-        $this->get(route('admin.orders.export'))
+        // Pastikan ekspor CSV menetralkan potensi formula injection pada kolom nama pelanggan
+        $poisonOrder = Order::query()->firstOrFail();
+        $poisonOrder->update(['customer_name' => '=HYPERLINK("http://evil.example","Klik")']);
+
+        $csvRes = $this->get(route('admin.orders.export'))
             ->assertOk()
             ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $csvContent = $csvRes->streamedContent();
+        $this->assertStringContainsString("'=HYPERLINK", $csvContent);
     }
 
     /**
@@ -132,6 +139,44 @@ class AdminPanelTest extends TestCase
         $this->get(route('admin.orders.recap'))
             ->assertOk()
             ->assertSee('Rekap Produksi');
+
+        // 6. Tolak transisi status / tandai lunas pada pesanan yang sudah dibatalkan & tolak mark_delivered saat belum lunas
+        $unpaidWaOrder = Order::create([
+            'order_number' => 'BC-9777',
+            'source' => 'whatsapp',
+            'customer_name' => 'Belum Bayar',
+            'customer_phone' => '081200001111',
+            'delivery_type' => 'delivery',
+            'recipient_name' => 'Belum Bayar',
+            'recipient_phone' => '081200001111',
+            'delivery_address' => 'Jl. Test No. 1',
+            'scheduled_date' => now()->addDays(2),
+            'scheduled_time_slot' => '09.00-11.00 WIB',
+            'subtotal' => 50000,
+            'shipping_fee' => 10000,
+            'total_amount' => 60000,
+            'order_status' => 'menunggu_pembayaran',
+            'payment_status' => 'belum_dibayar',
+        ]);
+
+        $this->post(route('admin.orders.update-courier', $unpaidWaOrder), [
+            'courier_name' => 'Kurir',
+            'mark_delivered' => '1',
+        ])->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->post(route('admin.orders.cancel', $unpaidWaOrder), [
+            'cancellation_reason' => 'Dibatalkan oleh admin untuk uji guard',
+        ])->assertRedirect();
+
+        $this->post(route('admin.orders.mark-paid', $unpaidWaOrder))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->post(route('admin.orders.update-status', $unpaidWaOrder), [
+            'order_status' => 'diproses',
+        ])->assertRedirect()
+            ->assertSessionHas('error');
     }
 
     /**
