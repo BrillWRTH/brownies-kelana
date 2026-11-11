@@ -9,11 +9,11 @@
 
             <div class="min-w-0 flex-1 space-y-6">
                 <div>
-                    <a href="{{ route('profile.show') }}" class="text-xs font-semibold text-[#52311a] hover:underline">&larr; Kembali ke Profil</a>
-                    <h1 class="mt-1 font-serif text-2xl font-bold text-[#52311a]">Edit Profil &amp; Kata Sandi</h1>
+                    <a href="{{ route('profile.show') }}" class="text-xs font-semibold text-[#593822] hover:underline">&larr; Kembali ke Profil</a>
+                    <h1 class="mt-1 font-serif text-2xl font-bold text-[#593822]">Edit Profil &amp; Kata Sandi</h1>
                 </div>
 
-                <form method="POST" action="{{ route('profile.update') }}" class="space-y-6 rounded-2xl border border-[#e3d5c3] bg-white p-6 shadow-xs">
+                <form method="POST" action="{{ route('profile.update') }}" class="kelana-card space-y-6 p-6">
                     @csrf
                     @method('PUT')
 
@@ -40,9 +40,9 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-[#f0e5d6] pt-5">
-                        <h2 class="text-sm font-bold text-[#52311a]">Ubah Kata Sandi (Opsional)</h2>
-                        <p class="mt-0.5 text-[11px] text-[#796b62]">Kosongkan bagian ini apabila tidak ingin mengubah kata sandi.</p>
+                    <div class="border-t border-[#efe2ce] pt-5">
+                        <h2 class="text-sm font-bold text-[#593822]">Ubah Kata Sandi (Opsional)</h2>
+                        <p class="mt-0.5 text-[11px] text-[#6f5a4a]">Kosongkan bagian ini apabila tidak ingin mengubah kata sandi.</p>
 
                         <div class="mt-4 grid gap-4 sm:grid-cols-3">
                             <div>
@@ -61,8 +61,8 @@
                     </div>
 
                     <div class="flex flex-wrap gap-3">
-                        <button type="submit" class="btn-kelana-primary rounded-full text-xs">Simpan Perubahan</button>
-                        <a href="{{ route('profile.show') }}" class="btn-kelana-outline rounded-full text-xs">Batal</a>
+                        <button type="submit" class="btn-kelana-primary rounded-lg text-xs">Simpan Perubahan</button>
+                        <a href="{{ route('profile.show') }}" class="btn-kelana-outline rounded-lg text-xs">Batal</a>
                     </div>
                 </form>
 

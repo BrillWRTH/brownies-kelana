@@ -11,17 +11,18 @@
 
     --color-cocoa-950: #28211c;
     --color-cocoa-900: #492d1a;
-    --color-cocoa-800: #52311a;
-    --color-cocoa-700: #67442f;
+    --color-cocoa-800: #593822;
+    --color-cocoa-700: #674732;
     --color-cocoa-600: #7d563c;
     --color-cocoa-500: #936b49;
-    --color-caramel-500: #b18950;
+    --color-caramel-600: #a67251;
+    --color-caramel-500: #a4804f;
     --color-caramel-400: #c7a26d;
-    --color-cream-50: #fdfbf6;
-    --color-cream-100: #f9eddd;
-    --color-cream-200: #f2e4cd;
-    --color-cream-300: #e9dcc7;
-    --color-cream-400: #dfc8ab;
+    --color-cream-50: #fcf3e3;
+    --color-cream-100: #f7ebd5;
+    --color-cream-200: #efe2ce;
+    --color-cream-300: #e8decb;
+    --color-cream-400: #d9c8b4;
 }
 
 @layer base {
@@ -30,27 +31,43 @@
     }
 
     body {
-        background-color: #fdfbf6;
-        color: #28211c;
+        background-color: #fcf3e3;
+        color: #2f2118;
         font-family: var(--font-sans);
     }
 }
 
-/* Gaya tombol dan kartu khas Brownies Kelana */
+/* Gaya tombol, kartu, dan input khas UI/UX Brownies Kelana */
 .btn-kelana-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#52311a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#492d1a] focus:outline-none focus:ring-2 focus:ring-[#b18950]/50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#593822] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#492d1a] focus:outline-none focus:ring-2 focus:ring-[#a4804f]/50 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-kelana-caramel {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#a67251] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#8f5e40] focus:outline-none focus:ring-2 focus:ring-[#a67251]/50 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-kelana-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#52311a] bg-white px-5 py-2.5 text-sm font-semibold text-[#52311a] transition hover:bg-[#f9eddd] focus:outline-none focus:ring-2 focus:ring-[#b18950]/40;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[#8f6743] bg-white px-5 py-2.5 text-sm font-semibold text-[#593822] transition hover:bg-[#f7ebd5] focus:outline-none focus:ring-2 focus:ring-[#a4804f]/40;
 }
 
 .kelana-input {
-    @apply w-full rounded-lg border border-[#d6c5b3] bg-white px-3.5 py-2.5 text-sm text-[#28211c] placeholder-[#a09083] transition focus:border-[#52311a] focus:outline-none focus:ring-2 focus:ring-[#b18950]/30;
+    @apply w-full rounded-xl border border-[#c8b29b] bg-white px-3.5 py-2.5 text-sm text-[#2f2118] placeholder-[#9e8a79] transition focus:border-[#593822] focus:outline-none focus:ring-2 focus:ring-[#a4804f]/30;
+}
+
+.kelana-input-pill {
+    @apply w-full rounded-full border border-[#8f6743] bg-[#f4ebd9] px-5 py-2.5 text-sm text-[#2f2118] placeholder-[#9e8a79] transition focus:border-[#593822] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#a4804f]/30;
 }
 
 .kelana-label {
-    @apply mb-1.5 block text-xs font-semibold tracking-wide text-[#52311a];
+    @apply mb-1.5 block text-xs font-semibold tracking-wide text-[#593822];
+}
+
+.kelana-card {
+    @apply overflow-hidden rounded-2xl border border-[#8f6743]/40 bg-white shadow-xs;
+}
+
+.kelana-card-header {
+    @apply bg-[#593822] px-5 py-3.5 text-sm font-bold text-white;
 }
 
 @media print {

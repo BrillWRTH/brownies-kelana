@@ -44,8 +44,11 @@
                                 <p class="mt-1 text-xs text-[#5e524a]">{{ $location->address }}</p>
                             </div>
                             @if($location->maps_url)
-                                <a href="{{ $location->maps_url }}" target="_blank" rel="noopener" class="mt-3 text-xs font-bold text-[#52311a] hover:underline">
-                                    Lihat di Google Maps &nearr;
+                                <a href="{{ $location->maps_url }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#52311a] hover:underline">
+                                    <span>Lihat di Google Maps</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                                    </svg>
                                 </a>
                             @endif
                         </div>

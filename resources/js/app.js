@@ -1,4 +1,4 @@
-// Interaktivitas global Brownies Kelana (Drawer Keranjang, Dropdown, Modal Logout)
+// Interaktivitas global Brownies Kelana (Drawer Keranjang, Dropdown, Modal, Hero Carousel, Toggle Sandi)
 document.addEventListener('DOMContentLoaded', () => {
     const cartDrawer = document.getElementById('kelana-cart-drawer');
     const cartBackdrop = document.getElementById('kelana-cart-backdrop');
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Modal konfirmasi keluar (Customer & Admin)
+    // Modal konfirmasi keluar / batal (Customer & Admin)
     document.querySelectorAll('[data-open-modal]').forEach((trigger) => {
         const modalId = trigger.getAttribute('data-open-modal');
         const modalEl = document.getElementById(modalId);
@@ -89,4 +89,40 @@ document.addEventListener('DOMContentLoaded', () => {
             modalEl.classList.remove('flex');
         });
     });
+
+    // Toggle lihat / sembunyikan kata sandi pada input password
+    document.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+        const inputId = btn.getAttribute('data-toggle-password');
+        const inputEl = document.getElementById(inputId);
+        if (!inputEl) {
+            return;
+        }
+        btn.addEventListener('click', () => {
+            const isHidden = inputEl.type === 'password';
+            inputEl.type = isHidden ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+        });
+    });
+
+    // Hero Slider Landing Page
+    const heroSlides = Array.from(document.querySelectorAll('[data-hero-slide]'));
+    const heroDots = Array.from(document.querySelectorAll('[data-hero-dot]'));
+    const heroPrev = document.querySelector('[data-hero-prev]');
+    const heroNext = document.querySelector('[data-hero-next]');
+    if (heroSlides.length > 0) {
+        let currentSlide = 0;
+        const showSlide = (idx) => {
+            currentSlide = (idx + heroSlides.length) % heroSlides.length;
+            heroSlides.forEach((slide, i) => {
+                slide.classList.toggle('hidden', i !== currentSlide);
+            });
+            heroDots.forEach((dot, i) => {
+                dot.classList.toggle('bg-white', i === currentSlide);
+                dot.classList.toggle('bg-white/45', i !== currentSlide);
+            });
+        };
+        heroPrev?.addEventListener('click', () => showSlide(currentSlide - 1));
+        heroNext?.addEventListener('click', () => showSlide(currentSlide + 1));
+        heroDots.forEach((dot, i) => dot.addEventListener('click', () => showSlide(i)));
+    }
 });

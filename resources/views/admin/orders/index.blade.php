@@ -1,62 +1,63 @@
 @extends('layouts.admin')
 
 @section('title', 'Daftar Pesanan — Panel Admin')
-@section('kicker', 'MANAJEMEN PESANAN')
+@section('kicker', 'PESANAN')
 
 @section('content')
     <div class="space-y-5">
-        {{-- Header Daftar Pesanan --}}
-        <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
+        {{-- Header Kelola Pesanan --}}
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <h1 class="text-xl font-bold text-[#28211c]">Daftar Semua Pesanan</h1>
+                <h1 class="font-serif text-3xl font-bold text-[#593822]">Kelola Pesanan</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
+                    {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY · HH:mm') }} WIB &middot;
                     <span class="font-semibold text-amber-800">{{ $unpaidCount }} menunggu pembayaran</span> &bull;
-                    <span class="font-semibold text-blue-800">{{ $processingCount }} sedang diproduksi/dikemas</span>
+                    <span class="font-semibold text-[#593822]">{{ $processingCount }} sedang diproduksi/dikemas</span>
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
-                <a href="{{ route('admin.orders.export', request()->query()) }}" class="btn-kelana-outline px-4 py-2 text-xs">
-                    Ekspor CSV
-                </a>
-                <a href="{{ route('admin.orders.recap') }}" class="btn-kelana-outline px-4 py-2 text-xs">
+                <a href="{{ route('admin.orders.recap') }}" class="btn-kelana-outline rounded-xl px-4 py-2 text-xs">
                     Rekap Produksi
                 </a>
-                <a href="{{ route('admin.orders.create') }}" class="btn-kelana-primary px-4 py-2 text-xs">
-                    + Pesanan WhatsApp
+                <a href="{{ route('admin.orders.export', request()->query()) }}" class="btn-kelana-outline rounded-xl px-4 py-2 text-xs">
+                    Export CSV
+                </a>
+                <a href="{{ route('admin.orders.create') }}" class="btn-kelana-primary rounded-xl px-4 py-2 text-xs">
+                    + Buat Pesanan Manual WhatsApp
                 </a>
             </div>
         </div>
 
         {{-- Baris Filter Pesanan --}}
         <form method="GET" action="{{ route('admin.orders.index') }}"
-            class="grid gap-3 rounded-2xl border border-[#e8dfd3] bg-white p-4 shadow-xs sm:grid-cols-2 lg:grid-cols-6">
-            <div>
-                <label class="kelana-label">Cari Order / Nama / HP</label>
-                <input type="text" name="q" value="{{ $searchKeyword }}" placeholder="BC-1040 atau nama..." class="kelana-input py-2 text-xs">
+            class="flex flex-wrap items-end gap-3 rounded-2xl border border-[#efe2ce] bg-white p-4 shadow-xs">
+            <div class="min-w-[170px] flex-1">
+                <label for="filter-order-q" class="kelana-label">Cari Order / Nama / HP</label>
+                <input id="filter-order-q" type="text" name="q" value="{{ $searchKeyword }}" placeholder="BC-1040 atau nama..." class="kelana-input py-2 text-xs">
             </div>
 
-            <div>
-                <label class="kelana-label">Sumber Order</label>
-                <select name="source" class="kelana-input py-2 text-xs">
-                    <option value="">Semua Sumber</option>
+            <div class="min-w-[140px] flex-1">
+                <label for="filter-order-source" class="kelana-label">Sumber</label>
+                <select id="filter-order-source" name="source" class="kelana-input py-2 text-xs">
+                    <option value="">Sumber: Semua</option>
                     <option value="website" @selected($sourceFilter === 'website')>Website</option>
                     <option value="whatsapp" @selected($sourceFilter === 'whatsapp')>WhatsApp Manual</option>
                 </select>
             </div>
 
-            <div>
-                <label class="kelana-label">Metode</label>
-                <select name="delivery_type" class="kelana-input py-2 text-xs">
-                    <option value="">Semua Metode</option>
+            <div class="min-w-[140px] flex-1">
+                <label for="filter-order-delivery" class="kelana-label">Metode</label>
+                <select id="filter-order-delivery" name="delivery_type" class="kelana-input py-2 text-xs">
+                    <option value="">Metode: Semua</option>
                     <option value="delivery" @selected($deliveryFilter === 'delivery')>Delivery / Kirim</option>
                     <option value="pickup" @selected($deliveryFilter === 'pickup')>Pickup / Ambil</option>
                 </select>
             </div>
 
-            <div>
-                <label class="kelana-label">Status Bayar</label>
-                <select name="payment_status" class="kelana-input py-2 text-xs">
-                    <option value="">Semua Status Bayar</option>
+            <div class="min-w-[140px] flex-1">
+                <label for="filter-order-payment" class="kelana-label">Status Bayar</label>
+                <select id="filter-order-payment" name="payment_status" class="kelana-input py-2 text-xs">
+                    <option value="">Bayar: Semua</option>
                     <option value="belum_dibayar" @selected($paymentFilter === 'belum_dibayar')>Belum Dibayar</option>
                     <option value="lunas" @selected($paymentFilter === 'lunas')>Lunas</option>
                     <option value="gagal" @selected($paymentFilter === 'gagal')>Gagal</option>
@@ -66,10 +67,10 @@
                 </select>
             </div>
 
-            <div>
-                <label class="kelana-label">Status Pesanan</label>
-                <select name="status" class="kelana-input py-2 text-xs">
-                    <option value="">Semua Status</option>
+            <div class="min-w-[145px] flex-1">
+                <label for="filter-order-status" class="kelana-label">Status Pesanan</label>
+                <select id="filter-order-status" name="status" class="kelana-input py-2 text-xs">
+                    <option value="">Status: Semua</option>
                     <option value="menunggu_pembayaran" @selected($statusFilter === 'menunggu_pembayaran')>Menunggu Pembayaran</option>
                     <option value="diproses" @selected($statusFilter === 'diproses')>Diproses</option>
                     <option value="dikemas" @selected($statusFilter === 'dikemas')>Dikemas</option>
@@ -82,108 +83,111 @@
                 </select>
             </div>
 
-            <div class="flex items-end gap-2">
-                <div class="flex-1">
-                    <label class="kelana-label">Tanggal Jadwal</label>
-                    <input type="date" name="date" value="{{ $dateFilter }}" class="kelana-input py-2 text-xs">
-                </div>
-                <button type="submit" class="btn-kelana-primary px-3 py-2 text-xs">Filter</button>
+            <div class="min-w-[140px] flex-1">
+                <label for="filter-order-date" class="kelana-label">Tanggal</label>
+                <input id="filter-order-date" type="date" name="date" value="{{ $dateFilter }}" class="kelana-input py-2 text-xs">
+            </div>
+
+            <div class="flex shrink-0 items-center gap-2">
+                <button type="submit" class="btn-kelana-primary rounded-xl px-4 py-2 text-xs">Filter</button>
                 @if($searchKeyword || $sourceFilter || $deliveryFilter || $paymentFilter || $statusFilter || $dateFilter)
-                    <a href="{{ route('admin.orders.index') }}" class="btn-kelana-outline px-2.5 py-2 text-xs" title="Reset Filter">Reset</a>
+                    <a href="{{ route('admin.orders.index') }}" class="btn-kelana-outline rounded-xl px-3 py-2 text-xs" title="Reset Filter">Reset</a>
                 @endif
             </div>
         </form>
 
-        {{-- Tabel Pesanan --}}
-        <div class="overflow-hidden rounded-2xl border border-[#e8dfd3] bg-white shadow-xs">
+        {{-- Daftar Pesanan --}}
+        <div class="overflow-hidden rounded-2xl border border-[#efe2ce] bg-white shadow-xs">
+            <div class="flex items-center justify-between border-b border-[#efe2ce] px-6 py-4">
+                <div>
+                    <h2 class="font-serif text-xl font-bold text-[#593822]">Daftar Pesanan</h2>
+                    <p class="text-xs text-[#796b62]">{{ $orders->total() }} transaksi ditemukan untuk dipantau.</p>
+                </div>
+            </div>
+
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-[#efe7dc] text-left text-xs">
-                    <thead class="bg-[#fdfbf6] text-[11px] font-bold tracking-wider text-[#936b49] uppercase">
+                <table class="min-w-full divide-y divide-[#efe2ce] text-left text-xs">
+                    <thead class="bg-[#fcf3e3]/60 text-[11px] font-semibold text-[#8f6743]">
                         <tr>
-                            <th class="px-4 py-3">No. Order &amp; Sumber</th>
+                            <th class="px-5 py-3">No.</th>
                             <th class="px-4 py-3">Pelanggan</th>
-                            <th class="px-4 py-3">Penerimaan</th>
-                            <th class="px-4 py-3">Jadwal H-1</th>
-                            <th class="px-4 py-3">Item &amp; Total</th>
-                            <th class="px-4 py-3">Pembayaran</th>
-                            <th class="px-4 py-3">Status Pesanan</th>
-                            <th class="px-4 py-3 text-right">Aksi</th>
+                            <th class="px-4 py-3">Metode &amp; Sumber</th>
+                            <th class="px-4 py-3">Tanggal Jadwal</th>
+                            <th class="px-4 py-3">Total &amp; Item</th>
+                            <th class="px-4 py-3">Bayar</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-5 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#f3ece2]">
+                    <tbody class="divide-y divide-[#f3e8d8]">
                         @forelse($orders as $order)
                             @php
                                 $payBadge = match($order->payment_status) {
-                                    'lunas' => 'border-emerald-200 bg-emerald-50 text-emerald-800',
-                                    'belum_dibayar' => 'border-amber-200 bg-amber-50 text-amber-800',
-                                    default => 'border-red-200 bg-red-50 text-red-800',
+                                    'lunas' => 'text-emerald-800',
+                                    'belum_dibayar' => 'text-amber-800',
+                                    default => 'text-red-700',
                                 };
                                 $orderBadge = match($order->order_status) {
                                     'sampai_tujuan', 'sudah_diambil' => 'bg-emerald-50 text-emerald-800',
                                     'menunggu_pembayaran' => 'bg-amber-50 text-amber-800',
-                                    'diproses', 'dikemas' => 'bg-blue-50 text-blue-800',
+                                    'diproses', 'dikemas' => 'bg-[#f7ebd5] text-[#593822]',
                                     'dalam_pengiriman', 'siap_diambil' => 'bg-violet-50 text-violet-800',
                                     default => 'bg-red-50 text-red-800',
                                 };
                             @endphp
-                            <tr class="hover:bg-[#fdfbf6]">
-                                <td class="px-4 py-3.5 align-top">
-                                    <a href="{{ route('admin.orders.show', $order) }}" class="font-bold text-[#52311a] hover:underline">
-                                        {{ $order->order_number }}
+                            <tr class="hover:bg-[#fcf3e3]/50">
+                                <td class="px-5 py-3.5 align-top">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="font-bold text-[#593822] hover:underline">
+                                        #{{ $order->order_number }}
                                     </a>
-                                    <div class="mt-1">
-                                        @if($order->source === 'whatsapp')
-                                            <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">WA Manual</span>
-                                        @else
-                                            <span class="rounded bg-[#f9eddd] px-1.5 py-0.5 text-[10px] font-semibold text-[#52311a]">Website</span>
-                                        @endif
-                                    </div>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
-                                    <p class="font-semibold text-[#28211c]">{{ $order->customer_name }}</p>
+                                    <p class="font-bold text-[#2f2118]">{{ $order->customer_name }}</p>
                                     <p class="text-[11px] text-[#796b62]">{{ $order->customer_phone }}</p>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
-                                    <span class="font-semibold text-[#52311a]">
-                                        {{ $order->delivery_type === 'pickup' ? 'Pickup' : 'Delivery' }}
+                                    <span class="font-semibold text-[#593822]">
+                                        {{ $order->delivery_type === 'pickup' ? 'Ambil di toko' : 'Pengiriman' }}
                                     </span>
-                                    <p class="mt-0.5 max-w-[180px] truncate text-[11px] text-[#796b62]">
-                                        {{ $order->delivery_type === 'pickup' ? ($order->pickupLocation?->name ?? '-') : ($order->delivery_address ?? '-') }}
-                                    </p>
+                                    <span class="mt-0.5 block text-[10px] text-[#8f6743]">
+                                        {{ $order->source === 'whatsapp' ? 'WhatsApp' : 'Website' }}
+                                    </span>
                                 </td>
-                                <td class="px-4 py-3.5 align-top text-[#5e524a]">
+                                <td class="px-4 py-3.5 align-top text-[#5e4d3e]">
                                     <p class="font-medium">{{ $order->scheduled_date?->locale('id')->isoFormat('D MMM YYYY') }}</p>
-                                    <p class="text-[11px] text-[#8d7d70]">{{ $order->scheduled_time_slot }}</p>
+                                    <p class="text-[10px] text-[#8f7968]">{{ $order->scheduled_time_slot }}</p>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
-                                    <p class="font-bold text-[#28211c]">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
-                                    <p class="text-[11px] text-[#796b62]">{{ $order->items->sum('quantity') }} pcs</p>
+                                    <p class="font-bold text-[#2f2118]">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                                    <p class="text-[11px] text-[#796b62]">{{ $order->items->sum('quantity') }} item</p>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
-                                    <span class="inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-bold {{ $payBadge }}">
+                                    <span class="font-bold {{ $payBadge }}">
                                         {{ $order->paymentStatusLabel() }}
                                     </span>
-                                    <p class="mt-1 text-[10px] text-[#8d7d70]">{{ $order->latestPayment?->channel_label ?? '-' }}</p>
+                                    <p class="mt-0.5 text-[10px] text-[#8f7968]">{{ $order->latestPayment?->channel_label ?? '-' }}</p>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
                                     <span class="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ $orderBadge }}">
                                         {{ $order->orderStatusLabel() }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3.5 text-right align-top whitespace-nowrap">
-                                    <a href="{{ route('admin.orders.show', $order) }}"
-                                        class="inline-flex rounded-lg border border-[#dfd2c0] px-2.5 py-1 text-[11px] font-semibold text-[#52311a] hover:bg-[#f9eddd]">
-                                        Detail
-                                    </a>
-                                    <a href="{{ route('admin.orders.receipt', $order) }}"
-                                        class="ml-1 inline-flex rounded-lg border border-[#dfd2c0] px-2.5 py-1 text-[11px] font-semibold text-[#5e524a] hover:bg-[#fdfbf6]">
-                                        Nota
-                                    </a>
+                                <td class="px-5 py-3.5 text-right align-top whitespace-nowrap">
+                                    <div class="inline-flex flex-col gap-1">
+                                        <a href="{{ route('admin.orders.show', $order) }}"
+                                            class="rounded-full bg-[#f7ebd5] px-3 py-1 text-center text-[11px] font-bold text-[#593822] hover:bg-[#e8decb]">
+                                            Ubah Status / Detail
+                                        </a>
+                                        <a href="{{ route('admin.orders.receipt', $order) }}"
+                                            class="rounded-full border border-[#d9c8b4] bg-white px-3 py-0.5 text-center text-[10px] font-semibold text-[#5e4d3e] hover:bg-[#fcf3e3]">
+                                            Nota
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-10 text-center text-sm text-[#796b62]">
+                                <td colspan="8" class="px-5 py-10 text-center text-sm text-[#796b62]">
                                     Belum ada pesanan yang sesuai dengan filter.
                                 </td>
                             </tr>
@@ -193,11 +197,10 @@
             </div>
 
             @if($orders->hasPages())
-                <div class="border-t border-[#efe7dc] px-4 py-3">
+                <div class="border-t border-[#efe2ce] px-5 py-3">
                     {{ $orders->links() }}
                 </div>
             @endif
         </div>
     </div>
 @endsection
-

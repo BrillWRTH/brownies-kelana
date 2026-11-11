@@ -69,22 +69,22 @@
     @endphp
 
     <section class="mx-auto flex max-w-lg flex-col items-center px-4 py-14 text-center">
-        <div class="w-full rounded-3xl border border-[#e3d5c3] bg-white p-8 shadow-md">
+        <div class="w-full rounded-3xl border border-[#8f6743] bg-white p-8 shadow-sm">
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-2xl font-extrabold {{ $stateMeta['badgeBg'] }}">
                 {!! $stateMeta['icon'] !!}
             </div>
 
-            <p class="mt-4 text-xs font-bold tracking-wider text-[#936b49] uppercase">
+            <p class="mt-4 text-xs font-bold tracking-wider text-[#8f6743] uppercase">
                 {{ $order->order_number }} &middot; Rp {{ number_format($order->total_amount, 0, ',', '.') }}
             </p>
-            <h1 class="mt-1 font-serif text-2xl font-bold text-[#52311a]">{{ $stateMeta['title'] }}</h1>
-            <p class="mt-3 text-xs leading-relaxed text-[#5e524a]">{{ $stateMeta['desc'] }}</p>
+            <h1 class="mt-1 font-serif text-2xl font-bold text-[#593822]">{{ $stateMeta['title'] }}</h1>
+            <p class="mt-3 text-xs leading-relaxed text-[#5e4d3e]">{{ $stateMeta['desc'] }}</p>
 
             <div class="mt-7 space-y-2.5">
-                <a href="{{ $stateMeta['primaryUrl'] }}" class="btn-kelana-primary w-full rounded-full text-xs">
+                <a href="{{ $stateMeta['primaryUrl'] }}" class="btn-kelana-primary w-full rounded-lg text-xs">
                     {{ $stateMeta['primaryText'] }}
                 </a>
-                <a href="{{ $stateMeta['secondaryUrl'] }}" class="btn-kelana-outline w-full rounded-full text-xs">
+                <a href="{{ $stateMeta['secondaryUrl'] }}" class="btn-kelana-outline w-full rounded-lg text-xs">
                     {{ $stateMeta['secondaryText'] }}
                 </a>
             </div>

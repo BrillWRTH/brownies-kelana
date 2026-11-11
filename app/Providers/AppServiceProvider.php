@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\StoreSetting;
 use App\Models\UserNotification;
 use Carbon\Carbon;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Carbon::setLocale('id');
+        Paginator::defaultView('vendor.pagination.kelana');
 
         // Bagikan data pengaturan toko, keranjang aktif, dan notifikasi ke seluruh tampilan Blade
         View::composer('*', function ($view): void {
