@@ -8,7 +8,7 @@
         {{-- Header Kelola Pesanan --}}
         <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <h1 class="font-serif text-3xl font-bold text-[#593822]">Kelola Pesanan</h1>
+                <h1 class="font-serif text-3xl font-semibold text-[#593822]">Kelola Pesanan</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY · HH:mm') }} WIB &middot;
                     <span class="font-semibold text-amber-800">{{ $unpaidCount }} menunggu pembayaran</span> &bull;
@@ -100,7 +100,7 @@
         <div class="overflow-hidden rounded-2xl border border-[#efe2ce] bg-white shadow-xs">
             <div class="flex items-center justify-between border-b border-[#efe2ce] px-6 py-4">
                 <div>
-                    <h2 class="font-serif text-xl font-bold text-[#593822]">Daftar Pesanan</h2>
+                    <h2 class="font-serif text-xl font-semibold text-[#593822]">Daftar Pesanan</h2>
                     <p class="text-xs text-[#796b62]">{{ $orders->total() }} transaksi ditemukan untuk dipantau.</p>
                 </div>
             </div>

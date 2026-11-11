@@ -10,13 +10,13 @@
                 class="pointer-events-none absolute -top-2 right-6 hidden w-56 select-none opacity-95 sm:block">
 
             <div class="relative z-10">
-                <h1 class="text-3xl font-extrabold tracking-wide text-[#593822]">DAFTAR</h1>
+                <h1 class="font-serif text-3xl font-semibold tracking-wide text-[#593822]">DAFTAR</h1>
                 <p class="mt-1 text-xs text-[#6f5a4a]">Buat akun pelanggan Brownies Kelana untuk checkout mudah dan pantau pesanan.</p>
 
                 <form method="POST" action="{{ route('register.store') }}" class="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">
                     @csrf
                     <div>
-                        <label for="name" class="kelana-label font-serif text-sm">Nama Lengkap</label>
+                        <label for="name" class="kelana-label text-sm">Nama Lengkap</label>
                         <input id="name" name="name" type="text" value="{{ old('name') }}" required
                             placeholder="Masukkan nama lengkap" class="kelana-input-pill">
                         @error('name')
@@ -25,7 +25,7 @@
                     </div>
 
                     <div>
-                        <label for="password" class="kelana-label font-serif text-sm">Kata Sandi</label>
+                        <label for="password" class="kelana-label text-sm">Kata Sandi</label>
                         <div class="relative">
                             <input id="password" name="password" type="password" required
                                 placeholder="Masukkan kata sandi" class="kelana-input-pill pr-11">
@@ -42,7 +42,7 @@
                     </div>
 
                     <div>
-                        <label for="email" class="kelana-label font-serif text-sm">Email</label>
+                        <label for="email" class="kelana-label text-sm">Email</label>
                         <input id="email" name="email" type="email" value="{{ old('email') }}" required
                             placeholder="Masukkan email" class="kelana-input-pill">
                         @error('email')
@@ -51,7 +51,7 @@
                     </div>
 
                     <div>
-                        <label for="password_confirmation" class="kelana-label font-serif text-sm">Konfirmasi Kata Sandi</label>
+                        <label for="password_confirmation" class="kelana-label text-sm">Konfirmasi Kata Sandi</label>
                         <div class="relative">
                             <input id="password_confirmation" name="password_confirmation" type="password" required
                                 placeholder="Masukkan kata sandi" class="kelana-input-pill pr-11">
@@ -65,7 +65,7 @@
                     </div>
 
                     <div>
-                        <label for="phone" class="kelana-label font-serif text-sm">No HP/Telepon</label>
+                        <label for="phone" class="kelana-label text-sm">No HP/Telepon</label>
                         <input id="phone" name="phone" type="text" value="{{ old('phone') }}" required
                             placeholder="Masukkan no telepon" class="kelana-input-pill">
                         @error('phone')

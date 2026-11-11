@@ -59,8 +59,8 @@
     <section class="relative overflow-hidden pt-4">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <h2 class="text-center font-serif text-3xl leading-snug text-[#9f826a] sm:text-4xl">
-                Temukan <span class="font-bold text-[#a4804f]">kebahagiaan</span><br>
-                di setiap <span class="font-bold text-[#593822]">Rasa</span>
+                Temukan <span class="font-semibold text-[#a4804f]">kebahagiaan</span><br>
+                di setiap <span class="font-semibold text-[#593822]">Rasa</span>
             </h2>
         </div>
 
@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="mt-8 border-t border-[#8f6743]/50 pt-6">
-                    <h3 class="text-lg font-bold leading-snug text-[#2f2118]">Ada Pertanyaan atau<br>Pemesanan?</h3>
+                    <h3 class="font-serif text-lg font-semibold leading-snug text-[#2f2118]">Ada Pertanyaan atau<br>Pemesanan?</h3>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
                         Untuk menanyakan ketersediaan produk, melakukan pemesanan, atau info lainnya langsung chat di WhatsApp!
                     </p>
@@ -154,7 +154,7 @@
                             </svg>
                         </span>
                         <div>
-                            <p class="font-serif text-sm font-bold text-[#2f2118]">{{ $storeSetting->store_name }}</p>
+                            <p class="font-serif text-sm font-semibold text-[#2f2118]">{{ $storeSetting->store_name }}</p>
                             <p class="mt-0.5 text-xs text-[#6f5a4a]">{{ $storeSetting->store_address }}</p>
                         </div>
                     </div>

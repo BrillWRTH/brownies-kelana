@@ -13,7 +13,7 @@
     <div class="mx-auto max-w-5xl space-y-5">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-bold text-[#28211c]">Tambah Produk Brownies / Kue</h1>
+                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Tambah Produk Brownies / Kue</h1>
                 <p class="mt-1 text-xs text-[#796b62]">Lengkapi deskripsi, alergen, varian ukuran/harga, serta galeri foto produk.</p>
             </div>
             <a href="{{ route('admin.products.index') }}" class="btn-kelana-outline px-4 py-2 text-xs">&larr; Kembali</a>
@@ -24,7 +24,7 @@
 
             <div class="space-y-5 lg:col-span-8">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-4">
-                    <h2 class="text-sm font-bold text-[#52311a]">Informasi Utama Produk</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Informasi Utama Produk</h2>
 
                     <div class="grid gap-4 sm:grid-cols-3">
                         <div>
@@ -72,7 +72,7 @@
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-sm font-bold text-[#52311a]">Varian Ukuran &amp; Harga</h2>
+                            <h2 class="text-sm font-semibold text-[#52311a]">Varian Ukuran &amp; Harga</h2>
                             <p class="text-[11px] text-[#796b62]">Harga dasar otomatis mengikuti varian termurah.</p>
                         </div>
                         <button type="button" id="btn-add-variant" class="btn-kelana-outline px-3 py-1.5 text-xs">+ Tambah Varian</button>
@@ -107,7 +107,7 @@
 
                 {{-- Unggah Foto Galeri --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Foto Produk Galeri</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Foto Produk Galeri</h2>
                     <p class="mt-1 text-xs text-[#796b62]">Unggah satu atau beberapa gambar sekaligus (maks 2MB per foto). Foto pertama menjadi thumbnail utama.</p>
                     <input type="file" name="images[]" multiple accept="image/*" class="kelana-input mt-3 py-2 text-xs">
                 </div>
@@ -116,7 +116,7 @@
             {{-- Kolom Kanan: Status, K3Mart & Catatan Kue --}}
             <div class="space-y-5 lg:col-span-4">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-3 text-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Pengaturan Tampilan &amp; Stok</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Pengaturan Tampilan &amp; Stok</h2>
 
                     <label class="flex items-center gap-2.5">
                         <input type="checkbox" name="is_available" value="1" @checked(old('is_available', true)) class="rounded border-[#b18950] text-[#52311a]">

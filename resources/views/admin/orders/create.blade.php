@@ -28,7 +28,7 @@
     <div class="mx-auto max-w-5xl space-y-5">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-bold text-[#28211c]">Buat Pesanan Manual WhatsApp</h1>
+                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Buat Pesanan Manual WhatsApp</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Catat pesanan pelanggan yang masuk lewat chat WhatsApp agar ikut terhitung di rekap produksi &amp; kuota harian.
                 </p>
@@ -42,7 +42,7 @@
             <div class="space-y-5 lg:col-span-8">
                 {{-- 1. Data Pemesan & Tautan Akun Pelanggan --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">1. Identitas Pemesan</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">1. Identitas Pemesan</h2>
 
                     <div class="mt-4">
                         <label for="user_id" class="kelana-label">Tautkan Akun Pelanggan Terdaftar (Opsional)</label>
@@ -81,7 +81,7 @@
                 {{-- 2. Item Produk Pesanan --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-bold text-[#52311a]">2. Daftar Item Brownies / Kue</h2>
+                        <h2 class="text-sm font-semibold text-[#52311a]">2. Daftar Item Brownies / Kue</h2>
                         <button type="button" id="btn-add-item-row" class="btn-kelana-outline px-3 py-1.5 text-xs">
                             + Tambah Produk
                         </button>
@@ -129,7 +129,7 @@
 
                 {{-- 3. Penerimaan, Alamat / Lokasi Pickup & Jadwal H-1 --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">3. Penerimaan &amp; Jadwal Produksi</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">3. Penerimaan &amp; Jadwal Produksi</h2>
 
                     <div class="mt-4 flex gap-3">
                         <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-[#d6c5b3] bg-[#fdfbf6] px-4 py-2.5 text-xs font-bold">
@@ -225,7 +225,7 @@
             {{-- Sidebar Kanan: Status Bayar Awal & Ringkasan Nominal --}}
             <div class="lg:col-span-4">
                 <div class="sticky top-6 space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Ringkasan &amp; Status Bayar Awal</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Ringkasan &amp; Status Bayar Awal</h2>
 
                     <div class="space-y-2 border-b border-[#efe7dc] pb-4 text-xs">
                         <div class="flex justify-between">
@@ -236,7 +236,7 @@
                             <span class="text-[#796b62]">Estimasi Ongkos Kirim</span>
                             <strong id="summary-shipping">Rp 0</strong>
                         </div>
-                        <div class="flex justify-between pt-2 text-sm font-extrabold text-[#52311a]">
+                        <div class="flex justify-between pt-2 text-sm font-bold text-[#52311a]">
                             <span>Total Tagihan</span>
                             <span id="summary-total">Rp 0</span>
                         </div>

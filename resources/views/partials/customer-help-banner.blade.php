@@ -10,7 +10,7 @@
             </svg>
         </div>
         <div>
-            <h3 class="text-sm font-bold text-[#2f2118]">Butuh Bantuan?</h3>
+            <h3 class="text-sm font-semibold text-[#2f2118]">Butuh Bantuan?</h3>
             <p class="mt-0.5 text-xs text-[#593822]">
                 WhatsApp CS: <strong>{{ $helpStore->whatsapp_number }}</strong> &middot; Untuk komunikasi dan bantuan pesanan.
             </p>

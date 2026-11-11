@@ -5,12 +5,12 @@
 @section('content')
     <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <div class="rounded-3xl border border-[#e3d5c3] bg-white p-6 shadow-xs sm:p-10">
-            <h1 class="font-serif text-3xl font-bold text-[#52311a]">Pengiriman dan Pengambilan</h1>
+            <h1 class="font-serif text-3xl font-semibold text-[#52311a]">Pengiriman dan Pengambilan</h1>
             <p class="mt-2 text-sm text-[#796b62]">Pilih metode penerimaan yang sesuai saat checkout. Periksa lokasi dan jadwal sebelum menyelesaikan pembayaran.</p>
 
             <div class="mt-8 grid gap-6 sm:grid-cols-2">
                 <div class="rounded-2xl border border-[#efe4d4] bg-[#fdfbf6] p-5">
-                    <h2 class="text-base font-bold text-[#52311a]">Pengiriman ke Alamat</h2>
+                    <h2 class="text-base font-semibold text-[#52311a]">Pengiriman ke Alamat</h2>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e524a]">
                         Lengkapi nama dan nomor telepon penerima, alamat tujuan, titik koordinat peta agar kurir mudah menemukan alamat, serta detail patokan rumah.
                     </p>
@@ -27,7 +27,7 @@
                 </div>
 
                 <div class="rounded-2xl border border-[#efe4d4] bg-[#fdfbf6] p-5">
-                    <h2 class="text-base font-bold text-[#52311a]">Ambil Sendiri (Pick-up)</h2>
+                    <h2 class="text-base font-semibold text-[#52311a]">Ambil Sendiri (Pick-up)</h2>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e524a]">
                         Pengambilan langsung di titik resmi Brownies Kelana <strong>bebas biaya ongkir (Rp 0)</strong>. Tunjukkan nomor pesanan kepada petugas saat pengambilan sesuai jadwal.
                     </p>
@@ -35,12 +35,12 @@
             </div>
 
             <div class="mt-8">
-                <h2 class="text-base font-bold text-[#52311a]">Lokasi Pengambilan Resmi</h2>
+                <h2 class="text-base font-semibold text-[#52311a]">Lokasi Pengambilan Resmi</h2>
                 <div class="mt-4 grid gap-4 sm:grid-cols-3">
                     @foreach($pickupLocations as $location)
                         <div class="flex flex-col justify-between rounded-2xl border border-[#e3d5c3] bg-[#f9eddd]/60 p-4">
                             <div>
-                                <h3 class="text-sm font-bold text-[#52311a]">{{ $location->name }}</h3>
+                                <h3 class="text-sm font-semibold text-[#52311a]">{{ $location->name }}</h3>
                                 <p class="mt-1 text-xs text-[#5e524a]">{{ $location->address }}</p>
                             </div>
                             @if($location->maps_url)
@@ -57,7 +57,7 @@
             </div>
 
             <div class="mt-8 rounded-2xl border border-[#efe4d4] bg-[#fdfbf6] p-5">
-                <h2 class="text-base font-bold text-[#52311a]">Jadwal dan Kuota Harian</h2>
+                <h2 class="text-base font-semibold text-[#52311a]">Jadwal dan Kuota Harian</h2>
                 <p class="mt-1 text-xs text-[#5e524a]">
                     Pre-order minimal H-{{ $storeSetting->preorder_min_days }} dengan kuota maksimal <strong>{{ $storeSetting->daily_quota }} pesanan/hari</strong>.
                     Jam operasional: {{ $storeSetting->operatingHoursSummary() }}.

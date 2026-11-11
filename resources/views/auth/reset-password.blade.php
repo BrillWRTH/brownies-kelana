@@ -11,7 +11,7 @@
                         class="h-64 w-full rounded-[1.5rem] object-cover shadow-sm md:h-80">
                 </div>
                 <div class="md:col-span-7">
-                    <h1 class="text-2xl font-extrabold text-[#593822]">Atur Ulang Kata Sandi</h1>
+                    <h1 class="font-serif text-2xl font-bold text-[#593822]">Atur Ulang Kata Sandi</h1>
                     <p class="mt-2 text-xs text-[#5e4d3e]">Buat kata sandi baru minimal 8 karakter untuk akunmu.</p>
 
                     <form method="POST" action="{{ route('password.update') }}" class="mt-5 space-y-4">
@@ -19,7 +19,7 @@
                         <input type="hidden" name="token" value="{{ $token }}">
 
                         <div>
-                            <label for="email" class="kelana-label font-serif text-sm">Email</label>
+                            <label for="email" class="kelana-label text-sm">Email</label>
                             <input id="email" name="email" type="email" value="{{ old('email', $email) }}" required
                                 class="kelana-input-pill">
                             @error('email')
@@ -28,7 +28,7 @@
                         </div>
 
                         <div>
-                            <label for="password" class="kelana-label font-serif text-sm">Kata Sandi Baru</label>
+                            <label for="password" class="kelana-label text-sm">Kata Sandi Baru</label>
                             <div class="relative">
                                 <input id="password" name="password" type="password" required
                                     placeholder="Minimal 8 karakter" class="kelana-input-pill pr-11">
@@ -45,7 +45,7 @@
                         </div>
 
                         <div>
-                            <label for="password_confirmation" class="kelana-label font-serif text-sm">Konfirmasi Kata Sandi Baru</label>
+                            <label for="password_confirmation" class="kelana-label text-sm">Konfirmasi Kata Sandi Baru</label>
                             <div class="relative">
                                 <input id="password_confirmation" name="password_confirmation" type="password" required
                                     placeholder="Ulangi kata sandi baru" class="kelana-input-pill pr-11">

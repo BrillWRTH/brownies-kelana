@@ -49,7 +49,7 @@
                     <div class="space-y-6 lg:col-span-6">
                         {{-- Kartu Header Pesanan --}}
                         <div class="kelana-card p-5">
-                            <h2 class="text-xl font-extrabold text-[#2f2118]">Pesanan #{{ $order->order_number }}</h2>
+                            <h2 class="text-xl font-bold text-[#2f2118]">Pesanan #{{ $order->order_number }}</h2>
                             <p class="mt-1 text-xs text-[#6f5a4a]">
                                 {{ $order->customer_name }} &middot; {{ $order->source === 'whatsapp' ? 'WhatsApp' : 'Website' }} &middot;
                                 {{ $order->delivery_type === 'pickup' ? 'Ambil Sendiri' : 'Pengiriman' }} &middot;
@@ -100,7 +100,7 @@
                                         <span>{{ $order->delivery_type === 'pickup' ? 'Ambil sendiri' : 'Ongkos kirim' }}</span>
                                         <span>Rp {{ number_format($order->shipping_fee, 0, ',', '.') }}</span>
                                     </div>
-                                    <div class="flex justify-between pt-2 text-base font-extrabold text-[#593822]">
+                                    <div class="flex justify-between pt-2 text-base font-bold text-[#593822]">
                                         <span>Total</span>
                                         <span>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                                     </div>
@@ -110,7 +110,7 @@
 
                         {{-- Informasi Penerima / Pickup --}}
                         <div class="kelana-card p-5">
-                            <h2 class="text-base font-bold text-[#2f2118]">
+                            <h2 class="font-serif text-base font-semibold text-[#2f2118]">
                                 {{ $order->delivery_type === 'pickup' ? 'Informasi Pengambilan (Pick-up)' : 'Informasi Penerima' }}
                             </h2>
 
@@ -163,7 +163,7 @@
 
                         {{-- Kartu Metode Pembayaran --}}
                         <div class="kelana-card p-5">
-                            <h2 class="text-base font-bold text-[#2f2118]">Metode Pembayaran</h2>
+                            <h2 class="font-serif text-base font-semibold text-[#2f2118]">Metode Pembayaran</h2>
                             <p class="mt-2 text-xs font-bold text-[#593822]">{{ $order->latestPayment?->channel_label ?? 'Midtrans Snap' }}</p>
 
                             @if($order->payment_status === 'lunas')
@@ -203,7 +203,7 @@
                     <div class="space-y-6 lg:col-span-6">
                         <div class="kelana-card p-5">
                             <div class="flex items-center justify-between gap-2">
-                                <h2 class="flex items-center gap-2 text-base font-bold text-[#2f2118]">
+                                <h2 class="flex items-center gap-2 font-serif text-base font-semibold text-[#2f2118]">
                                     Status Pesanan
                                 </h2>
                                 <span class="rounded-full bg-[#e8decb] px-3 py-0.5 text-[11px] font-bold text-[#593822]">
@@ -283,7 +283,7 @@
                         {{-- Informasi Kurir & Bukti Pengiriman --}}
                         @if($order->courier_name || $order->delivery_proof_path || $order->received_by)
                             <div class="kelana-card p-5">
-                                <h2 class="text-base font-bold text-[#2f2118]">Informasi Kurir</h2>
+                                <h2 class="font-serif text-base font-semibold text-[#2f2118]">Informasi Kurir</h2>
                                 <dl class="mt-3 space-y-2 text-xs">
                                     @if($order->courier_name)
                                         <div class="flex justify-between">
@@ -323,7 +323,7 @@
                         {{-- Bagian Ulasan Pelanggan (Muncul Setelah Selesai) --}}
                         @if($order->isCompleted())
                             <div class="rounded-2xl border border-[#8f6743] bg-[#e8decb] p-5">
-                                <h2 class="text-base font-bold text-[#2f2118]">Ulasan Pesanan</h2>
+                                <h2 class="font-serif text-base font-semibold text-[#2f2118]">Ulasan Pesanan</h2>
                                 @if($order->review)
                                     <div class="mt-3 rounded-xl bg-white p-4 text-xs">
                                         <div class="flex items-center justify-between">
@@ -388,7 +388,7 @@
     @if($order->canBeCancelledByCustomer())
         <div id="cancel-order-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
             <div class="w-full max-w-md rounded-3xl border border-[#8f6743] bg-[#fcf3e3] p-6 shadow-2xl">
-                <h3 class="font-serif text-xl font-bold text-[#593822]">Batalkan Pesanan {{ $order->order_number }}</h3>
+                <h3 class="font-serif text-xl font-semibold text-[#593822]">Batalkan Pesanan {{ $order->order_number }}</h3>
                 <p class="mt-1 text-xs text-[#6f5a4a]">Total tagihan: <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>. Tindakan ini tidak dapat dibatalkan.</p>
 
                 <form method="POST" action="{{ route('orders.cancel', $order) }}" class="mt-4 space-y-4">

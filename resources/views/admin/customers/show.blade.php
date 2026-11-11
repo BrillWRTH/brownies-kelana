@@ -9,7 +9,7 @@
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
                     <span class="rounded bg-[#f9eddd] px-2.5 py-0.5 text-xs font-bold text-[#52311a]">{{ $customer->customer_code ?? 'CUS' }}</span>
-                    <h1 class="text-xl font-bold text-[#28211c]">{{ $customer->name }}</h1>
+                    <h1 class="font-serif text-xl font-semibold text-[#28211c]">{{ $customer->name }}</h1>
                     @if($customer->is_active)
                         <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800">Akun Aktif</span>
                     @else
@@ -37,7 +37,7 @@
             {{-- Kolom Kiri: Kontak, Pesanan Pelanggan & Cocokkan WA Manual --}}
             <div class="space-y-6 lg:col-span-8">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs text-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Informasi Kontak &amp; Alamat Tersimpan</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Informasi Kontak &amp; Alamat Tersimpan</h2>
                     <div class="mt-3 grid gap-3 sm:grid-cols-2">
                         <p><span class="text-[#796b62]">No. WhatsApp Utama:</span> <strong class="text-[#28211c]">{{ $customer->phone ?: '-' }}</strong> (Normalisasi: {{ $normalizedPhone ?: '-' }})</p>
                         <p><span class="text-[#796b62]">No. HP Cadangan:</span> <strong class="text-[#28211c]">{{ $customer->secondary_phone ?: '-' }}</strong></p>
@@ -50,7 +50,7 @@
 
                 {{-- Pesanan Akun Terdaftar --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Riwayat Pesanan Akun ({{ $customer->orders->count() }})</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Riwayat Pesanan Akun ({{ $customer->orders->count() }})</h2>
                     <div class="mt-3 space-y-2.5">
                         @forelse($customer->orders as $order)
                             <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#efe7dc] bg-[#fdfbf6] p-3 text-xs">
@@ -76,7 +76,7 @@
                 {{-- Kecocokan Pesanan Manual WhatsApp Tanpa User ID --}}
                 @if($matchedGuestOrders->isNotEmpty())
                     <div class="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-xs">
-                        <h2 class="text-sm font-bold text-amber-900">Pesanan Tamu/WA Cocok Berdasarkan Nomor HP ({{ $matchedGuestOrders->count() }})</h2>
+                        <h2 class="text-sm font-semibold text-amber-900">Pesanan Tamu/WA Cocok Berdasarkan Nomor HP ({{ $matchedGuestOrders->count() }})</h2>
                         <p class="mt-1 text-xs text-amber-800">
                             Pesanan berikut dibuat tanpa tautan akun tetapi nomor WhatsApp-nya cocok dengan {{ $customer->phone }}.
                         </p>
@@ -97,7 +97,7 @@
             {{-- Kolom Kanan: Toggle Aktif/Nonaktif & Log Bantuan Pemulihan WA --}}
             <div class="space-y-5 lg:col-span-4">
                 <div class="rounded-2xl border {{ $customer->is_active ? 'border-red-200' : 'border-emerald-200' }} bg-white p-5 shadow-xs">
-                    <h3 class="text-sm font-bold {{ $customer->is_active ? 'text-red-800' : 'text-emerald-800' }}">
+                    <h3 class="text-sm font-semibold {{ $customer->is_active ? 'text-red-800' : 'text-emerald-800' }}">
                         {{ $customer->is_active ? 'Nonaktifkan Akun Pelanggan' : 'Aktifkan Kembali Akun' }}
                     </h3>
 
@@ -131,7 +131,7 @@
 
                 {{-- Catatan Bantuan Pemulihan Akun --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h3 class="text-sm font-bold text-[#52311a]">Catat Bantuan Pemulihan Akun</h3>
+                    <h3 class="text-sm font-semibold text-[#52311a]">Catat Bantuan Pemulihan Akun</h3>
                     <p class="mt-1 text-xs text-[#796b62]">
                         Catat bantuan verifikasi atau kendala login yang dibantu via WhatsApp.
                     </p>

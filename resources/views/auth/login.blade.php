@@ -12,13 +12,13 @@
                 </div>
 
                 <div class="md:col-span-6 md:px-2">
-                    <h1 class="text-3xl font-extrabold tracking-tight text-[#593822]">Masuk</h1>
+                    <h1 class="font-serif text-3xl font-bold text-[#593822]">Masuk</h1>
                     <p class="mt-1 text-xs text-[#6f5a4a]">Masuk ke akunmu untuk memesan dan memantau progres pesanan.</p>
 
                     <form method="POST" action="{{ route('login.attempt') }}" class="mt-6 space-y-4">
                         @csrf
                         <div>
-                            <label for="email" class="kelana-label font-serif text-sm">Email</label>
+                            <label for="email" class="kelana-label text-sm">Email</label>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
                                 placeholder="Masukkan email" class="kelana-input-pill">
                             @error('email')
@@ -27,7 +27,7 @@
                         </div>
 
                         <div>
-                            <label for="password" class="kelana-label font-serif text-sm">Kata Sandi</label>
+                            <label for="password" class="kelana-label text-sm">Kata Sandi</label>
                             <div class="relative">
                                 <input id="password" name="password" type="password" required
                                     placeholder="Masukkan kata sandi" class="kelana-input-pill pr-11">

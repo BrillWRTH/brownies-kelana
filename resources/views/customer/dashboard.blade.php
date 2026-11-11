@@ -46,7 +46,7 @@
 
                 {{-- Kartu Pesanan Aktif & Track 5 Langkah dengan Ikon Lingkaran --}}
                 <div class="rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
-                    <h2 class="text-lg font-bold text-[#2f2118]">Pesanan Aktif</h2>
+                    <h2 class="font-serif text-lg font-semibold text-[#2f2118]">Pesanan Aktif</h2>
 
                     @if($activeOrder)
                         @php
@@ -93,7 +93,7 @@
                                     <span class="rounded-full bg-[#e8decb] px-3 py-0.5 text-[11px] font-semibold text-[#593822]">
                                         {{ $activeOrder->orderStatusLabel() }}
                                     </span>
-                                    <p class="text-lg font-extrabold text-[#2f2118]">
+                                    <p class="text-lg font-bold text-[#2f2118]">
                                         Rp {{ number_format($activeOrder->total_amount, 0, ',', '.') }}
                                     </p>
                                     @if($activeOrder->payment_status === 'belum_dibayar')
@@ -196,7 +196,7 @@
 
                 {{-- Riwayat Pesanan + Filter Tab --}}
                 <div class="rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
-                    <h2 class="text-lg font-bold text-[#2f2118]">Riwayat Pesanan</h2>
+                    <h2 class="font-serif text-lg font-semibold text-[#2f2118]">Riwayat Pesanan</h2>
 
                     @php
                         $filterTabs = [

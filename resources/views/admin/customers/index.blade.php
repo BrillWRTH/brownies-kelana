@@ -6,7 +6,7 @@
 @section('content')
     <div class="space-y-5">
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h1 class="text-xl font-bold text-[#28211c]">Direktori Akun Pelanggan</h1>
+            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Direktori Akun Pelanggan</h1>
             <p class="mt-1 text-xs text-[#796b62]">
                 Pantau riwayat transaksi pelanggan, verifikasi email, pencocokan pesanan WhatsApp, serta bantuan pemulihan akun.
             </p>

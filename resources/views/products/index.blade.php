@@ -81,7 +81,7 @@
 
                 @if($products->isEmpty())
                     <div class="rounded-3xl border border-[#efe2ce] bg-white p-12 text-center shadow-xs">
-                        <h3 class="font-serif text-xl font-bold text-[#593822]">Produk tidak ditemukan</h3>
+                        <h3 class="font-serif text-xl font-semibold text-[#593822]">Produk tidak ditemukan</h3>
                         <p class="mx-auto mt-2 max-w-md text-xs text-[#796b62]">
                             Coba kata kunci lain atau hapus pencarian untuk melihat semua produk Brownies Kelana.
                         </p>
@@ -116,7 +116,7 @@
                                     </a>
 
                                     <div class="mt-auto flex items-center justify-between pt-4">
-                                        <span class="text-sm font-bold text-[#2f2118]">Rp {{ number_format($product->base_price, 0, ',', '.') }}</span>
+                                        <span class="text-sm font-semibold text-[#2f2118]">Rp {{ number_format($product->base_price, 0, ',', '.') }}</span>
 
                                         @if($product->is_available)
                                             <form method="POST" action="{{ route('cart.items.store') }}">

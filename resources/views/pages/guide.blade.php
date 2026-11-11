@@ -22,7 +22,7 @@
 
                 @foreach($steps as [$heading, $desc])
                     <div class="rounded-2xl border border-[#efe4d4] bg-[#fdfbf6] p-5">
-                        <h2 class="text-sm font-bold text-[#52311a]">{{ $heading }}</h2>
+                        <h2 class="text-sm font-semibold text-[#52311a]">{{ $heading }}</h2>
                         <p class="mt-1.5 text-xs leading-relaxed text-[#5e524a]">{{ $desc }}</p>
                     </div>
                 @endforeach

@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="border-t border-[#efe2ce] pt-5">
-                        <h2 class="text-sm font-bold text-[#593822]">Ubah Kata Sandi (Opsional)</h2>
+                        <h2 class="font-serif text-sm font-semibold text-[#593822]">Ubah Kata Sandi (Opsional)</h2>
                         <p class="mt-0.5 text-[11px] text-[#6f5a4a]">Kosongkan bagian ini apabila tidak ingin mengubah kata sandi.</p>
 
                         <div class="mt-4 grid gap-4 sm:grid-cols-3">

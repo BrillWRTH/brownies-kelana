@@ -74,7 +74,7 @@
                             <span class="rounded bg-[#f9eddd] px-2 py-0.5 text-[10px] font-bold text-[#52311a] uppercase">
                                 {{ $notif->category }}
                             </span>
-                            <h2 class="text-sm font-bold text-[#28211c]">{{ $notif->title }}</h2>
+                            <h2 class="text-sm font-semibold text-[#28211c]">{{ $notif->title }}</h2>
                         </div>
                         <p class="mt-1 text-xs text-[#5e524a]">{{ $notif->message }}</p>
                         <p class="mt-1 text-[11px] text-[#8d7d70]">

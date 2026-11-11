@@ -11,7 +11,7 @@
                         class="h-64 w-full rounded-[1.5rem] object-cover shadow-sm md:h-80">
                 </div>
                 <div class="md:col-span-7">
-                    <h1 class="text-2xl font-extrabold text-[#593822]">Lupa Kata Sandi</h1>
+                    <h1 class="font-serif text-2xl font-bold text-[#593822]">Lupa Kata Sandi</h1>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
                         Masukkan alamat email yang terdaftar di akun Brownies Kelana. Kami akan mengirimkan tautan untuk mengatur ulang kata sandimu.
                     </p>
@@ -19,7 +19,7 @@
                     <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
                         @csrf
                         <div>
-                            <label for="email" class="kelana-label font-serif text-sm">Email Terdaftar</label>
+                            <label for="email" class="kelana-label text-sm">Email Terdaftar</label>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" required
                                 placeholder="contoh@email.com" class="kelana-input-pill">
                             @error('email')

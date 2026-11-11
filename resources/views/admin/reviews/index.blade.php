@@ -6,7 +6,7 @@
 @section('content')
     <div class="space-y-5">
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h1 class="text-xl font-bold text-[#28211c]">Moderasi Ulasan Pelanggan</h1>
+            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Moderasi Ulasan Pelanggan</h1>
             <p class="mt-1 text-xs text-[#796b62]">
                 Setujui ulasan yang masuk, pilih testimoni terbaik untuk halaman Home, sembunyikan ulasan tidak pantas dengan alasan, atau kirim balasan resmi admin.
             </p>

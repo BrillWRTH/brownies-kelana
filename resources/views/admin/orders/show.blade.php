@@ -24,7 +24,7 @@
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <h1 class="text-xl font-extrabold text-[#28211c]">{{ $order->order_number }}</h1>
+                    <h1 class="font-serif text-xl font-semibold lining-nums text-[#28211c]">{{ $order->order_number }}</h1>
                     <span class="rounded-full px-3 py-0.5 text-xs font-bold {{ $orderBadge }}">
                         {{ $order->orderStatusLabel() }}
                     </span>
@@ -60,7 +60,7 @@
             <div class="space-y-6 lg:col-span-8">
                 {{-- Rincian Item & Tagihan --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Rincian Item &amp; Pembayaran</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Rincian Item &amp; Pembayaran</h2>
                     <div class="mt-4 divide-y divide-[#efe7dc]">
                         @foreach($order->items as $item)
                             <div class="flex items-start justify-between gap-4 py-3 text-xs">
@@ -98,7 +98,7 @@
                             <span>Ongkos Kirim ({{ $order->delivery_type === 'pickup' ? 'Pickup' : ($order->shipping_method_snapshot ?? 'Delivery') }})</span>
                             <span>Rp {{ number_format($order->shipping_fee, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between pt-1 text-sm font-extrabold text-[#52311a]">
+                        <div class="flex justify-between pt-1 text-sm font-bold text-[#52311a]">
                             <span>Total Pembayaran</span>
                             <span>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                         </div>
@@ -121,7 +121,7 @@
                 {{-- Data Pelanggan & Penerimaan --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-sm font-bold text-[#52311a]">Pemesan &amp; Informasi Penerimaan</h2>
+                        <h2 class="text-sm font-semibold text-[#52311a]">Pemesan &amp; Informasi Penerimaan</h2>
                         <span class="rounded-full bg-[#f9eddd] px-3 py-0.5 text-[11px] font-bold text-[#52311a]">
                             {{ $customerOrderCount > 1 ? 'Pelanggan Berulang · '.$customerOrderCount.' order' : 'Pelanggan Baru' }}
                         </span>
@@ -176,7 +176,7 @@
                 {{-- Form Kurir & Bukti Pengiriman (Khusus Delivery) --}}
                 @if($order->delivery_type === 'delivery' && !in_array($order->order_status, ['dibatalkan', 'kedaluwarsa']))
                     <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                        <h2 class="text-sm font-bold text-[#52311a]">Kurir Pengiriman &amp; Foto Bukti Sampai</h2>
+                        <h2 class="text-sm font-semibold text-[#52311a]">Kurir Pengiriman &amp; Foto Bukti Sampai</h2>
                         <form method="POST" action="{{ route('admin.orders.update-courier', $order) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
                             @csrf
                             <div class="grid gap-4 sm:grid-cols-2">
@@ -234,7 +234,7 @@
 
                 {{-- Riwayat Log Aktivitas Pesanan --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Riwayat Aktivitas &amp; Audit Pesanan</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Riwayat Aktivitas &amp; Audit Pesanan</h2>
                     <div class="mt-4 space-y-3">
                         @forelse($order->logs as $log)
                             <div class="flex gap-3 border-l-2 border-[#b18950] pl-3 text-xs">
@@ -259,7 +259,7 @@
                 {{-- Konfirmasi Pembayaran Manual (Khusus Belum Dibayar) --}}
                 @if($order->payment_status !== 'lunas' && !in_array($order->order_status, ['dibatalkan', 'kedaluwarsa']))
                     <div class="rounded-2xl border border-amber-300 bg-amber-50 p-5 shadow-xs">
-                        <h3 class="text-sm font-bold text-amber-900">Pelunasan Pembayaran</h3>
+                        <h3 class="text-sm font-semibold text-amber-900">Pelunasan Pembayaran</h3>
                         <p class="mt-1 text-xs text-amber-800">
                             Pesanan website biasanya lunas otomatis lewat webhook Midtrans. Untuk pesanan WhatsApp manual atau rekonsiliasi, tandai lunas di sini.
                         </p>
@@ -275,7 +275,7 @@
                 {{-- Perbarui Progres Status Pesanan --}}
                 @if(!in_array($order->order_status, ['dibatalkan', 'kedaluwarsa']))
                     <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                        <h3 class="text-sm font-bold text-[#52311a]">Perbarui Status Pesanan</h3>
+                        <h3 class="text-sm font-semibold text-[#52311a]">Perbarui Status Pesanan</h3>
                         <form method="POST" action="{{ route('admin.orders.update-status', $order) }}" class="mt-4 space-y-3">
                             @csrf
                             <div>
@@ -305,7 +305,7 @@
                 {{-- Ulasan Pelanggan jika Sudah Ada --}}
                 @if($order->review)
                     <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                        <h3 class="text-sm font-bold text-[#52311a]">Ulasan Pelanggan</h3>
+                        <h3 class="text-sm font-semibold text-[#52311a]">Ulasan Pelanggan</h3>
                         <p class="mt-2 text-xs font-bold text-amber-600">{{ str_repeat('★', $order->review->rating) }} ({{ $order->review->rating }}/5)</p>
                         <p class="mt-1 text-xs text-[#5e524a]">"{{ $order->review->comment }}"</p>
                         <a href="{{ route('admin.reviews.show', $order->review) }}" class="mt-2 inline-block text-xs font-bold text-[#52311a] hover:underline">
@@ -317,7 +317,7 @@
                 {{-- Pembatalan / Hapus Arsip Pesanan --}}
                 @if(!in_array($order->order_status, ['dibatalkan', 'kedaluwarsa']))
                     <div class="rounded-2xl border border-red-200 bg-white p-5 shadow-xs">
-                        <h3 class="text-sm font-bold text-red-800">Batalkan Pesanan</h3>
+                        <h3 class="text-sm font-semibold text-red-800">Batalkan Pesanan</h3>
                         <p class="mt-1 text-[11px] text-[#796b62]">
                             Pembatalan wajib menyertakan alasan agar terekam di riwayat pelanggan.
                         </p>
@@ -341,7 +341,7 @@
                     </div>
                 @else
                     <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 shadow-xs">
-                        <h3 class="text-sm font-bold text-red-800">Pesanan Ditutup ({{ $order->orderStatusLabel() }})</h3>
+                        <h3 class="text-sm font-semibold text-red-800">Pesanan Ditutup ({{ $order->orderStatusLabel() }})</h3>
                         <p class="mt-1 text-xs text-red-700">Alasan: {{ $order->cancellation_reason ?? '-' }}</p>
                         <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="mt-3"
                             onsubmit="return confirm('Yakin ingin menghapus arsip pesanan {{ $order->order_number }}?');">

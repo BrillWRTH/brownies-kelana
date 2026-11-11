@@ -20,7 +20,7 @@
 
     <div class="mx-auto max-w-6xl space-y-6">
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h1 class="text-xl font-bold text-[#28211c]">Pengaturan Operasional Brownies Kelana</h1>
+            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Pengaturan Operasional Brownies Kelana</h1>
             <p class="mt-1 text-xs text-[#796b62]">
                 Kelola identitas UMKM, jam buka &amp; libur H-1, titik pickup, metode ongkir aktif, batas bayar Midtrans, serta keamanan password admin.
             </p>
@@ -32,7 +32,7 @@
                 class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:col-span-6">
                 @csrf
                 @method('PUT')
-                <h2 class="text-sm font-bold text-[#52311a]">1. Identitas Toko &amp; Alamat Dapur Pusat</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">1. Identitas Toko &amp; Alamat Dapur Pusat</h2>
 
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
@@ -93,7 +93,7 @@
                     class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     @csrf
                     @method('PUT')
-                    <h2 class="text-sm font-bold text-[#52311a]">2. Batas Waktu Pembayaran Midtrans</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">2. Batas Waktu Pembayaran Midtrans</h2>
                     <p class="text-xs text-[#796b62]">
                         Pembayaran 100% dikelola otomatis melalui Midtrans (QRIS, Transfer Bank VA, GoPay, Kartu).
                     </p>
@@ -120,7 +120,7 @@
                     class="space-y-3 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     @csrf
                     @method('PUT')
-                    <h2 class="text-sm font-bold text-[#52311a]">3. Keamanan &amp; Ganti Password Admin</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">3. Keamanan &amp; Ganti Password Admin</h2>
                     <p class="text-xs text-[#796b62]">Akun Admin aktif saat ini: <strong>{{ $adminUser->email }}</strong></p>
 
                     <div>
@@ -149,7 +149,7 @@
                 class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:col-span-7">
                 @csrf
                 @method('PUT')
-                <h2 class="text-sm font-bold text-[#52311a]">4. Jam Operasional, Aturan Pre-Order H-1 &amp; Kuota Harian</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">4. Jam Operasional, Aturan Pre-Order H-1 &amp; Kuota Harian</h2>
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -197,7 +197,7 @@
 
             {{-- Hari Libur Khusus --}}
             <div class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:col-span-5">
-                <h2 class="text-sm font-bold text-[#52311a]">5. Kalender Hari Libur Khusus</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">5. Kalender Hari Libur Khusus</h2>
                 <p class="text-xs text-[#796b62]">Tanggal libur akan otomatis dikunci dari kalender checkout pelanggan.</p>
 
                 <form method="POST" action="{{ route('admin.settings.holidays.store') }}" class="space-y-3 rounded-xl bg-[#fdfbf6] p-3.5">
@@ -239,7 +239,7 @@
                 class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:col-span-7">
                 @csrf
                 @method('PUT')
-                <h2 class="text-sm font-bold text-[#52311a]">6. Pengaturan Metode Ongkos Kirim</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">6. Pengaturan Metode Ongkos Kirim</h2>
 
                 <div class="grid gap-2.5 sm:grid-cols-3 text-xs font-bold">
                     <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-[#d6c5b3] bg-[#fdfbf6] p-3">
@@ -293,7 +293,7 @@
 
             {{-- Daftar Zona Wilayah Pengiriman --}}
             <div class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:col-span-5">
-                <h2 class="text-sm font-bold text-[#52311a]">Daftar Zona Pengiriman</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">Daftar Zona Pengiriman</h2>
 
                 <form method="POST" action="{{ route('admin.settings.zones.store') }}" class="space-y-2.5 rounded-xl bg-[#fdfbf6] p-3.5">
                     @csrf
@@ -324,7 +324,7 @@
         {{-- 7. Lokasi Pengambilan (Pickup) --}}
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-5">
             <div>
-                <h2 class="text-sm font-bold text-[#52311a]">7. Lokasi Pengambilan Mandiri (Pickup · Gratis Ongkir)</h2>
+                <h2 class="text-sm font-semibold text-[#52311a]">7. Lokasi Pengambilan Mandiri (Pickup · Gratis Ongkir)</h2>
                 <p class="mt-1 text-xs text-[#796b62]">Tambahkan, ubah, atau nonaktifkan titik lokasi pickup yang muncul saat checkout.</p>
             </div>
 

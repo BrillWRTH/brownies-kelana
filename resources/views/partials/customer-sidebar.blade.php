@@ -9,14 +9,14 @@
                 {{ strtoupper(substr($sidebarUser->name, 0, 1)) }}
             </div>
             <div class="min-w-0">
-                <p class="truncate text-sm font-bold text-[#2f2118]">{{ $sidebarUser->name }}</p>
+                <p class="truncate text-sm font-semibold text-[#2f2118]">{{ $sidebarUser->name }}</p>
                 <p class="truncate text-xs text-[#6f5d50]">{{ $sidebarUser->email }}</p>
             </div>
         </div>
 
-        <nav class="mt-4 space-y-1.5 text-xs font-semibold">
+        <nav class="mt-4 space-y-1.5 text-xs font-medium">
             <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('dashboard') || request()->routeIs('orders.*') ? 'bg-[#593822] text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
+                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('dashboard') || request()->routeIs('orders.*') ? 'bg-[#593822] font-semibold text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/>
                 </svg>
@@ -24,7 +24,7 @@
             </a>
 
             <a href="{{ route('notifications.index') }}"
-                class="flex items-center justify-between rounded-full px-4 py-2.5 transition {{ request()->routeIs('notifications.*') ? 'bg-[#593822] text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
+                class="flex items-center justify-between rounded-full px-4 py-2.5 transition {{ request()->routeIs('notifications.*') ? 'bg-[#593822] font-semibold text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
                 <span class="flex items-center gap-2.5">
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -37,7 +37,7 @@
             </a>
 
             <a href="{{ route('profile.show') }}"
-                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('profile.*') ? 'bg-[#593822] text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
+                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('profile.*') ? 'bg-[#593822] font-semibold text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                 </svg>

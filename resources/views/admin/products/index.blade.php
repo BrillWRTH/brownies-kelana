@@ -7,7 +7,7 @@
     <div class="space-y-5">
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="text-xl font-bold text-[#28211c]">Daftar Produk Brownies Kelana</h1>
+                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Daftar Produk Brownies Kelana</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Atur harga varian, foto galeri, status Tersedia/Habis, dan badge spesial K3Mart.
                 </p>

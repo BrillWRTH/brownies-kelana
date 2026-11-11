@@ -66,7 +66,7 @@
                     {{-- Informasi Penerima / Pengambil --}}
                     <div class="mt-5">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="font-serif text-base font-bold text-[#2f2118]" id="recipient-heading">Informasi penerima</h2>
+                            <h2 class="font-serif text-base font-semibold text-[#2f2118]" id="recipient-heading">Informasi penerima</h2>
                             <button type="button" id="copy-customer-to-recipient" class="text-xs font-semibold text-[#8f6743] hover:text-[#593822] hover:underline">
                                 Samakan dengan data pemesan
                             </button>
@@ -90,7 +90,7 @@
 
                     {{-- Jadwal Pengiriman / Pengambilan (Kalender Pre-Order H-1) --}}
                     <div class="mt-6 border-t border-[#efe2ce] pt-5">
-                        <h2 class="font-serif text-base font-bold text-[#2f2118]">Jadwal pengiriman</h2>
+                        <h2 class="font-serif text-base font-semibold text-[#2f2118]">Jadwal pengiriman</h2>
                         <div class="mt-2.5 flex items-start gap-2 rounded-xl bg-[#f7ebd5] px-4 py-3 text-xs text-[#593822]">
                             <span class="mt-0.5 shrink-0 font-bold">&#9432;</span>
                             <p>
@@ -137,7 +137,7 @@
                                             cursor-not-allowed border-[#e8decb] bg-[#efe2ce]/70 text-[#8f7968]
                                         @endif">
                                         <span class="text-[10px] font-semibold uppercase">{{ $day['day_short'] }}</span>
-                                        <span class="text-sm font-extrabold">{{ $day['day_number'] }}</span>
+                                        <span class="text-sm font-bold">{{ $day['day_number'] }}</span>
                                         <span class="mt-0.5 text-[9px]">
                                             @if($day['is_today'])
                                                 Hari ini
@@ -190,7 +190,7 @@
                     {{-- Panel Alamat Tujuan & Peta / Zona Ongkir (Tampil saat Delivery) --}}
                     <div id="delivery-section" class="mt-6 space-y-4 border-t border-[#efe2ce] pt-5 {{ old('delivery_type', 'delivery') === 'pickup' ? 'hidden' : '' }}">
                         <div>
-                            <h2 class="font-serif text-base font-bold text-[#2f2118]">Alamat pengiriman</h2>
+                            <h2 class="font-serif text-base font-semibold text-[#2f2118]">Alamat pengiriman</h2>
                             <p class="mt-0.5 text-xs text-[#6f5a4a]">
                                 @if($storeSetting->shipping_method === 'distance')
                                     Tarif jarak: Rp {{ number_format($storeSetting->distance_base_fee, 0, ',', '.') }} untuk {{ (float) $storeSetting->distance_base_km }} km pertama + Rp {{ number_format($storeSetting->distance_per_km_fee, 0, ',', '.') }}/km (maks {{ (float) $storeSetting->distance_max_km }} km).
@@ -259,7 +259,7 @@
 
                     {{-- Panel Pilihan 3 Lokasi Pickup Resmi (Tampil saat Pickup) --}}
                     <div id="pickup-section" class="mt-6 space-y-3 border-t border-[#efe2ce] pt-5 {{ old('delivery_type', 'delivery') === 'pickup' ? '' : 'hidden' }}">
-                        <h3 class="font-serif text-base font-bold text-[#2f2118]">Pilih Lokasi Pengambilan (Pick-up Gratis Ongkir) *</h3>
+                        <h3 class="font-serif text-base font-semibold text-[#2f2118]">Pilih Lokasi Pengambilan (Pick-up Gratis Ongkir) *</h3>
                         <div class="grid gap-3">
                             @foreach($pickupLocations as $index => $location)
                                 <label class="cursor-pointer">
@@ -323,8 +323,8 @@
                         </div>
 
                         <div class="mt-4 flex items-center justify-between">
-                            <span class="text-sm font-bold text-[#2f2118]">Total Bayar</span>
-                            <span id="summary-total-amount" class="text-xl font-extrabold text-[#593822]">
+                            <span class="text-sm font-semibold text-[#2f2118]">Total Bayar</span>
+                            <span id="summary-total-amount" class="text-xl font-bold text-[#593822]">
                                 Rp {{ number_format($cart->subtotalAmount() + $initialShipping['fee'], 0, ',', '.') }}
                             </span>
                         </div>
@@ -369,7 +369,7 @@
                                         @if($iconPath)
                                             <img src="{{ asset($iconPath) }}" alt="{{ $title }}" class="h-5 w-10 shrink-0 object-contain">
                                         @else
-                                            <span class="flex h-5 w-10 shrink-0 items-center justify-center rounded bg-[#f7ebd5] text-[9px] font-extrabold text-[#593822]">MID</span>
+                                            <span class="flex h-5 w-10 shrink-0 items-center justify-center rounded bg-[#f7ebd5] text-[9px] font-bold text-[#593822]">MID</span>
                                         @endif
                                         <div>
                                             <p class="text-xs font-bold text-[#2f2118]">{{ $title }}</p>

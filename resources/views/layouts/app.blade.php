@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Brownies Kelana — Dibuat Untuk Dinikmati')</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
@@ -38,7 +36,7 @@
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#a4804f] bg-white p-0.5 shadow-sm transition group-hover:scale-105 sm:h-11 sm:w-11">
                     <img src="{{ asset('images/kelana/logo-kelana.png') }}" alt="Logo Brownies Kelana" class="h-full w-full rounded-full object-cover">
                 </div>
-                <span class="font-serif text-lg font-bold tracking-tight text-[#593822] sm:text-2xl">
+                <span class="font-serif text-lg font-semibold tracking-tight text-[#593822] sm:text-2xl">
                     {{ $store->store_name }}
                 </span>
             </a>
@@ -46,15 +44,15 @@
             {{-- Menu Navigasi Tengah Desktop --}}
             <nav class="hidden items-center gap-8 text-xs tracking-wider uppercase md:flex">
                 <a href="{{ route('home') }}"
-                    class="transition {{ request()->routeIs('home') ? 'font-extrabold text-[#593822]' : 'font-semibold text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="transition {{ request()->routeIs('home') ? 'font-semibold text-[#593822]' : 'font-medium text-[#6f5d50] hover:text-[#593822]' }}">
                     Home
                 </a>
                 <a href="{{ route('products.index') }}"
-                    class="transition {{ request()->routeIs('products.*') ? 'font-extrabold text-[#593822]' : 'font-semibold text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="transition {{ request()->routeIs('products.*') ? 'font-semibold text-[#593822]' : 'font-medium text-[#6f5d50] hover:text-[#593822]' }}">
                     Produk
                 </a>
                 <a href="{{ route('about') }}"
-                    class="transition {{ request()->routeIs('about') ? 'font-extrabold text-[#593822]' : 'font-semibold text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="transition {{ request()->routeIs('about') ? 'font-semibold text-[#593822]' : 'font-medium text-[#6f5d50] hover:text-[#593822]' }}">
                     Tentang Kami
                 </a>
             </nav>
@@ -187,10 +185,10 @@
         </div>
 
         {{-- Navigasi Mobile Sederhana --}}
-        <div class="flex items-center justify-center gap-6 border-t border-[#e9d9c2] bg-[#f7ebd5] py-2 text-[11px] font-bold uppercase md:hidden">
-            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Home</a>
-            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Produk</a>
-            <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Tentang Kami</a>
+        <div class="flex items-center justify-center gap-6 border-t border-[#e9d9c2] bg-[#f7ebd5] py-2 text-[11px] font-medium uppercase md:hidden">
+            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'font-semibold text-[#593822]' : 'text-[#6f5d50]' }}">Home</a>
+            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'font-semibold text-[#593822]' : 'text-[#6f5d50]' }}">Produk</a>
+            <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'font-semibold text-[#593822]' : 'text-[#6f5d50]' }}">Tentang Kami</a>
             <a href="{{ route('cart.index') }}" class="text-[#6f5d50]">Keranjang</a>
         </div>
     </header>
@@ -237,7 +235,7 @@
         <div class="bg-[#593822] pb-10 pt-5">
             <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
                 <div>
-                    <h3 class="font-serif text-xl font-bold text-white">{{ $store->store_name }}</h3>
+                    <h3 class="font-serif text-xl font-semibold text-white">{{ $store->store_name }}</h3>
                     <p class="text-[9px] font-semibold tracking-[0.2em] text-[#e8decb] uppercase">{{ $store->tagline }}</p>
                     <p class="mt-4 text-xs leading-relaxed text-[#e8decb]/90">
                         Kelezatan yang mengajakmu berhenti sejenak. Untuk diri sendiri, untuk berbagi, untuk momen yang berarti.
@@ -260,7 +258,7 @@
                 </div>
 
                 <div>
-                    <h4 class="text-[11px] font-bold tracking-wider text-white uppercase">Jelajahi Kelana</h4>
+                    <h4 class="text-[11px] font-semibold tracking-wider text-white uppercase">Jelajahi Kelana</h4>
                     <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
                         <li><a href="{{ route('about') }}" class="hover:text-white">Tentang kami</a></li>
                         <li><a href="{{ route('products.index') }}" class="hover:text-white">Koleksi kue &amp; jajanan terkini</a></li>
@@ -269,7 +267,7 @@
                 </div>
 
                 <div>
-                    <h4 class="text-[11px] font-bold tracking-wider text-white uppercase">Bantuan Pesanan</h4>
+                    <h4 class="text-[11px] font-semibold tracking-wider text-white uppercase">Bantuan Pesanan</h4>
                     <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
                         <li><a href="{{ route('orders.guide') }}" class="hover:text-white">Cara pemesanan</a></li>
                         <li><a href="{{ route('shipping.info') }}" class="hover:text-white">Pengiriman &amp; pengambilan</a></li>
@@ -279,13 +277,13 @@
                 </div>
 
                 <div>
-                    <h4 class="text-[11px] font-bold tracking-wider text-white uppercase">Hubungi Kami</h4>
+                    <h4 class="text-[11px] font-semibold tracking-wider text-white uppercase">Hubungi Kami</h4>
                     <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
                         <li>WhatsApp CS: {{ $store->whatsapp_number }}</li>
                         <li>Email: {{ $store->email }}</li>
                     </ul>
                     <a href="{{ $store->whatsappUrl('Halo Brownies Kelana, saya ingin bertanya mengenai produk & pemesanan.') }}" target="_blank" rel="noopener"
-                        class="mt-5 inline-flex items-center gap-2 text-[11px] font-bold tracking-wider text-white uppercase transition hover:text-[#e9dcc7]">
+                        class="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold tracking-wider text-white uppercase transition hover:text-[#e9dcc7]">
                         <span>Mulai Percakapan</span>
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
@@ -325,7 +323,7 @@
                         <div class="flex gap-3 rounded-2xl border border-[#e3d5c3] bg-[#fcf3e3]/50 p-3">
                             <img src="{{ $item->product->primaryImageUrl() }}" alt="{{ $item->product->name }}" class="h-16 w-16 shrink-0 rounded-xl object-cover">
                             <div class="min-w-0 flex-1">
-                                <h3 class="truncate font-serif text-sm font-bold text-[#2f2118]">{{ $item->product->name }}</h3>
+                                <h3 class="truncate font-serif text-sm font-semibold text-[#2f2118]">{{ $item->product->name }}</h3>
                                 <p class="text-xs text-[#6f5d50]">
                                     {{ $item->variant?->name ?? 'Reguler' }} &middot; Rp {{ number_format($item->unitPrice(), 0, ',', '.') }}
                                 </p>
@@ -379,14 +377,14 @@
             @if($cart && $cart->items->isNotEmpty())
                 <div class="mb-4 flex items-center justify-between">
                     <span class="text-xs font-medium text-[#6f5d50]">Subtotal sementara ({{ $cartCount }} item)</span>
-                    <span class="text-base font-extrabold text-[#593822]">Rp {{ number_format($cartSubtotal, 0, ',', '.') }}</span>
+                    <span class="text-base font-bold text-[#593822]">Rp {{ number_format($cartSubtotal, 0, ',', '.') }}</span>
                 </div>
                 <div class="space-y-2.5">
                     <a href="{{ route('cart.index') }}" class="flex w-full items-center justify-center rounded-xl border border-[#a67251] bg-white py-2.5 text-xs font-semibold text-[#593822] transition hover:bg-[#fcf3e3]">
                         Lihat Keranjang
                     </a>
                     <div class="flex justify-end">
-                        <a href="{{ route('checkout.index') }}" class="flex w-full items-center justify-center rounded-xl bg-[#593822] px-6 py-3 text-xs font-bold tracking-wider text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
+                        <a href="{{ route('checkout.index') }}" class="flex w-full items-center justify-center rounded-xl bg-[#593822] px-6 py-3 text-xs font-semibold tracking-wider text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
                             Beli Sekarang
                         </a>
                     </div>
@@ -397,7 +395,7 @@
                         Lanjut Belanja
                     </a>
                     <div class="flex justify-end">
-                        <a href="{{ route('products.index') }}" class="inline-flex items-center justify-center rounded-xl bg-[#593822] px-7 py-2.5 text-xs font-bold tracking-wider text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
+                        <a href="{{ route('products.index') }}" class="inline-flex items-center justify-center rounded-xl bg-[#593822] px-7 py-2.5 text-xs font-semibold tracking-wider text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
                             Beli Sekarang
                         </a>
                     </div>
@@ -412,7 +410,7 @@
             <div id="customer-logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
                 <div class="w-full max-w-md rounded-2xl border border-[#e3d5c3] bg-[#fcf3e3] p-6 text-center shadow-2xl">
                     <img src="{{ asset('images/kelana/mascot-brownie.png') }}" alt="Maskot Brownies Kelana" class="mx-auto h-24 w-24 object-contain">
-                    <h3 class="mt-3 font-serif text-xl font-bold text-[#593822]">Yakin ingin keluar dari akun?</h3>
+                    <h3 class="mt-3 font-serif text-xl font-semibold text-[#593822]">Yakin ingin keluar dari akun?</h3>
                     <p class="mt-1 text-xs leading-relaxed text-[#6f5d50]">
                         Kamu akan keluar dari akun Brownies Kelana dan perlu masuk kembali untuk memantau progres pesanan.
                     </p>

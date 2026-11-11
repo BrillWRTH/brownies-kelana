@@ -8,7 +8,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-[11px] font-bold tracking-wider text-[#936b49] uppercase">{{ $product->product_code }}</p>
-                <h1 class="text-xl font-bold text-[#28211c]">Edit Produk: {{ $product->name }}</h1>
+                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Edit Produk: {{ $product->name }}</h1>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('products.show', $product) }}" target="_blank" class="btn-kelana-outline inline-flex items-center gap-1 px-3 py-2 text-xs">
@@ -28,7 +28,7 @@
 
             <div class="space-y-5 lg:col-span-8">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-4">
-                    <h2 class="text-sm font-bold text-[#52311a]">Informasi Utama Produk</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Informasi Utama Produk</h2>
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -71,7 +71,7 @@
                 {{-- Sinkronisasi Varian Ukuran & Harga --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-bold text-[#52311a]">Varian Ukuran &amp; Harga</h2>
+                        <h2 class="text-sm font-semibold text-[#52311a]">Varian Ukuran &amp; Harga</h2>
                         <button type="button" id="btn-add-edit-variant" class="btn-kelana-outline px-3 py-1.5 text-xs">+ Tambah Varian</button>
                     </div>
 
@@ -105,7 +105,7 @@
 
                 {{-- Tambah Foto Baru --}}
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Tambahkan Foto Baru ke Galeri</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Tambahkan Foto Baru ke Galeri</h2>
                     <p class="mt-1 text-xs text-[#796b62]">Unggah foto tambahan (maks 2MB per foto). Foto lama tetap aman di bagian Galeri bawah.</p>
                     <input type="file" name="images[]" multiple accept="image/*" class="kelana-input mt-3 py-2 text-xs">
                 </div>
@@ -114,7 +114,7 @@
             {{-- Kolom Kanan --}}
             <div class="space-y-5 lg:col-span-4">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-3 text-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Status &amp; Pengaturan</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Status &amp; Pengaturan</h2>
 
                     <label class="flex items-center gap-2.5">
                         <input type="checkbox" name="is_available" value="1" @checked(old('is_available', $product->is_available)) class="rounded border-[#b18950] text-[#52311a]">
@@ -158,7 +158,7 @@
 
         {{-- Galeri Foto Tersimpan (Form Terpisah untuk Hapus Gambar) --}}
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h2 class="text-sm font-bold text-[#52311a]">Galeri Foto Tersimpan ({{ $product->images->count() }})</h2>
+            <h2 class="text-sm font-semibold text-[#52311a]">Galeri Foto Tersimpan ({{ $product->images->count() }})</h2>
             <div class="mt-4 grid gap-4 sm:grid-cols-3 md:grid-cols-4">
                 @forelse($product->images as $image)
                     <div class="rounded-xl border border-[#efe7dc] bg-[#fdfbf6] p-2.5">
@@ -183,7 +183,7 @@
         {{-- Hapus Produk (Form Terpisah) --}}
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50/50 p-5">
             <div>
-                <h3 class="text-sm font-bold text-red-800">Hapus Produk dari Katalog</h3>
+                <h3 class="text-sm font-semibold text-red-800">Hapus Produk dari Katalog</h3>
                 <p class="text-xs text-red-700">Pesanan lama tetap mempertahankan nama dan harga produk pada saat transaksi terjadi.</p>
             </div>
             <form method="POST" action="{{ route('admin.products.destroy', $product) }}"

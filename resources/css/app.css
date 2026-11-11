@@ -5,9 +5,9 @@
 @source '../views/**/*.blade.php';
 
 @theme {
-    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-serif: 'Playfair Display', Georgia, Cambria, serif;
+    --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Newsreader', Georgia, Cambria, 'Times New Roman', Times, serif;
 
     --color-cocoa-950: #28211c;
     --color-cocoa-900: #492d1a;
@@ -67,7 +67,7 @@
 }
 
 .kelana-card-header {
-    @apply bg-[#593822] px-5 py-3.5 text-sm font-bold text-white;
+    @apply bg-[#593822] px-5 py-3.5 text-sm font-semibold text-white;
 }
 
 @media print {

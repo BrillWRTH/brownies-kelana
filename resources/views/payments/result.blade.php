@@ -70,7 +70,7 @@
 
     <section class="mx-auto flex max-w-lg flex-col items-center px-4 py-14 text-center">
         <div class="w-full rounded-3xl border border-[#8f6743] bg-white p-8 shadow-sm">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-2xl font-extrabold {{ $stateMeta['badgeBg'] }}">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold {{ $stateMeta['badgeBg'] }}">
                 {!! $stateMeta['icon'] !!}
             </div>
 

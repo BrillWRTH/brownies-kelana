@@ -11,7 +11,7 @@
                         class="h-64 w-full rounded-[1.5rem] object-cover shadow-sm md:h-80">
                 </div>
                 <div class="md:col-span-7">
-                    <h1 class="text-2xl font-extrabold text-[#593822]">Verifikasi Email</h1>
+                    <h1 class="font-serif text-2xl font-bold text-[#593822]">Verifikasi Email</h1>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
                         Halo, <strong>{{ $user->name }}</strong>. Tautan verifikasi email telah dikirimkan ke:
                     </p>

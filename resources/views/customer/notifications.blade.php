@@ -38,7 +38,7 @@
 
                 @if($notifications->isEmpty())
                     <div class="kelana-card p-10 text-center">
-                        <h2 class="text-base font-bold text-[#593822]">Belum ada notifikasi</h2>
+                        <h2 class="font-serif text-base font-semibold text-[#593822]">Belum ada notifikasi</h2>
                         <p class="mt-1 text-xs text-[#6f5a4a]">Informasi terbaru tentang pesanan dan sistem akan tampil di sini.</p>
                     </div>
                 @else
@@ -51,7 +51,7 @@
                                     <div class="flex flex-wrap items-center justify-between gap-2">
                                         <div class="flex items-center gap-2">
                                             <span class="rounded-full bg-[#593822] px-2.5 py-0.5 text-[10px] font-bold text-white uppercase">{{ $notif->category }}</span>
-                                            <h3 class="text-sm font-bold text-[#2f2118]">{{ $notif->title }}</h3>
+                                            <h3 class="text-sm font-semibold text-[#2f2118]">{{ $notif->title }}</h3>
                                             @if(! $notif->read_at)
                                                 <span class="h-2 w-2 rounded-full bg-red-600"></span>
                                             @endif

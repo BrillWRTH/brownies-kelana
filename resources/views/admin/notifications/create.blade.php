@@ -16,7 +16,7 @@
             @csrf
 
             <div class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-6 shadow-xs lg:col-span-7">
-                <h1 class="text-lg font-bold text-[#28211c]">Kirim Pengumuman / Notifikasi Personal</h1>
+                <h1 class="font-serif text-lg font-semibold text-[#28211c]">Kirim Pengumuman / Notifikasi Personal</h1>
 
                 <div>
                     <label class="kelana-label">Target Penerima *</label>
@@ -112,7 +112,7 @@
             {{-- Pratinjau Langsung Pesan --}}
             <div class="space-y-4 lg:col-span-5">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-                    <h2 class="text-sm font-bold text-[#52311a]">Pratinjau Pesan Pelanggan</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Pratinjau Pesan Pelanggan</h2>
                     <div class="mt-4 rounded-2xl border border-[#efe7dc] bg-[#fdfbf6] p-4">
                         <p id="preview-title" class="text-sm font-bold text-[#28211c]">Judul notifikasi tampil di sini</p>
                         <p id="preview-message" class="mt-2 whitespace-pre-line text-xs leading-relaxed text-[#5e524a]">

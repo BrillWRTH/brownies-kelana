@@ -8,7 +8,7 @@
         {{-- Header & Filter Rentang Tanggal --}}
         <div class="no-print flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:flex-row lg:items-end lg:justify-between">
             <div>
-                <h1 class="text-xl font-bold text-[#28211c]">Rekap Produksi per Tanggal Jadwal</h1>
+                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Rekap Produksi per Tanggal Jadwal</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Ringkasan otomatis jumlah loyang/item yang harus dibuat dapur per tanggal H-1, slot waktu, dan catatan kue.
                 </p>
@@ -32,7 +32,7 @@
             <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe7dc] pb-4">
                     <div>
-                        <h2 class="text-base font-extrabold text-[#52311a]">{{ $group['date_formatted'] }}</h2>
+                        <h2 class="font-serif text-base font-semibold text-[#52311a]">{{ $group['date_formatted'] }}</h2>
                         <p class="mt-0.5 text-xs text-[#796b62]">
                             {{ $group['orders_count'] }} / {{ $group['daily_quota'] }} Kuota Harian &bull;
                             <strong>{{ $group['total_pcs'] }} pcs</strong> total &bull;
@@ -47,7 +47,7 @@
                 <div class="mt-4 grid gap-6 lg:grid-cols-12">
                     {{-- Rekap Jumlah Produksi per Produk & Varian --}}
                     <div class="lg:col-span-5">
-                        <h3 class="text-xs font-bold tracking-wider text-[#936b49] uppercase">Total Item yang Harus Dibuat</h3>
+                        <h3 class="text-xs font-semibold tracking-wider text-[#936b49] uppercase">Total Item yang Harus Dibuat</h3>
                         <ul class="mt-2.5 divide-y divide-[#f3ece2] rounded-xl border border-[#efe7dc] bg-[#fdfbf6]">
                             @foreach($group['item_summary'] as $itemName => $qty)
                                 <li class="flex items-center justify-between px-3.5 py-2.5 text-xs">
@@ -58,7 +58,7 @@
                         </ul>
 
                         @if(!empty($group['custom_notes']))
-                            <h3 class="mt-4 text-xs font-bold tracking-wider text-amber-800 uppercase">Daftar Tulisan di Atas Kue</h3>
+                            <h3 class="mt-4 text-xs font-semibold tracking-wider text-amber-800 uppercase">Daftar Tulisan di Atas Kue</h3>
                             <ul class="mt-2 space-y-1.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950">
                                 @foreach($group['custom_notes'] as $custom)
                                     <li>
@@ -72,7 +72,7 @@
 
                     {{-- Checklist Pesanan per Slot Jam --}}
                     <div class="lg:col-span-7">
-                        <h3 class="text-xs font-bold tracking-wider text-[#936b49] uppercase">Antrean Pengiriman / Pengambilan</h3>
+                        <h3 class="text-xs font-semibold tracking-wider text-[#936b49] uppercase">Antrean Pengiriman / Pengambilan</h3>
                         <div class="mt-2.5 space-y-2.5">
                             @foreach($group['orders'] as $order)
                                 <div class="rounded-xl border border-[#efe7dc] p-3 text-xs">

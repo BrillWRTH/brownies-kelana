@@ -80,7 +80,7 @@
     {{-- 2. Bagian PRODUK KAMI (Kategori Utama + Menu Favorit Pelanggan) --}}
     <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         <div>
-            <h2 class="text-2xl font-normal tracking-wide text-[#2f2118] uppercase sm:text-3xl">PRODUK KAMI</h2>
+            <h2 class="font-serif text-2xl font-normal tracking-wide text-[#2f2118] uppercase sm:text-3xl">PRODUK KAMI</h2>
             <p class="mt-1 text-sm text-[#5e4d3e]">Temukan Rasa Yang Kamu Sukai</p>
             <div class="mt-4">
                 <a href="{{ route('products.index') }}"
@@ -106,7 +106,7 @@
                             KELANA
                         </div>
                         <div class="absolute bottom-3 right-3 text-right">
-                            <h3 class="text-xl font-normal tracking-wide text-white drop-shadow sm:text-2xl">
+                            <h3 class="font-serif text-xl font-normal tracking-wide text-white drop-shadow sm:text-2xl">
                                 {{ $category->name }}
                             </h3>
                         </div>
@@ -119,7 +119,7 @@
         @if($featuredProducts->isNotEmpty())
             <div class="mt-14">
                 <div class="mb-6 flex items-center justify-between">
-                    <h3 class="font-serif text-xl font-bold text-[#593822]">Menu Favorit Pelanggan</h3>
+                    <h3 class="font-serif text-xl font-semibold text-[#593822]">Menu Favorit Pelanggan</h3>
                     <a href="{{ route('products.index') }}" class="text-xs font-semibold text-[#8f6743] hover:text-[#593822]">Lihat semua &rarr;</a>
                 </div>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -137,7 +137,7 @@
                                 </a>
                                 <p class="mt-1 line-clamp-2 text-xs text-[#796b62]">{{ $product->description }}</p>
                                 <div class="mt-auto flex items-center justify-between pt-4">
-                                    <span class="text-sm font-bold text-[#2f2118]">Rp {{ number_format($product->base_price, 0, ',', '.') }}</span>
+                                    <span class="text-sm font-semibold text-[#2f2118]">Rp {{ number_format($product->base_price, 0, ',', '.') }}</span>
                                     @if($product->is_available)
                                         <form method="POST" action="{{ route('cart.items.store') }}">
                                             @csrf
@@ -165,7 +165,7 @@
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-normal tracking-wide text-[#2f2118] uppercase sm:text-3xl">TERSEDIA DI K3MART</h2>
+                        <h2 class="font-serif text-2xl font-normal tracking-wide text-[#2f2118] uppercase sm:text-3xl">TERSEDIA DI K3MART</h2>
                         <img src="{{ asset('images/kelana/k3mart-badge.png') }}" alt="K3Mart" class="h-8 w-auto object-contain">
                     </div>
                     <p class="mt-1 text-xs text-[#6f5a4a]">Temukan favorit barumu di K3Mart Corner.</p>
@@ -186,7 +186,7 @@
                                 class="absolute left-2.5 top-2.5 h-8 w-8 rounded-full bg-white/95 object-contain p-1 shadow-xs">
                         </div>
                         <div class="pt-3.5 pb-1">
-                            <h3 class="text-lg font-bold tracking-tight">{{ $k3Product->name }}</h3>
+                            <h3 class="font-serif text-lg font-medium">{{ $k3Product->name }}</h3>
                             <p class="mt-0.5 text-xs text-[#f7ebd5]">Rp {{ number_format($k3Product->base_price, 0, ',', '.') }}</p>
                         </div>
                     </a>
