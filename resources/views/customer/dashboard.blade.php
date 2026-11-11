@@ -19,7 +19,7 @@
                                 Selamat datang di dashboard kamu. Pantau pesanan dan notifikasi terbaru di sini.
                             </p>
                             @if($user->customer_code)
-                                <span class="mt-3 inline-block rounded-full bg-[#593822]/85 px-3 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase">
+                                <span class="mt-3 inline-block rounded-full bg-[#593822]/85 px-3 py-0.5 text-[10px] font-bold text-white uppercase">
                                     {{ $user->customer_code }}
                                 </span>
                             @endif
@@ -46,7 +46,7 @@
 
                 {{-- Kartu Pesanan Aktif & Track 5 Langkah dengan Ikon Lingkaran --}}
                 <div class="rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
-                    <h2 class="font-serif text-lg font-semibold text-[#2f2118]">Pesanan Aktif</h2>
+                    <h2 class="font-serif text-lg font-bold text-[#2f2118]">Pesanan Aktif</h2>
 
                     @if($activeOrder)
                         @php
@@ -196,7 +196,7 @@
 
                 {{-- Riwayat Pesanan + Filter Tab --}}
                 <div class="rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
-                    <h2 class="font-serif text-lg font-semibold text-[#2f2118]">Riwayat Pesanan</h2>
+                    <h2 class="font-serif text-lg font-bold text-[#2f2118]">Riwayat Pesanan</h2>
 
                     @php
                         $filterTabs = [

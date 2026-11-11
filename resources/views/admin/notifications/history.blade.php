@@ -42,7 +42,7 @@
         <div class="overflow-hidden rounded-2xl border border-[#e8dfd3] bg-white shadow-xs">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-[#efe7dc] text-left text-xs">
-                    <thead class="bg-[#fdfbf6] text-[11px] font-bold tracking-wider text-[#936b49] uppercase">
+                    <thead class="bg-[#fdfbf6] text-[11px] font-bold text-[#936b49] uppercase">
                         <tr>
                             <th class="px-4 py-3">Waktu</th>
                             <th class="px-4 py-3">Pelanggan</th>

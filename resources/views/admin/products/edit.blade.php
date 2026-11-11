@@ -7,8 +7,8 @@
     <div class="mx-auto max-w-5xl space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-                <p class="text-[11px] font-bold tracking-wider text-[#936b49] uppercase">{{ $product->product_code }}</p>
-                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Edit Produk: {{ $product->name }}</h1>
+                <p class="text-[11px] font-bold text-[#936b49] uppercase">{{ $product->product_code }}</p>
+                <h1 class="font-serif text-xl font-bold text-[#28211c]">Edit Produk: {{ $product->name }}</h1>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('products.show', $product) }}" target="_blank" class="btn-kelana-outline inline-flex items-center gap-1 px-3 py-2 text-xs">

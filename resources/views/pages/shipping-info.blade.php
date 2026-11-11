@@ -5,7 +5,7 @@
 @section('content')
     <section class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <div class="rounded-3xl border border-[#e3d5c3] bg-white p-6 shadow-xs sm:p-10">
-            <h1 class="font-serif text-3xl font-semibold text-[#52311a]">Pengiriman dan Pengambilan</h1>
+            <h1 class="font-serif text-3xl font-bold text-[#52311a]">Pengiriman dan Pengambilan</h1>
             <p class="mt-2 text-sm text-[#796b62]">Pilih metode penerimaan yang sesuai saat checkout. Periksa lokasi dan jadwal sebelum menyelesaikan pembayaran.</p>
 
             <div class="mt-8 grid gap-6 sm:grid-cols-2">

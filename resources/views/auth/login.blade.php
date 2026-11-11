@@ -45,7 +45,7 @@
                                 <input type="checkbox" name="remember" value="1" class="rounded border-[#8f6743] text-[#593822] focus:ring-[#a4804f]">
                                 <span>Ingat Saya</span>
                             </label>
-                            <a href="{{ route('password.request') }}" class="font-medium text-[#593822] hover:underline">Lupa Kata Sandi</a>
+                            <a href="{{ route('password.request') }}" class="font-semibold text-[#593822] hover:underline">Lupa Kata Sandi</a>
                         </div>
 
                         <button type="submit" class="btn-kelana-primary w-full rounded-lg py-2.5 text-sm">

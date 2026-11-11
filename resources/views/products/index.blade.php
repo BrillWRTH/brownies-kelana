@@ -7,17 +7,17 @@
         <div class="grid gap-8 lg:grid-cols-12">
             {{-- Sidebar Filter Kategori Tanpa Kotak + Kartu K3Mart --}}
             <aside class="lg:col-span-3 lg:pt-14">
-                <ul class="space-y-1 text-sm">
+                <ul class="space-y-1 text-sm font-semibold">
                     <li>
                         <a href="{{ route('products.index', $searchKeyword !== '' ? ['q' => $searchKeyword] : []) }}"
-                            class="block rounded-full px-4 py-2 transition {{ $selectedCategorySlug === '' && !$isK3martFilter ? 'bg-[#593822] font-semibold text-white' : 'text-[#3b2a1e] hover:bg-[#f7ebd5]' }}">
+                            class="block rounded-full px-4 py-2 transition {{ $selectedCategorySlug === '' && !$isK3martFilter ? 'bg-[#593822] text-white' : 'text-[#3b2a1e] hover:bg-[#f7ebd5]' }}">
                             Semua Produk
                         </a>
                     </li>
                     @foreach($categories as $category)
                         <li>
                             <a href="{{ route('products.index', array_filter(['kategori' => $category->slug, 'q' => $searchKeyword ?: null])) }}"
-                                class="block rounded-full px-4 py-2 transition {{ $selectedCategorySlug === $category->slug ? 'bg-[#593822] font-semibold text-white' : 'text-[#3b2a1e] hover:bg-[#f7ebd5]' }}">
+                                class="block rounded-full px-4 py-2 transition {{ $selectedCategorySlug === $category->slug ? 'bg-[#593822] text-white' : 'text-[#3b2a1e] hover:bg-[#f7ebd5]' }}">
                                 {{ $category->name }}
                             </a>
                         </li>
@@ -28,7 +28,7 @@
 
                 <a href="{{ route('products.index', ['k3mart' => 1]) }}"
                     class="block rounded-2xl border bg-white p-4 shadow-xs transition hover:shadow-md {{ $isK3martFilter ? 'border-[#593822] ring-2 ring-[#593822]/25' : 'border-[#efe2ce]' }}">
-                    <p class="text-[10px] font-bold tracking-wider text-[#593822] uppercase">Tersedia di</p>
+                    <p class="text-[10px] font-bold text-[#593822] uppercase">Tersedia di</p>
                     <div class="mt-2 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
                             <img src="{{ asset('images/kelana/k3mart-badge.png') }}" alt="K3Mart Corner" class="h-8 w-8 shrink-0 object-contain">
@@ -45,7 +45,7 @@
             {{-- Kolom Kanan: Judul + Pencarian Pill + Grid Produk --}}
             <div class="lg:col-span-9">
                 <div class="flex flex-col justify-between gap-4 pb-6 sm:flex-row sm:items-center">
-                    <h1 class="font-serif text-2xl font-normal text-[#2f2118] sm:text-3xl">Temukan Rasa Yang Kamu suka !</h1>
+                    <h1 class="font-serif text-2xl font-bold text-[#2f2118] sm:text-3xl">Temukan Rasa Yang Kamu suka !</h1>
 
                     <form method="GET" action="{{ route('products.index') }}" class="flex w-full items-center gap-2 sm:w-64">
                         @if($selectedCategorySlug !== '')
@@ -81,7 +81,7 @@
 
                 @if($products->isEmpty())
                     <div class="rounded-3xl border border-[#efe2ce] bg-white p-12 text-center shadow-xs">
-                        <h3 class="font-serif text-xl font-semibold text-[#593822]">Produk tidak ditemukan</h3>
+                        <h3 class="font-serif text-xl font-bold text-[#593822]">Produk tidak ditemukan</h3>
                         <p class="mx-auto mt-2 max-w-md text-xs text-[#796b62]">
                             Coba kata kunci lain atau hapus pencarian untuk melihat semua produk Brownies Kelana.
                         </p>
@@ -111,7 +111,7 @@
                                 </a>
 
                                 <div class="mt-3.5 flex flex-1 flex-col">
-                                    <a href="{{ route('products.show', $product->slug) }}" class="font-serif text-base font-medium text-[#2f2118] hover:text-[#593822]">
+                                    <a href="{{ route('products.show', $product->slug) }}" class="font-serif text-base font-semibold text-[#2f2118] hover:text-[#593822]">
                                         {{ $product->name }}
                                     </a>
 

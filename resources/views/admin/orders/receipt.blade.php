@@ -19,12 +19,12 @@
         <div class="rounded-2xl border border-[#d6c5b3] bg-white p-6 shadow-xs sm:p-8">
             <div class="flex items-start justify-between border-b border-dashed border-[#c7b49e] pb-5">
                 <div>
-                    <h1 class="font-serif text-2xl font-semibold text-[#52311a]">{{ $storeSetting->store_name }}</h1>
+                    <h1 class="font-serif text-2xl font-bold text-[#52311a]">{{ $storeSetting->store_name }}</h1>
                     <p class="mt-1 max-w-sm text-[11px] text-[#5e524a]">{{ $storeSetting->store_address }}</p>
                     <p class="mt-0.5 text-[11px] text-[#796b62]">WA: {{ $storeSetting->whatsapp_number }}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] font-bold tracking-widest text-[#936b49] uppercase">NOTA PESANAN</p>
+                    <p class="text-[10px] font-bold tracking-wide text-[#936b49] uppercase">NOTA PESANAN</p>
                     <p class="mt-1 text-lg font-bold text-[#28211c]">{{ $order->order_number }}</p>
                     <p class="mt-0.5 text-[11px] text-[#796b62]">{{ $order->created_at?->format('d/m/Y H:i') }} WIB</p>
                 </div>

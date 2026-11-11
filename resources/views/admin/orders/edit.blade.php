@@ -11,7 +11,7 @@
     <div class="mx-auto max-w-4xl space-y-5">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Edit Informasi Pesanan {{ $order->order_number }}</h1>
+                <h1 class="font-serif text-xl font-bold text-[#28211c]">Edit Informasi Pesanan {{ $order->order_number }}</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Perbarui penerima, alamat tujuan, metode penerimaan, jadwal kirim/pickup, atau tarif ongkir sesuai konfirmasi pelanggan.
                 </p>

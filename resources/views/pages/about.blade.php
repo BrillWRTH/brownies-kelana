@@ -7,7 +7,7 @@
     <section class="relative overflow-hidden bg-[#a4804f] text-white">
         <div class="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 md:grid-cols-12 lg:px-8 lg:py-16">
             <div class="md:col-span-6">
-                <span class="inline-block rounded-full bg-[#593822]/85 px-3 py-1 text-[10px] font-bold tracking-widest uppercase">Sejak 2018</span>
+                <span class="inline-block rounded-full bg-[#593822]/85 px-3 py-1 text-[10px] font-bold tracking-wide uppercase">Sejak 2018</span>
                 <h1 class="mt-4 font-serif text-3xl font-bold leading-tight sm:text-4xl">
                     Selamat Datang di {{ $storeSetting->store_name }}
                 </h1>
@@ -16,7 +16,7 @@
                 </p>
                 <div class="mt-7 flex flex-wrap gap-3">
                     <a href="{{ route('products.index') }}"
-                        class="rounded-md bg-[#492d1a] px-6 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition hover:bg-[#2f2118]">
+                        class="rounded-md bg-[#492d1a] px-6 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#2f2118]">
                         Jelajahi Katalog Produk
                     </a>
                     <a href="{{ route('orders.guide') }}"
@@ -42,13 +42,13 @@
                     class="-ml-4 max-h-80 w-auto object-contain brightness-[1.06] contrast-[1.05] mix-blend-multiply sm:-ml-8">
             </div>
             <div class="md:col-span-7">
-                <h2 class="font-serif text-2xl font-normal text-[#593822] sm:text-3xl">
+                <h2 class="font-serif text-2xl font-bold text-[#593822] sm:text-3xl">
                     Ingin Menikmati Kelezatan Brownies Kelana?
                 </h2>
-                <p class="mt-4 font-serif text-sm leading-relaxed text-[#593822]">
+                <p class="mt-4 text-sm leading-relaxed text-[#593822]">
                     Kami selalu menyajikan kue yang baru dipanggang. Pastikan kamu memesan minimal <strong>H-{{ $storeSetting->preorder_min_days }} hari sebelumnya</strong> agar kami dapat menyiapkannya dengan sempurna.
                 </p>
-                <p class="mt-3 font-serif text-sm leading-relaxed text-[#593822]">
+                <p class="mt-3 text-sm leading-relaxed text-[#593822]">
                     Untuk pengambilan mandiri di luar, kamu bisa mengambil pesanan langsung di titik pengambilan resmi yang telah kami tentukan dengan gratis ongkos kirim.
                 </p>
             </div>
@@ -58,9 +58,9 @@
     {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" di atas Gelombang Cokelat --}}
     <section class="relative overflow-hidden pt-4">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 class="text-center font-serif text-3xl leading-snug text-[#9f826a] sm:text-4xl">
-                Temukan <span class="font-semibold text-[#a4804f]">kebahagiaan</span><br>
-                di setiap <span class="font-semibold text-[#593822]">Rasa</span>
+            <h2 class="text-center font-serif text-3xl font-semibold leading-snug text-[#9f826a] sm:text-4xl">
+                Temukan <span class="font-bold text-[#a4804f]">kebahagiaan</span><br>
+                di setiap <span class="font-bold text-[#593822]">Rasa</span>
             </h2>
         </div>
 
@@ -91,7 +91,7 @@
             {{-- Jam Operasional Dinamis dari Database --}}
             <div class="flex flex-col justify-between rounded-2xl border border-[#8f6743] bg-[#fdfaf5] p-6 sm:p-8 lg:col-span-6">
                 <div>
-                    <h2 class="text-center font-serif text-xl font-normal text-[#2f2118]">Jam Operasional</h2>
+                    <h2 class="text-center font-serif text-xl font-bold text-[#2f2118]">Jam Operasional</h2>
 
                     <div class="mt-6 space-y-2.5">
                         @foreach($storeSetting->operating_hours ?? [] as $day)
@@ -117,12 +117,12 @@
                 </div>
 
                 <div class="mt-8 border-t border-[#8f6743]/50 pt-6">
-                    <h3 class="font-serif text-lg font-semibold leading-snug text-[#2f2118]">Ada Pertanyaan atau<br>Pemesanan?</h3>
+                    <h3 class="font-serif text-lg font-bold leading-snug text-[#2f2118]">Ada Pertanyaan atau<br>Pemesanan?</h3>
                     <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
                         Untuk menanyakan ketersediaan produk, melakukan pemesanan, atau info lainnya langsung chat di WhatsApp!
                     </p>
                     <a href="{{ $storeSetting->whatsappUrl('Halo Brownies Kelana, saya ingin bertanya tentang pemesanan.') }}" target="_blank" rel="noopener"
-                        class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#7d5a42] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#593822]">
+                        class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#7d5a42] px-5 py-2 text-xs font-bold text-white transition hover:bg-[#593822]">
                         <span>{{ $storeSetting->store_name }}</span>
                     </a>
                 </div>
@@ -154,14 +154,14 @@
                             </svg>
                         </span>
                         <div>
-                            <p class="font-serif text-sm font-semibold text-[#2f2118]">{{ $storeSetting->store_name }}</p>
+                            <p class="font-serif text-sm font-bold text-[#2f2118]">{{ $storeSetting->store_name }}</p>
                             <p class="mt-0.5 text-xs text-[#6f5a4a]">{{ $storeSetting->store_address }}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-5 space-y-2.5">
-                    <h3 class="text-[11px] font-bold tracking-wider text-[#8f6743] uppercase">Titik Pengambilan Resmi ({{ $pickupLocations->count() }})</h3>
+                    <h3 class="text-[11px] font-bold tracking-wide text-[#8f6743] uppercase">Titik Pengambilan Resmi ({{ $pickupLocations->count() }})</h3>
                     @foreach($pickupLocations as $pickup)
                         <div class="flex items-start justify-between gap-3 rounded-xl border border-[#e3d5c3] bg-white px-3.5 py-2.5">
                             <div>

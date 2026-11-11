@@ -16,7 +16,7 @@
             @csrf
 
             <div class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-6 shadow-xs lg:col-span-7">
-                <h1 class="font-serif text-lg font-semibold text-[#28211c]">Kirim Pengumuman / Notifikasi Personal</h1>
+                <h1 class="font-serif text-lg font-bold text-[#28211c]">Kirim Pengumuman / Notifikasi Personal</h1>
 
                 <div>
                     <label class="kelana-label">Target Penerima *</label>

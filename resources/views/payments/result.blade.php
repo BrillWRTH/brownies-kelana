@@ -74,7 +74,7 @@
                 {!! $stateMeta['icon'] !!}
             </div>
 
-            <p class="mt-4 text-xs font-bold tracking-wider text-[#8f6743] uppercase">
+            <p class="mt-4 text-xs font-bold text-[#8f6743] uppercase">
                 {{ $order->order_number }} &middot; Rp {{ number_format($order->total_amount, 0, ',', '.') }}
             </p>
             <h1 class="mt-1 font-serif text-2xl font-bold text-[#593822]">{{ $stateMeta['title'] }}</h1>

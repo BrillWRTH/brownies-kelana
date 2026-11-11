@@ -28,7 +28,7 @@
     <div class="mx-auto max-w-5xl space-y-5">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Buat Pesanan Manual WhatsApp</h1>
+                <h1 class="font-serif text-xl font-bold text-[#28211c]">Buat Pesanan Manual WhatsApp</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Catat pesanan pelanggan yang masuk lewat chat WhatsApp agar ikut terhitung di rekap produksi &amp; kuota harian.
                 </p>

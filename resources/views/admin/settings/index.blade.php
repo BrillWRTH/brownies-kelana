@@ -20,7 +20,7 @@
 
     <div class="mx-auto max-w-6xl space-y-6">
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Pengaturan Operasional Brownies Kelana</h1>
+            <h1 class="font-serif text-xl font-bold text-[#28211c]">Pengaturan Operasional Brownies Kelana</h1>
             <p class="mt-1 text-xs text-[#796b62]">
                 Kelola identitas UMKM, jam buka &amp; libur H-1, titik pickup, metode ongkir aktif, batas bayar Midtrans, serta keamanan password admin.
             </p>

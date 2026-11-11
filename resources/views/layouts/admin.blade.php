@@ -19,42 +19,42 @@
         <aside class="no-print hidden w-60 shrink-0 flex-col bg-[#674732] text-[#f7ebd5] lg:flex">
             <div class="px-6 pb-6 pt-7">
                 <a href="{{ route('admin.dashboard') }}" class="block leading-tight">
-                    <span class="block font-serif text-xl font-semibold text-white">Brownies Kelana</span>
+                    <span class="block font-serif text-xl font-bold text-white">Brownies Kelana</span>
                     <span class="mt-0.5 block text-[11px] font-medium text-[#e8decb]/85">Panel Admin</span>
                 </a>
             </div>
 
-            <nav class="flex-1 space-y-1.5 px-4 text-xs font-medium">
+            <nav class="flex-1 space-y-1.5 px-4 text-xs font-semibold">
                 <a href="{{ route('admin.dashboard') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.dashboard') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.dashboard') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Dashboard</span>
                 </a>
                 <a href="{{ route('admin.orders.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.orders.index', 'admin.orders.create', 'admin.orders.show', 'admin.orders.edit') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.orders.index', 'admin.orders.create', 'admin.orders.show', 'admin.orders.edit') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Pesanan</span>
                 </a>
                 <a href="{{ route('admin.orders.recap') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.orders.recap') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.orders.recap') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Rekap Produksi</span>
                 </a>
                 <a href="{{ route('admin.products.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.products.*') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.products.*') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Produk</span>
                 </a>
                 <a href="{{ route('admin.reviews.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.reviews.*') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.reviews.*') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Ulasan</span>
                 </a>
                 <a href="{{ route('admin.settings.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.settings.*') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.settings.*') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Pengaturan</span>
                 </a>
                 <a href="{{ route('admin.customers.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.customers.*') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.customers.*') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Pelanggan</span>
                 </a>
                 <a href="{{ route('admin.notifications.index') }}"
-                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.notifications.*') ? 'bg-[#492d1a] font-semibold text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
+                    class="flex items-center justify-between rounded-xl px-4 py-2.5 transition {{ request()->routeIs('admin.notifications.*') ? 'bg-[#492d1a] text-white shadow-xs' : 'text-[#f7ebd5] hover:bg-[#593822] hover:text-white' }}">
                     <span>Notifikasi</span>
                     @if($adminUnread > 0)
                         <span class="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">{{ $adminUnread }}</span>
@@ -64,14 +64,14 @@
 
             <div class="border-t border-[#7d563c]/60 p-4 space-y-2">
                 <a href="{{ route('home') }}" target="_blank"
-                    class="flex items-center justify-center gap-1.5 rounded-xl border border-[#8f6743] bg-[#593822]/60 px-3 py-2 text-xs font-semibold text-[#fcf3e3] transition hover:bg-[#492d1a]">
+                    class="flex items-center justify-center gap-1.5 rounded-xl border border-[#8f6743] bg-[#593822]/60 px-3 py-2 text-xs font-bold text-[#fcf3e3] transition hover:bg-[#492d1a]">
                     <span>Lihat Storefront</span>
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
                     </svg>
                 </a>
                 <button type="button" data-open-modal="admin-logout-modal"
-                    class="w-full rounded-xl bg-[#492d1a]/70 px-3 py-2 text-xs font-semibold text-[#f7ebd5] transition hover:bg-red-800 hover:text-white">
+                    class="w-full rounded-xl bg-[#492d1a]/70 px-3 py-2 text-xs font-bold text-[#f7ebd5] transition hover:bg-red-800 hover:text-white">
                     Logout Admin
                 </button>
             </div>
@@ -82,8 +82,8 @@
             {{-- Topbar Ringkas --}}
             <header class="no-print flex items-center justify-between border-b border-[#efe2ce] bg-[#fcf3e3]/90 px-4 py-3 sm:px-8 lg:py-4">
                 <div class="flex items-center gap-3">
-                    <span class="font-serif text-base font-semibold text-[#593822] lg:hidden">Brownies Kelana</span>
-                    <span class="hidden text-[11px] font-semibold tracking-widest text-[#8f6743] uppercase lg:inline">@yield('kicker', 'ADMIN PANEL')</span>
+                    <span class="font-serif text-base font-bold text-[#593822] lg:hidden">Brownies Kelana</span>
+                    <span class="hidden text-[11px] font-semibold tracking-wide text-[#8f6743] uppercase lg:inline">@yield('kicker', 'ADMIN PANEL')</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('admin.notifications.index') }}" class="relative rounded-full border border-[#d9c8b4] bg-white p-2 text-[#593822] transition hover:bg-[#f7ebd5]">
@@ -154,7 +154,7 @@
     {{-- Modal Konfirmasi Logout Admin --}}
     <div id="admin-logout-modal" class="no-print hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
         <div class="w-full max-w-md rounded-2xl border border-[#8f6743] bg-[#fcf3e3] p-6 shadow-2xl">
-            <h3 class="font-serif text-lg font-semibold text-[#593822]">Logout dari Panel Admin?</h3>
+            <h3 class="font-serif text-lg font-bold text-[#593822]">Logout dari Panel Admin?</h3>
             <p class="mt-1 text-xs text-[#5e4d3e]">
                 Sesi admin Anda ({{ auth()->user()->email }}) akan diakhiri. Anda perlu login kembali untuk mengelola pesanan.
             </p>

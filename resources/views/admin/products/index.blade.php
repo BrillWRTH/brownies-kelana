@@ -7,7 +7,7 @@
     <div class="space-y-5">
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 class="font-serif text-xl font-semibold text-[#28211c]">Daftar Produk Brownies Kelana</h1>
+                <h1 class="font-serif text-xl font-bold text-[#28211c]">Daftar Produk Brownies Kelana</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Atur harga varian, foto galeri, status Tersedia/Habis, dan badge spesial K3Mart.
                 </p>
@@ -58,7 +58,7 @@
         <div class="overflow-hidden rounded-2xl border border-[#e8dfd3] bg-white shadow-xs">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-[#efe7dc] text-left text-xs">
-                    <thead class="bg-[#fdfbf6] text-[11px] font-bold tracking-wider text-[#936b49] uppercase">
+                    <thead class="bg-[#fdfbf6] text-[11px] font-bold text-[#936b49] uppercase">
                         <tr>
                             <th class="px-4 py-3">Produk</th>
                             <th class="px-4 py-3">Kategori &amp; Badge</th>
@@ -124,14 +124,14 @@
                                 </td>
                                 <td class="px-4 py-3.5 text-right align-top whitespace-nowrap">
                                     <a href="{{ route('admin.products.edit', $product) }}"
-                                        class="inline-flex rounded-lg border border-[#dfd2c0] px-3 py-1 text-[11px] font-semibold text-[#52311a] hover:bg-[#f9eddd]">
+                                        class="inline-flex rounded-lg border border-[#dfd2c0] px-3 py-1 text-[11px] font-bold text-[#52311a] hover:bg-[#f9eddd]">
                                         Edit
                                     </a>
                                     <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="ml-1 inline-block"
                                         onsubmit="return confirm('Hapus produk {{ $product->name }} dari katalog? Riwayat pesanan lama tetap aman.');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="rounded-lg border border-red-200 px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50">
+                                        <button type="submit" class="rounded-lg border border-red-200 px-2.5 py-1 text-[11px] font-bold text-red-700 hover:bg-red-50">
                                             Hapus
                                         </button>
                                     </form>

@@ -24,7 +24,7 @@
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <h1 class="font-serif text-xl font-semibold lining-nums text-[#28211c]">{{ $order->order_number }}</h1>
+                    <h1 class="font-serif text-xl font-bold lining-nums text-[#28211c]">{{ $order->order_number }}</h1>
                     <span class="rounded-full px-3 py-0.5 text-xs font-bold {{ $orderBadge }}">
                         {{ $order->orderStatusLabel() }}
                     </span>
@@ -129,7 +129,7 @@
 
                     <div class="mt-4 grid gap-4 text-xs sm:grid-cols-2">
                         <div class="rounded-xl bg-[#fdfbf6] p-3.5">
-                            <p class="text-[11px] font-bold tracking-wider text-[#936b49] uppercase">Pemesan</p>
+                            <p class="text-[11px] font-bold text-[#936b49] uppercase">Pemesan</p>
                             <p class="mt-1 font-bold text-[#28211c]">{{ $order->customer_name }}</p>
                             <p class="text-[#5e524a]">WA: {{ $order->customer_phone }}</p>
                             @if($order->customer_email)
@@ -143,7 +143,7 @@
                         </div>
 
                         <div class="rounded-xl bg-[#fdfbf6] p-3.5">
-                            <p class="text-[11px] font-bold tracking-wider text-[#936b49] uppercase">
+                            <p class="text-[11px] font-bold text-[#936b49] uppercase">
                                 {{ $order->delivery_type === 'pickup' ? 'Pengambilan (Pickup)' : 'Penerima & Alamat' }}
                             </p>
                             <p class="mt-1 font-bold text-[#28211c]">{{ $order->recipient_name }} ({{ $order->recipient_phone }})</p>

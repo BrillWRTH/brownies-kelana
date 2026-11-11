@@ -14,7 +14,7 @@
             </div>
 
             <div class="rounded-2xl border border-[#8f6743]/60 bg-[#f7ebd5] px-4 py-2 text-right">
-                <p class="text-[10px] font-bold tracking-wider text-[#593822] uppercase">Sisa Waktu Pembayaran</p>
+                <p class="text-[10px] font-bold text-[#593822] uppercase">Sisa Waktu Pembayaran</p>
                 <p id="payment-countdown" data-deadline="{{ $order->payment_deadline_at?->timestamp ?? 0 }}"
                     class="text-lg font-bold tabular-nums text-[#593822]">
                     Memuat waktu...
@@ -31,7 +31,7 @@
                             <span class="rounded-full bg-[#e8decb] px-3 py-0.5 text-[11px] font-bold text-[#593822]">
                                 {{ $isProduction ? 'Midtrans Resmi' : 'Midtrans Sandbox' }}
                             </span>
-                            <h2 class="mt-2 font-serif text-xl font-semibold text-[#2f2118]">{{ $payment?->channel_label ?? 'Midtrans Snap' }}</h2>
+                            <h2 class="mt-2 font-serif text-xl font-bold text-[#2f2118]">{{ $payment?->channel_label ?? 'Midtrans Snap' }}</h2>
                             <p class="mt-0.5 text-xs text-[#6f5a4a]">
                                 Pesanan {{ $order->order_number }}
                                 @if($payment?->midtrans_order_id)

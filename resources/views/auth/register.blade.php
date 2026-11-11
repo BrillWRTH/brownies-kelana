@@ -10,7 +10,7 @@
                 class="pointer-events-none absolute -top-2 right-6 hidden w-56 select-none opacity-95 sm:block">
 
             <div class="relative z-10">
-                <h1 class="font-serif text-3xl font-semibold tracking-wide text-[#593822]">DAFTAR</h1>
+                <h1 class="font-serif text-3xl font-bold text-[#593822]">DAFTAR</h1>
                 <p class="mt-1 text-xs text-[#6f5a4a]">Buat akun pelanggan Brownies Kelana untuk checkout mudah dan pantau pesanan.</p>
 
                 <form method="POST" action="{{ route('register.store') }}" class="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">

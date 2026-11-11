@@ -57,8 +57,8 @@
                 </div>
 
                 <div class="mt-5 rounded-2xl bg-[#e8decb] p-5 sm:p-6">
-                    <h2 class="font-serif text-sm font-semibold text-[#2f2118]">Deskripsi</h2>
-                    <p class="mt-2 font-serif text-sm leading-relaxed text-[#3b2a1e]">{{ $product->description }}</p>
+                    <h2 class="font-serif text-sm font-bold text-[#2f2118]">Deskripsi</h2>
+                    <p class="mt-2 text-sm font-normal leading-relaxed text-[#3b2a1e]">{{ $product->description }}</p>
 
                     @if($product->allergen_info)
                         <p class="mt-3 border-t border-[#8f6743]/30 pt-2.5 text-xs text-[#5e4d3e]">
@@ -147,7 +147,7 @@
 
         {{-- Ulasan Pelanggan untuk Produk Ini --}}
         <div class="mt-14 rounded-2xl border border-[#efe2ce] bg-white p-6 shadow-xs sm:p-8">
-            <h2 class="font-serif text-xl font-semibold text-[#593822]">Ulasan Pelanggan ({{ $approvedReviews->count() }})</h2>
+            <h2 class="font-serif text-xl font-bold text-[#593822]">Ulasan Pelanggan ({{ $approvedReviews->count() }})</h2>
             @if($approvedReviews->isEmpty())
                 <p class="mt-2 text-xs text-[#796b62]">Belum ada ulasan terverifikasi untuk produk ini.</p>
             @else
@@ -173,13 +173,13 @@
         {{-- Produk Terkait --}}
         @if($relatedProducts->isNotEmpty())
             <div class="mt-12">
-                <h2 class="font-serif text-xl font-semibold text-[#593822]">Menu Sejenis Lainnya</h2>
+                <h2 class="font-serif text-xl font-bold text-[#593822]">Menu Sejenis Lainnya</h2>
                 <div class="mt-5 grid gap-6 sm:grid-cols-3">
                     @foreach($relatedProducts as $rel)
                         <a href="{{ route('products.show', $rel->slug) }}" class="overflow-hidden rounded-2xl border border-[#efe2ce] bg-white p-3.5 shadow-xs transition hover:shadow-md">
                             <img src="{{ $rel->primaryImageUrl() }}" alt="{{ $rel->name }}" class="aspect-square w-full rounded-xl object-cover">
                             <div class="pt-3">
-                                <h3 class="font-serif text-sm font-medium text-[#2f2118]">{{ $rel->name }}</h3>
+                                <h3 class="font-serif text-sm font-semibold text-[#2f2118]">{{ $rel->name }}</h3>
                                 <p class="mt-1 text-xs font-semibold text-[#593822]">Rp {{ number_format($rel->base_price, 0, ',', '.') }}</p>
                             </div>
                         </a>

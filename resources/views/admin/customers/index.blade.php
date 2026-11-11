@@ -6,7 +6,7 @@
 @section('content')
     <div class="space-y-5">
         <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
-            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Direktori Akun Pelanggan</h1>
+            <h1 class="font-serif text-xl font-bold text-[#28211c]">Direktori Akun Pelanggan</h1>
             <p class="mt-1 text-xs text-[#796b62]">
                 Pantau riwayat transaksi pelanggan, verifikasi email, pencocokan pesanan WhatsApp, serta bantuan pemulihan akun.
             </p>
@@ -42,7 +42,7 @@
         <div class="overflow-hidden rounded-2xl border border-[#e8dfd3] bg-white shadow-xs">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-[#efe7dc] text-left text-xs">
-                    <thead class="bg-[#fdfbf6] text-[11px] font-bold tracking-wider text-[#936b49] uppercase">
+                    <thead class="bg-[#fdfbf6] text-[11px] font-bold text-[#936b49] uppercase">
                         <tr>
                             <th class="px-4 py-3">Kode &amp; Nama Pelanggan</th>
                             <th class="px-4 py-3">Kontak &amp; Verifikasi</th>
@@ -87,7 +87,7 @@
                                 </td>
                                 <td class="px-4 py-3.5 text-right">
                                     <a href="{{ route('admin.customers.show', $customer) }}"
-                                        class="inline-flex rounded-lg border border-[#dfd2c0] px-3 py-1 text-[11px] font-semibold text-[#52311a] hover:bg-[#f9eddd]">
+                                        class="inline-flex rounded-lg border border-[#dfd2c0] px-3 py-1 text-[11px] font-bold text-[#52311a] hover:bg-[#f9eddd]">
                                         Lihat Detail
                                     </a>
                                 </td>

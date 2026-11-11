@@ -67,7 +67,7 @@
                     <div class="mt-5">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <h2 class="font-serif text-base font-semibold text-[#2f2118]" id="recipient-heading">Informasi penerima</h2>
-                            <button type="button" id="copy-customer-to-recipient" class="text-xs font-semibold text-[#8f6743] hover:text-[#593822] hover:underline">
+                            <button type="button" id="copy-customer-to-recipient" class="text-xs font-bold text-[#8f6743] hover:text-[#593822] hover:underline">
                                 Samakan dengan data pemesan
                             </button>
                         </div>
@@ -388,7 +388,7 @@
                 </div>
 
                 <button type="submit" id="checkout-submit-btn"
-                    class="w-full rounded-xl bg-[#a4804f] py-3.5 text-center text-sm font-bold tracking-wide text-white shadow-xs transition hover:bg-[#8d6c40] disabled:cursor-not-allowed disabled:opacity-50">
+                    class="w-full rounded-xl bg-[#a4804f] py-3.5 text-center text-sm font-bold text-white shadow-xs transition hover:bg-[#8d6c40] disabled:cursor-not-allowed disabled:opacity-50">
                     BAYAR &middot; <span id="submit-btn-total">Rp {{ number_format($cart->subtotalAmount() + $initialShipping['fee'], 0, ',', '.') }}</span>
                 </button>
                 <p class="text-center text-[10px] text-[#796b62]">

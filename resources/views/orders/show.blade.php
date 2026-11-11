@@ -262,7 +262,7 @@
 
                             @if($order->logs->isNotEmpty())
                                 <div class="mt-6 border-t border-[#efe2ce] pt-4">
-                                    <h3 class="text-xs font-bold tracking-wider text-[#8f6743] uppercase">Catatan Aktivitas</h3>
+                                    <h3 class="text-xs font-bold text-[#8f6743] uppercase">Catatan Aktivitas</h3>
                                     <div class="mt-3 space-y-2.5">
                                         @foreach($order->logs as $log)
                                             <div class="rounded-xl bg-[#e8decb]/70 p-3 text-xs">
@@ -388,7 +388,7 @@
     @if($order->canBeCancelledByCustomer())
         <div id="cancel-order-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
             <div class="w-full max-w-md rounded-3xl border border-[#8f6743] bg-[#fcf3e3] p-6 shadow-2xl">
-                <h3 class="font-serif text-xl font-semibold text-[#593822]">Batalkan Pesanan {{ $order->order_number }}</h3>
+                <h3 class="font-serif text-xl font-bold text-[#593822]">Batalkan Pesanan {{ $order->order_number }}</h3>
                 <p class="mt-1 text-xs text-[#6f5a4a]">Total tagihan: <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>. Tindakan ini tidak dapat dibatalkan.</p>
 
                 <form method="POST" action="{{ route('orders.cancel', $order) }}" class="mt-4 space-y-4">

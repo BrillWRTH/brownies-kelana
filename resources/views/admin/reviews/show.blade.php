@@ -6,7 +6,7 @@
 @section('content')
     <div class="mx-auto max-w-4xl space-y-5">
         <div class="flex items-center justify-between">
-            <h1 class="font-serif text-xl font-semibold text-[#28211c]">Detail Ulasan Pelanggan</h1>
+            <h1 class="font-serif text-xl font-bold text-[#28211c]">Detail Ulasan Pelanggan</h1>
             <a href="{{ route('admin.reviews.index') }}" class="btn-kelana-outline px-4 py-2 text-xs">&larr; Semua Ulasan</a>
         </div>
 

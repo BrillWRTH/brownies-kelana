@@ -14,7 +14,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                     </svg>
                 </div>
-                <h2 class="mt-4 font-serif text-lg font-semibold text-[#593822]">Keranjang Kamu Masih Kosong</h2>
+                <h2 class="mt-4 font-serif text-lg font-bold text-[#593822]">Keranjang Kamu Masih Kosong</h2>
                 <p class="mt-1 text-xs text-[#6f5a4a]">Yuk pilih brownies, bolu, atau burnt cheesecake favoritmu di katalog kami.</p>
                 <a href="{{ route('products.index') }}" class="btn-kelana-primary mt-6 rounded-full text-xs">Jelajahi Produk &rarr;</a>
             </div>
@@ -27,7 +27,7 @@
                             <div class="flex items-center gap-4">
                                 <img src="{{ $item->product->primaryImageUrl() }}" alt="{{ $item->product->name }}" class="h-20 w-20 rounded-xl object-cover">
                                 <div>
-                                    <a href="{{ route('products.show', $item->product->slug) }}" class="font-serif text-base font-medium text-[#2f2118] hover:text-[#593822]">
+                                    <a href="{{ route('products.show', $item->product->slug) }}" class="font-serif text-base font-semibold text-[#2f2118] hover:text-[#593822]">
                                         {{ $item->product->name }}
                                     </a>
                                     <p class="text-xs text-[#6f5a4a]">
@@ -61,7 +61,7 @@
                                     <form method="POST" action="{{ route('cart.items.destroy', $item) }}" class="mt-0.5">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-[11px] font-semibold text-red-600 hover:underline">Hapus</button>
+                                        <button type="submit" class="text-[11px] font-bold text-red-600 hover:underline">Hapus</button>
                                     </form>
                                 </div>
                             </div>
@@ -120,14 +120,14 @@
         {{-- Rekomendasi Tambahan Menu --}}
         @if($recommendedProducts->isNotEmpty())
             <div class="mt-14">
-                <h2 class="font-serif text-xl font-semibold text-[#593822]">Sempurnakan Pesananmu</h2>
+                <h2 class="font-serif text-xl font-bold text-[#593822]">Sempurnakan Pesananmu</h2>
                 <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach($recommendedProducts as $rec)
                         <div class="flex items-center justify-between gap-3 rounded-2xl border border-[#efe2ce] bg-white p-3 shadow-xs">
                             <a href="{{ route('products.show', $rec->slug) }}" class="flex min-w-0 items-center gap-3">
                                 <img src="{{ $rec->primaryImageUrl() }}" alt="{{ $rec->name }}" class="h-14 w-14 shrink-0 rounded-xl object-cover">
                                 <div class="min-w-0">
-                                    <p class="truncate font-serif text-xs font-medium text-[#2f2118]">{{ $rec->name }}</p>
+                                    <p class="truncate font-serif text-xs font-semibold text-[#2f2118]">{{ $rec->name }}</p>
                                     <p class="text-xs font-semibold text-[#593822]">Rp {{ number_format($rec->base_price, 0, ',', '.') }}</p>
                                 </div>
                             </a>

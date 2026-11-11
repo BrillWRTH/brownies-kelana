@@ -38,7 +38,7 @@
 
                 @if($notifications->isEmpty())
                     <div class="kelana-card p-10 text-center">
-                        <h2 class="font-serif text-base font-semibold text-[#593822]">Belum ada notifikasi</h2>
+                        <h2 class="font-serif text-base font-bold text-[#593822]">Belum ada notifikasi</h2>
                         <p class="mt-1 text-xs text-[#6f5a4a]">Informasi terbaru tentang pesanan dan sistem akan tampil di sini.</p>
                     </div>
                 @else

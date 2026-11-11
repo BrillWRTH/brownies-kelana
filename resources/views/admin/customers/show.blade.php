@@ -9,7 +9,7 @@
             <div>
                 <div class="flex flex-wrap items-center gap-2.5">
                     <span class="rounded bg-[#f9eddd] px-2.5 py-0.5 text-xs font-bold text-[#52311a]">{{ $customer->customer_code ?? 'CUS' }}</span>
-                    <h1 class="font-serif text-xl font-semibold text-[#28211c]">{{ $customer->name }}</h1>
+                    <h1 class="font-serif text-xl font-bold text-[#28211c]">{{ $customer->name }}</h1>
                     @if($customer->is_active)
                         <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-800">Akun Aktif</span>
                     @else

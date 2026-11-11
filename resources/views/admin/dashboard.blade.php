@@ -8,7 +8,7 @@
         {{-- Header & Aksi Cepat sesuai UI/UX --}}
         <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <h1 class="font-serif text-3xl font-semibold text-[#593822]">Ringkasan Operasional</h1>
+                <h1 class="font-serif text-3xl font-bold text-[#593822]">Ringkasan Operasional</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     Ringkasan Toko &middot; {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY · HH:mm') }} WIB
                 </p>
@@ -45,7 +45,7 @@
                         </svg>
                     </span>
                 </div>
-                <p class="mt-2 font-serif text-3xl font-semibold lining-nums text-[#593822]">{{ $totalOrders }}</p>
+                <p class="mt-2 font-serif text-3xl font-bold lining-nums text-[#593822]">{{ $totalOrders }}</p>
                 <p class="mt-1 text-[11px] text-[#8f6743]">
                     {{ $pendingPaymentCount }} menunggu pembayaran Midtrans
                 </p>
@@ -60,7 +60,7 @@
                         </svg>
                     </span>
                 </div>
-                <p class="mt-2 font-serif text-3xl font-semibold lining-nums text-[#593822]">{{ $needsActionCount }}</p>
+                <p class="mt-2 font-serif text-3xl font-bold lining-nums text-[#593822]">{{ $needsActionCount }}</p>
                 <p class="mt-1 text-[11px] text-[#8f6743]">
                     {{ $processingCount }} diproduksi/kemas &bull; {{ $inTransitCount }} kirim/siap ambil
                 </p>
@@ -75,7 +75,7 @@
                         </svg>
                     </span>
                 </div>
-                <p class="mt-2 font-serif text-2xl font-semibold lining-nums text-[#593822]">
+                <p class="mt-2 font-serif text-2xl font-bold lining-nums text-[#593822]">
                     Rp {{ number_format($paidTotalRevenue, 0, ',', '.') }}
                 </p>
                 <p class="mt-1 text-[11px] text-[#8f6743]">
@@ -92,7 +92,7 @@
                         </svg>
                     </span>
                 </div>
-                <p class="mt-2 font-serif text-3xl font-semibold lining-nums text-[#593822]">{{ $completedCount }} / {{ $totalOrders }}</p>
+                <p class="mt-2 font-serif text-3xl font-bold lining-nums text-[#593822]">{{ $completedCount }} / {{ $totalOrders }}</p>
                 <p class="mt-1 text-[11px] text-[#8f6743]">
                     Sampai tujuan atau telah diambil pelanggan
                 </p>
@@ -105,11 +105,11 @@
                 <div class="rounded-2xl border border-[#efe2ce] bg-white p-6 shadow-xs">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <h2 class="font-serif text-2xl font-semibold text-[#593822]">Pesanan Terbaru</h2>
+                            <h2 class="font-serif text-2xl font-bold text-[#593822]">Pesanan Terbaru</h2>
                             <p class="text-xs text-[#796b62]">5 transaksi terbaru yang perlu diawasi dari website maupun WhatsApp manual.</p>
                         </div>
                         <a href="{{ route('admin.orders.index') }}"
-                            class="rounded-xl border border-[#efe2ce] bg-[#fcf3e3] px-3.5 py-2 text-xs font-semibold text-[#593822] hover:bg-[#f7ebd5]">
+                            class="rounded-xl border border-[#efe2ce] bg-[#fcf3e3] px-3.5 py-2 text-xs font-bold text-[#593822] hover:bg-[#f7ebd5]">
                             Kelola Semua &rarr;
                         </a>
                     </div>
@@ -198,11 +198,11 @@
                 <div class="rounded-2xl border border-[#efe2ce] bg-white p-6 shadow-xs">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="font-serif text-xl font-semibold text-[#593822]">Operasional Hari Ini</h2>
+                            <h2 class="font-serif text-xl font-bold text-[#593822]">Operasional Hari Ini</h2>
                             <p class="text-xs text-[#796b62]">Pembayaran, inbox, dan produksi</p>
                         </div>
                         <a href="{{ route('admin.orders.index') }}"
-                            class="rounded-xl border border-[#efe2ce] bg-[#fcf3e3] px-3 py-1.5 text-[11px] font-semibold text-[#593822] hover:bg-[#f7ebd5]">
+                            class="rounded-xl border border-[#efe2ce] bg-[#fcf3e3] px-3 py-1.5 text-[11px] font-bold text-[#593822] hover:bg-[#f7ebd5]">
                             Lihat
                         </a>
                     </div>
