@@ -30,47 +30,49 @@
     {{-- 1. Hero Banner Cokelat Tua dengan Carousel Brownies Panggang --}}
     <section class="relative bg-[#593822] pb-12 pt-6 text-white sm:pb-16 sm:pt-8">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-[1.5rem] bg-[#492d1a] shadow-lg">
-                @foreach($heroSlides as $slideIndex => $slide)
-                    <div data-hero-slide class="{{ $slideIndex === 0 ? '' : 'hidden' }} relative">
-                        <img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] }}"
-                            class="h-64 w-full object-cover sm:h-96 md:h-[430px]">
-                        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#28211c]/70 via-[#28211c]/20 to-transparent"></div>
-                        <div class="absolute bottom-5 left-5 right-5 flex flex-col items-start justify-between gap-3 sm:bottom-6 sm:left-7 sm:right-7 sm:flex-row sm:items-end">
-                            <div>
-                                <span class="inline-block rounded-full bg-[#a67251]/90 px-3 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
-                                    {{ $slide['badge'] }}
-                                </span>
-                                <h1 class="mt-1.5 max-w-lg font-serif text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl">
-                                    {{ $slide['title'] }}
-                                </h1>
+            <div id="hero-carousel-container" class="relative overflow-hidden rounded-[1.5rem] bg-[#492d1a] shadow-lg">
+                <div id="hero-slider-track" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
+                    @foreach($heroSlides as $slideIndex => $slide)
+                        <div class="relative w-full shrink-0">
+                            <img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] }}"
+                                class="h-64 w-full object-cover sm:h-96 md:h-[430px]">
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#28211c]/80 via-[#28211c]/30 to-transparent"></div>
+                            <div class="absolute bottom-5 left-5 right-5 flex flex-col items-start justify-between gap-3 sm:bottom-6 sm:left-7 sm:right-7 sm:flex-row sm:items-end">
+                                <div>
+                                    <span class="inline-block rounded-full bg-[#a67251]/95 px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-xs">
+                                        {{ $slide['badge'] }}
+                                    </span>
+                                    <h1 class="mt-2 max-w-lg font-serif text-xl font-black leading-snug text-white drop-shadow sm:text-3xl">
+                                        {{ $slide['title'] }}
+                                    </h1>
+                                </div>
+                                <a href="{{ route('products.index') }}"
+                                    class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-black text-[#593822] shadow-md transition hover:scale-105 hover:bg-[#fcf3e3]">
+                                    Pesan Sekarang &rarr;
+                                </a>
                             </div>
-                            <a href="{{ route('products.index') }}"
-                                class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-xs font-bold text-[#593822] shadow-md transition hover:bg-[#fcf3e3]">
-                                Pesan Sekarang &rarr;
-                            </a>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
 
                 {{-- Panah & Indikator Slide Carousel --}}
-                <button type="button" data-hero-prev aria-label="Slide sebelumnya"
-                    class="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#28211c]/35 text-white transition hover:bg-[#28211c]/65 sm:left-5">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <button type="button" id="hero-prev-btn" aria-label="Slide sebelumnya"
+                    class="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#28211c]/40 text-white backdrop-blur-xs transition hover:scale-110 hover:bg-[#28211c]/80 sm:left-5">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
-                <button type="button" data-hero-next aria-label="Slide berikutnya"
-                    class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#28211c]/35 text-white transition hover:bg-[#28211c]/65 sm:right-5">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <button type="button" id="hero-next-btn" aria-label="Slide berikutnya"
+                    class="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#28211c]/40 text-white backdrop-blur-xs transition hover:scale-110 hover:bg-[#28211c]/80 sm:right-5">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                 </button>
 
-                <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2">
+                <div id="hero-dots-container" class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
                     @foreach($heroSlides as $dotIndex => $slide)
-                        <button type="button" data-hero-dot aria-label="Slide {{ $dotIndex + 1 }}"
-                            class="h-2.5 w-2.5 rounded-full transition {{ $dotIndex === 0 ? 'bg-white' : 'bg-white/45' }}"></button>
+                        <button type="button" data-hero-dot-index="{{ $dotIndex }}" aria-label="Slide {{ $dotIndex + 1 }}"
+                            class="h-2.5 rounded-full transition-all duration-300 {{ $dotIndex === 0 ? 'w-8 bg-white' : 'w-2.5 bg-white/50 hover:bg-white/80' }}"></button>
                     @endforeach
                 </div>
             </div>
@@ -214,9 +216,9 @@
         <div class="mt-10 flex flex-wrap justify-center gap-6">
             @forelse($homeReviews as $review)
                 <article class="flex w-full flex-col rounded-xl border border-[#593822] bg-white p-4 shadow-xs md:w-[calc((100%-3rem)/3)]">
-                    <div class="overflow-hidden rounded-lg bg-[#f7ebd5]">
+                    <div class="overflow-hidden rounded-lg bg-[#fcf8f2] border border-[#efe2ce]">
                         <img src="{{ asset('images/kelana/testimonial-ig.png') }}" alt="Testimoni Pelanggan Brownies Kelana"
-                            class="h-40 w-full object-cover">
+                            class="h-56 w-full object-contain p-1">
                     </div>
 
                     <div class="mt-3 flex justify-center gap-1 text-[#d4ad37]">

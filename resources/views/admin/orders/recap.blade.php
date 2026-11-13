@@ -23,8 +23,14 @@
                     <label for="end_date" class="kelana-label">Sampai Tanggal</label>
                     <input id="end_date" name="end_date" type="date" value="{{ $endDate }}" class="kelana-input py-2 text-xs">
                 </div>
-                <button type="submit" class="btn-kelana-primary px-4 py-2 text-xs">Tampilkan</button>
-                <button type="button" onclick="window.print()" class="btn-kelana-outline px-4 py-2 text-xs">Cetak Rekap</button>
+                <button type="submit" class="btn-kelana-outline px-4 py-2 text-xs">Tampilkan</button>
+                <a href="{{ route('admin.orders.recap.download', ['start_date' => $startDate, 'end_date' => $endDate]) }}"
+                    class="btn-kelana-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span>Download Rekap Produksi</span>
+                </a>
             </form>
         </div>
 

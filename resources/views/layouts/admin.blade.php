@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel Admin — Brownies Kelana')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -15,8 +18,8 @@
     @endphp
 
     <div class="flex min-h-screen">
-        {{-- Sidebar Kiri Admin Panel (Cocoa Brown sesuai UI/UX) --}}
-        <aside class="no-print hidden w-60 shrink-0 flex-col bg-[#674732] text-[#f7ebd5] lg:flex">
+        {{-- Sidebar Kiri Admin Panel Sticky & Memanjang Penuh (Sesuai UI/UX) --}}
+        <aside class="no-print sticky top-0 hidden h-screen w-60 shrink-0 flex-col overflow-y-auto bg-[#674732] text-[#f7ebd5] lg:flex">
             <div class="px-6 pb-6 pt-7">
                 <a href="{{ route('admin.dashboard') }}" class="block leading-tight">
                     <span class="block font-serif text-xl font-bold text-white">Brownies Kelana</span>
@@ -145,7 +148,7 @@
                 @endif
             </div>
 
-            <main class="flex-1 p-4 sm:px-8 sm:py-6">
+            <main class="flex-1 p-4 pb-16 sm:px-8 sm:py-6 sm:pb-20">
                 @yield('content')
             </main>
         </div>

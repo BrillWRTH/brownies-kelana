@@ -386,6 +386,10 @@ class OrderAndMidtransPaymentTest extends TestCase
         $this->get(route('profile.edit'))->assertOk();
         $this->get(route('cart.index'))->assertOk();
         $this->get(route('orders.show', 'BC-TIDAK-ADA'))->assertOk();
+
+        // 6. Pastikan cek status pembayaran dapat diakses via GET maupun POST tanpa error 405 Method Not Allowed
+        $this->get(route('payments.check-status', $completedOrder))->assertRedirect();
+        $this->post(route('payments.check-status', $completedOrder))->assertRedirect();
     }
 
     /**

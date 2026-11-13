@@ -93,7 +93,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:15,1')->name('checkout.store');
 
     Route::get('/pembayaran/{order}', [PaymentController::class, 'show'])->name('payments.show');
-    Route::post('/pembayaran/{order}/cek-status', [PaymentController::class, 'checkStatus'])->middleware('throttle:20,1')->name('payments.check-status');
+    Route::match(['GET', 'POST'], '/pembayaran/{order}/cek-status', [PaymentController::class, 'checkStatus'])->middleware('throttle:20,1')->name('payments.check-status');
     Route::get('/pembayaran/{order}/status/{state}', [PaymentController::class, 'result'])->name('payments.result');
 
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
@@ -127,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
         // Pengelolaan Pesanan & Rekap Produksi
         Route::get('/rekap-produksi', [AdminOrderController::class, 'productionRecap'])->name('orders.recap');
+        Route::get('/rekap-produksi/download', [AdminOrderController::class, 'downloadProductionRecap'])->name('orders.recap.download');
         Route::get('/orders/{order}/nota', [AdminOrderController::class, 'printReceipt'])->name('orders.receipt');
         Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::post('/orders/{order}/kurir', [AdminOrderController::class, 'updateCourier'])->name('orders.update-courier');

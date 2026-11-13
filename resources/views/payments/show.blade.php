@@ -2,6 +2,15 @@
 
 @section('title', 'Pembayaran '.$order->order_number.' — Brownies Kelana')
 
+@push('head')
+    @if(! empty($midtransClientKey) && $payment?->snap_token)
+        <link rel="preconnect" href="{{ $isProduction ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com' }}">
+        <link rel="preload" href="{{ $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" as="script">
+        <script src="{{ $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+            data-client-key="{{ $midtransClientKey }}" defer></script>
+    @endif
+@endpush
+
 @section('content')
     <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -49,35 +58,49 @@
                         </div>
                     @endif
 
-                    {{-- Panel Utama Popup & Link Resmi Midtrans Snap --}}
-                    <div class="mt-6 rounded-2xl border border-[#efe2ce] bg-[#fcf3e3] p-6 text-center">
+                    {{-- Panel Utama Pembayaran Inline Midtrans Snap & QRIS di Halaman Langsung --}}
+                    <div class="mt-6 rounded-2xl border border-[#efe2ce] bg-[#fcf3e3] p-5 text-center">
                         <p class="text-xs font-semibold text-[#6f5a4a]">Total Tagihan Pembayaran</p>
                         <p class="mt-1 text-3xl font-bold text-[#593822]">
                             Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                         </p>
                         <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
-                            Nomor Virtual Account, kode QRIS, GoPay, atau pembayaran kartu diproses secara langsung dan aman melalui jendela pembayaran resmi Midtrans.
+                            Kode QRIS, Virtual Account, GoPay, dan metode lainnya terbuka langsung di halaman ini tanpa membuka tab/halaman baru.
                         </p>
 
-                        <div class="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                        <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
                             @if(! empty($midtransClientKey) && $payment?->snap_token)
-                                <button type="button" id="pay-with-snap-btn" class="btn-kelana-primary w-full rounded-xl px-6 py-3 text-xs sm:w-auto">
-                                    Bayar Sekarang via Midtrans Snap &rarr;
+                                <button type="button" id="pay-with-snap-btn" class="btn-kelana-primary rounded-xl px-5 py-2.5 text-xs font-bold shadow-md hover:scale-[1.02] transition">
+                                    Buka Pembayaran / QRIS Sekarang &rarr;
                                 </button>
                             @endif
 
-                            @if($payment?->snap_redirect_url)
-                                <a href="{{ $payment->snap_redirect_url }}" target="_blank" rel="noopener"
-                                    class="btn-kelana-outline w-full rounded-xl px-5 py-3 text-xs sm:w-auto">
-                                    Buka Halaman Pembayaran Midtrans
-                                </a>
-                            @endif
+                            <form method="POST" action="{{ route('payments.check-status', $order) }}" class="inline-block">
+                                @csrf
+                                <button type="submit" class="btn-kelana-outline rounded-xl px-4 py-2.5 text-xs font-bold hover:bg-[#f7ebd5] transition">
+                                    Cek Status Pembayaran
+                                </button>
+                            </form>
                         </div>
 
-                        <p class="mt-4 text-[11px] text-[#796b62]">
+                        <p class="mt-3 text-[11px] text-[#796b62]">
                             Batas akhir pembayaran: <strong>{{ $order->payment_deadline_at?->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</strong>.
                         </p>
                     </div>
+
+                    {{-- Kontainer Snap Embed Langsung di Halaman (Tanpa Tab Baru) --}}
+                    @if(! empty($midtransClientKey) && $payment?->snap_token)
+                        <div class="mt-4 overflow-hidden rounded-2xl border border-[#d9c8b4] bg-white p-3 shadow-inner">
+                            <p class="mb-2 text-center text-[11px] font-bold text-[#593822]">Jendela Pembayaran Langsung</p>
+                            <div id="snap-container" class="relative min-h-[460px] w-full rounded-xl bg-[#fdfbf6]">
+                                <div id="snap-loading-placeholder" class="flex min-h-[420px] flex-col items-center justify-center p-6 text-center">
+                                    <div class="h-10 w-10 animate-spin rounded-full border-3 border-[#d9c8b4] border-t-[#593822]"></div>
+                                    <p class="mt-4 font-serif text-sm font-bold text-[#593822]">Menghubungkan ke Pembayaran Midtrans...</p>
+                                    <p class="mt-1 text-xs text-[#796b62]">Memuat metode QRIS, GoPay, Virtual Account & Bank Transfer</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Rincian Kanal Resmi Apabila Sudah Dikirim oleh API Midtrans --}}
                     @if($payment && ($payment->va_number || $payment->bill_key || $payment->qris_url))
@@ -230,23 +253,76 @@
 
     @push('scripts')
         @if(! empty($midtransClientKey) && $payment?->snap_token)
-            <script src="{{ $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-                data-client-key="{{ $midtransClientKey }}"></script>
             <script>
-                document.getElementById('pay-with-snap-btn')?.addEventListener('click', () => {
+                const snapToken = @json($payment->snap_token);
+                const resultSuccessUrl = @json(route('payments.result', ['order' => $order, 'state' => 'berhasil']));
+                const resultPendingUrl = @json(route('payments.result', ['order' => $order, 'state' => 'pending']));
+                const resultErrorUrl = @json(route('payments.result', ['order' => $order, 'state' => 'gagal']));
+
+                const snapCallbacks = {
+                    onSuccess: (result) => window.location.href = resultSuccessUrl,
+                    onPending: (result) => window.location.href = resultPendingUrl,
+                    onError: (result) => window.location.href = resultErrorUrl,
+                    onClose: () => {
+                        console.log('Jendela pembayaran ditutup oleh pengguna.');
+                    }
+                };
+
+                let snapEmbedded = false;
+
+                function startSnapPayment(forcePopup = false) {
                     if (! window.snap) {
-                        @if($payment?->snap_redirect_url)
-                            window.open(@json($payment->snap_redirect_url), '_blank', 'noopener');
-                        @endif
-                        return;
+                        return false;
                     }
 
-                    window.snap.pay(@json($payment->snap_token), {
-                        onSuccess: () => window.location.href = @json(route('payments.result', ['order' => $order, 'state' => 'berhasil'])),
-                        onPending: () => window.location.href = @json(route('payments.result', ['order' => $order, 'state' => 'pending'])),
-                        onError: () => window.location.href = @json(route('payments.result', ['order' => $order, 'state' => 'gagal'])),
-                    });
+                    const container = document.getElementById('snap-container');
+                    if (!forcePopup && container && typeof window.snap.embed === 'function') {
+                        try {
+                            const placeholder = document.getElementById('snap-loading-placeholder');
+                            window.snap.embed(snapToken, Object.assign({ embedId: 'snap-container' }, snapCallbacks));
+                            snapEmbedded = true;
+                            if (placeholder) placeholder.style.display = 'none';
+                            return true;
+                        } catch (err) {
+                            console.warn('Embed Snap gagal, beralih ke popup modal:', err);
+                        }
+                    }
+
+                    // Fallback ke popup Snap modal di atas website langsung
+                    if (typeof window.snap.pay === 'function') {
+                        window.snap.pay(snapToken, snapCallbacks);
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                document.getElementById('pay-with-snap-btn')?.addEventListener('click', () => {
+                    startSnapPayment(true);
                 });
+
+                // Inisialisasi secepat kilat: periksa snap.js setiap 50ms sehingga langsung aktif saat script selesai dimuat
+                let attempts = 0;
+                const snapCheckInterval = setInterval(() => {
+                    attempts++;
+                    if (window.snap) {
+                        clearInterval(snapCheckInterval);
+                        startSnapPayment(false);
+                    } else if (attempts > 100) { // Timeout 5 detik
+                        clearInterval(snapCheckInterval);
+                        const placeholder = document.getElementById('snap-loading-placeholder');
+                        if (placeholder) {
+                            placeholder.innerHTML = `
+                                <div class="p-4 text-center">
+                                    <p class="text-xs font-bold text-[#593822]">Memuat embed sedikit lambat di perangkat Anda?</p>
+                                    <button type="button" onclick="startSnapPayment(true)" class="btn-kelana-primary mt-3 rounded-xl px-5 py-2.5 text-xs font-bold">
+                                        Klik untuk Buka Pembayaran Popup Midtrans &rarr;
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                }, 50);
             </script>
         @endif
 

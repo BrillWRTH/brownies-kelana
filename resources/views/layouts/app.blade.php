@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Brownies Kelana — Dibuat Untuk Dinikmati')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -21,38 +24,38 @@
 
     {{-- Navigasi Utama Pelanggan sesuai UI/UX Brownies Kelana --}}
     <header class="sticky top-0 z-40 border-b border-[#e5d5bf] bg-[#fcf3e3]/95 backdrop-blur-sm">
-        {{-- Ornamen Pita Sudut Cokelat-Emas di Kiri Atas --}}
-        <div class="pointer-events-none absolute left-0 top-0 h-16 w-20 overflow-hidden sm:h-[72px] sm:w-24">
-            <svg viewBox="0 0 96 72" fill="none" class="h-full w-full">
-                <polygon points="0,0 88,0 44,36 0,0" fill="#d9c6af" />
-                <polygon points="0,0 44,36 0,72" fill="#593822" />
-                <polygon points="44,36 88,0 96,0 52,44" fill="#c7a26d" opacity="0.55" />
+        {{-- Ornamen Pita Sudut Cokelat-Emas di Kiri Atas sesuai Figma --}}
+        <div class="pointer-events-none absolute left-0 top-0 bottom-0 h-full w-[95px] overflow-hidden sm:w-[115px]">
+            <svg viewBox="0 0 118 148" preserveAspectRatio="none" fill="none" class="h-full w-full">
+                <polygon points="0,0 105,0 56,56" fill="#d4c7b5" />
+                <polygon points="105,0 118,0 118,118 56,56" fill="#b18a50" />
+                <polygon points="0,0 56,56 118,118 118,148 0,148" fill="#4a2e1b" />
             </svg>
         </div>
 
-        <div class="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+        <div class="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             {{-- Logo Circular + Wordmark Serif --}}
-            <a href="{{ route('home') }}" class="group relative z-10 flex items-center gap-3 pl-6 sm:pl-8">
+            <a href="{{ route('home') }}" class="group relative z-10 flex items-center gap-3 pl-12 sm:pl-16">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#a4804f] bg-white p-0.5 shadow-sm transition group-hover:scale-105 sm:h-11 sm:w-11">
                     <img src="{{ asset('images/kelana/logo-kelana.png') }}" alt="Logo Brownies Kelana" class="h-full w-full rounded-full object-cover">
                 </div>
-                <span class="font-serif text-lg font-bold tracking-tight text-[#593822] sm:text-2xl">
+                <span class="font-serif text-xl sm:text-2xl font-black tracking-tight text-[#4a2e1b] group-hover:text-[#311c10] transition">
                     {{ $store->store_name }}
                 </span>
             </a>
 
             {{-- Menu Navigasi Tengah Desktop --}}
-            <nav class="hidden items-center gap-8 text-xs font-semibold uppercase md:flex">
+            <nav class="hidden items-center gap-9 text-[13px] font-extrabold uppercase tracking-widest md:flex">
                 <a href="{{ route('home') }}"
-                    class="transition {{ request()->routeIs('home') ? 'text-[#593822]' : 'text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('home') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Home
                 </a>
                 <a href="{{ route('products.index') }}"
-                    class="transition {{ request()->routeIs('products.*') ? 'text-[#593822]' : 'text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('products.*') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Produk
                 </a>
                 <a href="{{ route('about') }}"
-                    class="transition {{ request()->routeIs('about') ? 'text-[#593822]' : 'text-[#6f5d50] hover:text-[#593822]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('about') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Tentang Kami
                 </a>
             </nav>
@@ -224,31 +227,34 @@
         @yield('content')
     </main>
 
-    {{-- Footer Brand Brownies Kelana dengan Kurva Gelombang Cocoa --}}
-    <footer class="relative mt-16 text-[#f7ebd5]">
+    {{-- Footer Brand Brownies Kelana dengan Kurva Gelombang Cocoa Proporsional --}}
+    <footer class="relative mt-10 text-[#f7ebd5] sm:mt-12">
         <div class="overflow-hidden leading-none text-[#593822]">
-            <svg viewBox="0 0 1440 84" preserveAspectRatio="none" class="block h-12 w-full sm:h-16">
-                <path fill="currentColor" d="M0,42 C240,0 480,0 740,38 C1000,76 1240,68 1440,22 L1440,84 L0,84 Z"></path>
+            <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="block h-7 w-full sm:h-9">
+                <path fill="currentColor" d="M0,30 C240,0 480,0 740,26 C1000,52 1240,46 1440,15 L1440,60 L0,60 Z"></path>
             </svg>
         </div>
 
-        <div class="bg-[#593822] pb-10 pt-5">
-            <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
+        <div class="bg-[#593822] pb-6 pt-2">
+            <div class="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-4 lg:gap-8 lg:px-8">
                 <div>
-                    <h3 class="font-serif text-xl font-bold text-white">{{ $store->store_name }}</h3>
+                    <h3 class="font-serif text-lg font-bold text-white">{{ $store->store_name }}</h3>
                     <p class="text-[9px] font-semibold tracking-wide text-[#e8decb] uppercase">{{ $store->tagline }}</p>
-                    <p class="mt-4 text-xs leading-relaxed text-[#e8decb]/90">
+                    <p class="mt-2 text-xs leading-relaxed text-[#e8decb]/90">
                         Kelezatan yang mengajakmu berhenti sejenak. Untuk diri sendiri, untuk berbagi, untuk momen yang berarti.
                     </p>
-                    <div class="mt-5 flex items-center gap-3">
-                        <a href="{{ $store->whatsappUrl('Halo Brownies Kelana, saya ingin bertanya tentang produk.') }}" target="_blank" rel="noopener"
-                            aria-label="WhatsApp Brownies Kelana"
+                    <div class="mt-3.5 flex items-center gap-2.5">
+                        <a href="{{ $store->phoneUrl() }}"
+                            aria-label="Telepon Brownies Kelana"
+                            title="Hubungi Brownies Kelana: {{ $store->whatsapp_number }}"
                             class="flex h-8 w-8 items-center justify-center rounded-full border border-[#c7a26d]/60 text-[#f7ebd5] transition hover:bg-[#a4804f] hover:text-white">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                             </svg>
                         </a>
-                        <a href="mailto:{{ $store->email }}" aria-label="Email Brownies Kelana"
+                        <a href="mailto:{{ $store->email }}"
+                            aria-label="Email Brownies Kelana"
+                            title="Kirim email: {{ $store->email }}"
                             class="flex h-8 w-8 items-center justify-center rounded-full border border-[#c7a26d]/60 text-[#f7ebd5] transition hover:bg-[#a4804f] hover:text-white">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -259,7 +265,7 @@
 
                 <div>
                     <h4 class="text-[11px] font-semibold text-white uppercase">Jelajahi Kelana</h4>
-                    <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
+                    <ul class="mt-2.5 space-y-1.5 text-xs text-[#e8decb]/90">
                         <li><a href="{{ route('about') }}" class="hover:text-white">Tentang kami</a></li>
                         <li><a href="{{ route('products.index') }}" class="hover:text-white">Koleksi kue &amp; jajanan terkini</a></li>
                         <li><a href="{{ route('products.index', ['k3mart' => 1]) }}" class="hover:text-white">K3Mart Corner</a></li>
@@ -268,7 +274,7 @@
 
                 <div>
                     <h4 class="text-[11px] font-semibold text-white uppercase">Bantuan Pesanan</h4>
-                    <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
+                    <ul class="mt-2.5 space-y-1.5 text-xs text-[#e8decb]/90">
                         <li><a href="{{ route('orders.guide') }}" class="hover:text-white">Cara pemesanan</a></li>
                         <li><a href="{{ route('shipping.info') }}" class="hover:text-white">Pengiriman &amp; pengambilan</a></li>
                         <li><a href="{{ route('allergen.info') }}" class="hover:text-white">Informasi alergen</a></li>
@@ -278,21 +284,21 @@
 
                 <div>
                     <h4 class="text-[11px] font-semibold text-white uppercase">Hubungi Kami</h4>
-                    <ul class="mt-3.5 space-y-2 text-xs text-[#e8decb]/90">
+                    <ul class="mt-2.5 space-y-1.5 text-xs text-[#e8decb]/90">
                         <li>WhatsApp CS: {{ $store->whatsapp_number }}</li>
                         <li>Email: {{ $store->email }}</li>
                     </ul>
                     <a href="{{ $store->whatsappUrl('Halo Brownies Kelana, saya ingin bertanya mengenai produk & pemesanan.') }}" target="_blank" rel="noopener"
-                        class="mt-5 inline-flex items-center gap-2 text-[11px] font-bold text-white uppercase transition hover:text-[#e9dcc7]">
+                        class="mt-3.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-white uppercase transition hover:text-[#e9dcc7]">
                         <span>Mulai Percakapan</span>
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
                         </svg>
                     </a>
                 </div>
             </div>
 
-            <div class="mx-auto mt-10 flex max-w-7xl flex-col items-center justify-between gap-3 border-t border-[#c7a26d]/35 px-4 pt-6 text-[11px] text-[#e8decb]/80 sm:flex-row sm:px-6 lg:px-8">
+            <div class="mx-auto mt-6 flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-[#c7a26d]/35 px-4 pt-4 text-[11px] text-[#e8decb]/80 sm:flex-row sm:px-6 lg:px-8">
                 <p>&copy; {{ date('Y') }} {{ $store->store_name }}. Seluruh hak cipta dilindungi.</p>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('privacy') }}" class="hover:text-white">Kebijakan privasi</a>

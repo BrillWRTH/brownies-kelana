@@ -27,7 +27,8 @@
             </div>
 
             @if($unreadCount > 0)
-                <form method="POST" action="{{ route('admin.notifications.read-all') }}">
+                <form method="POST" action="{{ route('admin.notifications.read-all') }}"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menandai semua notifikasi sudah dibaca?')">
                     @csrf
                     <button type="submit" class="btn-kelana-outline px-3.5 py-1.5 text-xs">
                         Tandai Semua Sudah Dibaca
@@ -88,6 +89,7 @@
                     <div class="flex shrink-0 items-center gap-2">
                         @if(!$notif->read_at)
                             <a href="{{ route('admin.notifications.index', array_merge(request()->query(), ['read' => $notif->id])) }}"
+                                onclick="return confirm('Tandai notifikasi ini sebagai sudah dibaca?')"
                                 class="btn-kelana-outline px-3 py-1.5 text-[11px]">
                                 Tandai Dibaca
                             </a>

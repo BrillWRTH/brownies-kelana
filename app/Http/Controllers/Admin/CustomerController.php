@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\StoreSetting;
 use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Http\RedirectResponse;
@@ -85,10 +86,7 @@ class CustomerController extends Controller
         }
 
         // 3. Bangun tautan WhatsApp bantuan pemulihan akun & komunikasi langsung
-        $waDigits = preg_replace('/[^0-9]/', '', (string) $customer->phone) ?? '';
-        if (str_starts_with($waDigits, '0')) {
-            $waDigits = '62'.substr($waDigits, 1);
-        }
+        $waDigits = StoreSetting::normalizePhone($customer->phone);
         $waHelpMessage = 'Halo Kak '.$customer->name.' ('.$customer->customer_code.'), kami dari tim Admin Brownies Kelana siap membantu terkait akun dan pesanan Anda.';
         $whatsappRecoveryUrl = $waDigits !== '' ? 'https://wa.me/'.$waDigits.'?text='.urlencode($waHelpMessage) : '#';
 

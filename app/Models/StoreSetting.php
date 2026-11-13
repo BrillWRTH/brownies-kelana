@@ -89,13 +89,37 @@ class StoreSetting extends Model
     }
 
     /**
+     * Normalisasi nomor telepon Indonesia ke format internasional 628...
+     */
+    public static function normalizePhone(?string $phone): string
+    {
+        if (! $phone) {
+            return '';
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', $phone) ?? '';
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+        if (str_starts_with($digits, '0')) {
+            $digits = '62'.substr($digits, 1);
+        } elseif (str_starts_with($digits, '620')) {
+            $digits = '62'.substr($digits, 3);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62'.$digits;
+        }
+
+        return $digits;
+    }
+
+    /**
      * Membuat tautan WhatsApp resmi toko dalam format wa.me.
      */
     public function whatsappUrl(?string $message = null): string
     {
-        $digits = preg_replace('/[^0-9]/', '', $this->whatsapp_number) ?? '6281231858544';
-        if (str_starts_with($digits, '0')) {
-            $digits = '62'.substr($digits, 1);
+        $digits = static::normalizePhone($this->whatsapp_number);
+        if ($digits === '') {
+            $digits = '6281231858544';
         }
 
         $url = 'https://wa.me/'.$digits;
@@ -104,6 +128,16 @@ class StoreSetting extends Model
         }
 
         return $url;
+    }
+
+    /**
+     * Membuat tautan tel: resmi toko untuk panggilan telepon langsung.
+     */
+    public function phoneUrl(): string
+    {
+        $digits = static::normalizePhone($this->whatsapp_number);
+
+        return $digits ? 'tel:+'.$digits : 'tel:+6281231858544';
     }
 
     /**

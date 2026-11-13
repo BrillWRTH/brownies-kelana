@@ -160,6 +160,17 @@
                                 <td class="px-4 py-3.5 align-top">
                                     <p class="font-bold text-[#2f2118]">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
                                     <p class="text-[11px] text-[#796b62]">{{ $order->items->sum('quantity') }} item</p>
+                                    <div class="mt-1.5 space-y-0.5 text-[11px] text-[#593822]">
+                                        @foreach($order->items as $it)
+                                            <p class="line-clamp-1" title="{{ $it->product_name }}{{ $it->variant_name ? ' ('.$it->variant_name.')' : '' }} x{{ $it->quantity }}">
+                                                &bull; <span class="font-medium">{{ $it->product_name }}</span>
+                                                @if($it->variant_name)
+                                                    <span class="text-[10px] text-[#8f7968]">({{ $it->variant_name }})</span>
+                                                @endif
+                                                <span class="font-bold">x{{ $it->quantity }}</span>
+                                            </p>
+                                        @endforeach
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
                                     <span class="font-bold {{ $payBadge }}">

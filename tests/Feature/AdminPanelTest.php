@@ -304,4 +304,40 @@ class AdminPanelTest extends TestCase
         $this->get(route('admin.notifications.history'))->assertOk();
         $this->get(route('admin.settings.index'))->assertOk();
     }
+
+    /**
+     * Memastikan download rekap produksi CSV berfungsi dan validasi nomor kurir hanya menerima angka.
+     */
+    public function test_recap_csv_download_and_courier_phone_numeric_validation(): void
+    {
+        $admin = User::query()->where('role', 'admin')->firstOrFail();
+        $this->actingAs($admin);
+
+        // 1. Uji unduh rekap produksi CSV
+        $downloadRes = $this->get(route('admin.orders.recap.download', [
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(7)->toDateString(),
+        ]));
+        $downloadRes->assertOk();
+        $downloadRes->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+        // 2. Uji validasi nomor HP kurir harus berupa angka saja
+        $order = Order::query()->where('delivery_type', 'delivery')->firstOrFail();
+        $order->update(['payment_status' => 'lunas']);
+
+        // Input huruf pada nomor HP kurir harus gagal validasi
+        $invalidRes = $this->post(route('admin.orders.update-courier', $order), [
+            'courier_name' => 'Budi Santoso',
+            'courier_phone' => 'segSH',
+        ]);
+        $invalidRes->assertSessionHasErrors('courier_phone');
+
+        // Input angka valid harus berhasil
+        $validRes = $this->post(route('admin.orders.update-courier', $order), [
+            'courier_name' => 'Budi Santoso',
+            'courier_phone' => '081234567890',
+        ]);
+        $validRes->assertSessionHasNoErrors();
+        $this->assertEquals('081234567890', $order->fresh()->courier_phone);
+    }
 }

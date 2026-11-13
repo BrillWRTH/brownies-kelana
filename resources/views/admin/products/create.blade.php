@@ -10,7 +10,7 @@
         ]);
     @endphp
 
-    <div class="mx-auto max-w-5xl space-y-5">
+    <div class="mx-auto max-w-5xl space-y-5 pb-16 mb-8">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="font-serif text-xl font-bold text-[#28211c]">Tambah Produk Brownies / Kue</h1>

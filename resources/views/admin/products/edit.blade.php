@@ -4,7 +4,7 @@
 @section('kicker', 'UBAH DATA PRODUK')
 
 @section('content')
-    <div class="mx-auto max-w-5xl space-y-6">
+    <div class="mx-auto max-w-5xl space-y-6 pb-16 mb-8">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-[11px] font-bold text-[#936b49] uppercase">{{ $product->product_code }}</p>

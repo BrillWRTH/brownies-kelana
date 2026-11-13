@@ -215,9 +215,9 @@
                             </div>
                         @endif
 
-                        {{-- Peta Interaktif Leaflet.js untuk Menentukan Titik Pin & Jarak Rute --}}
+                        {{-- Peta Interaktif Leaflet.js dengan Pencarian Real & Sinkronisasi Alamat Dua Arah --}}
                         <div class="rounded-2xl border border-[#efe2ce] bg-[#fcf3e3]/70 p-4">
-                            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+                            <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
                                 <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#593822] px-3 py-1.5 text-xs font-bold text-white">
                                     Pilih Lokasi Tujuan di Peta
                                 </span>
@@ -225,6 +225,30 @@
                                     Menghitung titik...
                                 </span>
                             </div>
+
+                            {{-- Input Pencarian Alamat Peta (Pencarian Cerdas POI & Koordinat Google Maps) --}}
+                            <div class="mb-2 space-y-1.5">
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="text" id="map-search-query"
+                                            placeholder="Cari jalan, patokan, apotek, toko, atau tempel link/koordinat Google Maps..."
+                                            value="{{ old('delivery_address', $user->saved_address) }}"
+                                            class="kelana-input text-xs py-2 pr-8">
+                                        <span id="map-search-spinner" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#593822] border-t-transparent"></span>
+                                    </div>
+                                    <button type="button" id="map-search-btn" class="btn-kelana-primary shrink-0 px-4 py-2 text-xs font-bold">
+                                        Cari Titik
+                                    </button>
+                                </div>
+                                <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] text-[#796b62]">
+                                    <span>Tip: Bisa cari nama tempat (contoh: <em>Pulosari Surabaya</em>) atau tempel link Google Maps</span>
+                                    <a id="open-gmaps-link" href="https://maps.google.com" target="_blank" rel="noopener" class="font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
+                                        <span>Buka Google Maps</span> &nearr;
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="map-search-message" class="hidden mb-2 rounded-xl p-2.5 text-xs"></div>
+                            <div id="map-search-results" class="hidden mb-2 max-h-52 overflow-y-auto rounded-xl border border-[#d9c8b4] bg-white p-1 text-xs shadow-md space-y-1"></div>
 
                             <div id="checkout-map" class="h-64 w-full rounded-xl border border-[#d9c8b4]"></div>
 
@@ -537,13 +561,13 @@
                     });
                 });
 
-                // Peta Interaktif Leaflet.js + OSRM Route Calculation
+                // Peta Interaktif Leaflet.js dengan Pencarian Real & Reverse Geocoding Dua Arah
                 const mapEl = document.getElementById('checkout-map');
                 if (mapEl && typeof L !== 'undefined') {
                     const startLat = parseFloat(latInput.value || -7.33185);
                     const startLng = parseFloat(lngInput.value || 112.72441);
 
-                    const map = L.map('checkout-map').setView([startLat, startLng], 13);
+                    const map = L.map('checkout-map').setView([startLat, startLng], 14);
                     window.kelanaMap = map;
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -559,7 +583,34 @@
                     // Marker Tujuan Pengiriman (Draggable)
                     const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
 
-                    const onCoordinateChanged = (lat, lng) => {
+                    let reverseGeoTimeout = null;
+                    const triggerReverseGeocode = (lat, lng) => {
+                        clearTimeout(reverseGeoTimeout);
+                        reverseGeoTimeout = setTimeout(async () => {
+                            try {
+                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+                                    headers: { 'Accept': 'application/json' }
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    if (data && data.display_name) {
+                                        const addressTextarea = document.getElementById('delivery_address');
+                                        if (addressTextarea) {
+                                            addressTextarea.value = data.display_name;
+                                        }
+                                        const searchInput = document.getElementById('map-search-query');
+                                        if (searchInput) {
+                                            searchInput.value = data.display_name;
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('Nominatim reverse error:', e);
+                            }
+                        }, 400);
+                    };
+
+                    const onCoordinateChanged = (lat, lng, doReverse = true) => {
                         const roundedLat = parseFloat(lat).toFixed(6);
                         const roundedLng = parseFloat(lng).toFixed(6);
                         latInput.value = roundedLat;
@@ -567,19 +618,216 @@
                         coordPreview.textContent = `Koordinat: ${roundedLat}, ${roundedLng}`;
                         mapsPreviewLink.href = `https://maps.google.com/?q=${roundedLat},${roundedLng}`;
                         updateShippingSummary();
+                        if (doReverse) {
+                            triggerReverseGeocode(roundedLat, roundedLng);
+                        }
                     };
 
                     marker.on('dragend', () => {
                         const pos = marker.getLatLng();
-                        onCoordinateChanged(pos.lat, pos.lng);
+                        onCoordinateChanged(pos.lat, pos.lng, true);
                     });
 
                     map.on('click', (event) => {
                         marker.setLatLng(event.latlng);
-                        onCoordinateChanged(event.latlng.lat, event.latlng.lng);
+                        onCoordinateChanged(event.latlng.lat, event.latlng.lng, true);
                     });
 
-                    onCoordinateChanged(startLat, startLng);
+                    // Integrasi Pencarian Cerdas Titik Peta (Photon Komoot + Google Maps Regex + Nominatim)
+                    const searchInput = document.getElementById('map-search-query');
+                    const searchBtn = document.getElementById('map-search-btn');
+                    const searchSpinner = document.getElementById('map-search-spinner');
+                    const searchMessage = document.getElementById('map-search-message');
+                    const resultsBox = document.getElementById('map-search-results');
+                    const openGmapsLink = document.getElementById('open-gmaps-link');
+
+                    if (openGmapsLink) {
+                        openGmapsLink.href = `https://www.google.com/maps/@${startLat},${startLng},16z`;
+                    }
+
+                    const showSearchMessage = (text, type = 'info') => {
+                        if (!searchMessage) return;
+                        searchMessage.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'border-red-200', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200', 'bg-amber-50', 'text-amber-800', 'border-amber-200');
+                        if (type === 'error') {
+                            searchMessage.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200');
+                        } else if (type === 'success') {
+                            searchMessage.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+                        } else {
+                            searchMessage.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                        }
+                        searchMessage.innerHTML = text;
+                    };
+
+                    const hideSearchMessage = () => {
+                        if (searchMessage) searchMessage.classList.add('hidden');
+                    };
+
+                    const executeMapSearch = async () => {
+                        const rawQuery = searchInput?.value.trim();
+                        if (!rawQuery) return;
+
+                        hideSearchMessage();
+                        resultsBox.innerHTML = '';
+                        resultsBox.classList.add('hidden');
+
+                        if (searchBtn) searchBtn.disabled = true;
+                        if (searchSpinner) searchSpinner.classList.remove('hidden');
+
+                        try {
+                            // 1. Periksa apakah pengguna menempelkan koordinat langsung atau URL Google Maps
+                            // Contoh: "-7.3038, 112.7198", "@-7.3038,112.7198", "q=-7.3038,112.7198"
+                            const coordRegex = /(-?\d{1,2}\.\d+)[,\s/]+(\d{2,3}\.\d+)/;
+                            const coordMatch = rawQuery.match(coordRegex);
+                            if (coordMatch) {
+                                const lat = parseFloat(coordMatch[1]);
+                                const lng = parseFloat(coordMatch[2]);
+                                if (lat >= -11 && lat <= 6 && lng >= 95 && lng <= 141) { // Wilayah Indonesia
+                                    map.setView([lat, lng], 16);
+                                    marker.setLatLng([lat, lng]);
+                                    onCoordinateChanged(lat, lng, true);
+                                    showSearchMessage(`✓ Titik berhasil diset dari koordinat Google Maps: <strong>${lat}, ${lng}</strong>`, 'success');
+                                    return;
+                                }
+                            }
+
+                            // 2. Normalisasi kata pencarian (Hapus preposisi bahasa Indonesia)
+                            let cleanQuery = rawQuery
+                                .replace(/\b(di|ke|dari|pada|sebelah|dekat|depan|area|wilayah)\b/gi, ' ')
+                                .replace(/\s+/g, ' ')
+                                .trim();
+
+                            let places = [];
+
+                            // Tahap A: Cari via Photon API (Elasticsearch POI dengan prioritas koordinat Surabaya/Dapur)
+                            try {
+                                const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&lat=${storeLat}&lon=${storeLng}&limit=6`;
+                                const pRes = await fetch(photonUrl, { headers: { 'Accept': 'application/json' } });
+                                if (pRes.ok) {
+                                    const pData = await pRes.json();
+                                    if (pData && pData.features && pData.features.length > 0) {
+                                        places = pData.features.map(f => {
+                                            const p = f.properties || {};
+                                            const name = p.name || p.street || 'Lokasi';
+                                            const parts = [p.street, p.district, p.city || p.locality, p.state].filter(Boolean);
+                                            return {
+                                                title: name,
+                                                description: parts.join(', '),
+                                                lat: f.geometry.coordinates[1],
+                                                lng: f.geometry.coordinates[0],
+                                            };
+                                        });
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('Photon lookup warning:', e);
+                            }
+
+                            // Tahap B: Jika kata kunci mengandung "apotek/toko/kantor" dan belum ketemu, coba cari nama intinya (contoh: "pulosari surabaya")
+                            if (places.length === 0) {
+                                const stripped = cleanQuery.replace(/\b(apotek|toko|warung|cafe|kedai|pt|cv|klinik|rumah|masjid)\b/gi, '').trim();
+                                if (stripped.length > 2 && stripped !== cleanQuery) {
+                                    try {
+                                        const pFallbackUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(stripped)}&lat=${storeLat}&lon=${storeLng}&limit=6`;
+                                        const pfRes = await fetch(pFallbackUrl, { headers: { 'Accept': 'application/json' } });
+                                        if (pfRes.ok) {
+                                            const pfData = await pfRes.json();
+                                            if (pfData && pfData.features && pfData.features.length > 0) {
+                                                places = pfData.features.map(f => {
+                                                    const p = f.properties || {};
+                                                    const name = p.name || p.street || 'Lokasi';
+                                                    const parts = [p.street, p.district, p.city || p.locality, p.state].filter(Boolean);
+                                                    return {
+                                                        title: name,
+                                                        description: parts.join(', '),
+                                                        lat: f.geometry.coordinates[1],
+                                                        lng: f.geometry.coordinates[0],
+                                                    };
+                                                });
+                                            }
+                                        }
+                                    } catch (e) {}
+                                }
+                            }
+
+                            // Tahap C: Fallback ke Nominatim OSM jika masih kosong
+                            if (places.length === 0) {
+                                try {
+                                    const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=5&viewbox=112.55,-7.48,112.85,-7.15&bounded=0&q=${encodeURIComponent(cleanQuery)}`;
+                                    const nRes = await fetch(nomUrl, { headers: { 'Accept': 'application/json' } });
+                                    if (nRes.ok) {
+                                        const nItems = await nRes.json();
+                                        if (nItems && nItems.length > 0) {
+                                            places = nItems.map(item => ({
+                                                title: item.display_name.split(',')[0],
+                                                description: item.display_name,
+                                                lat: parseFloat(item.lat),
+                                                lng: parseFloat(item.lon),
+                                            }));
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.warn('Nominatim lookup warning:', e);
+                                }
+                            }
+
+                            // Tampilkan hasil pencarian
+                            if (places.length > 0) {
+                                resultsBox.innerHTML = '';
+                                resultsBox.classList.remove('hidden');
+
+                                places.forEach((place) => {
+                                    const itemEl = document.createElement('div');
+                                    itemEl.className = 'cursor-pointer rounded-lg p-2.5 transition hover:bg-[#f7ebd5] border-b border-[#f3ece2] last:border-0 flex items-start gap-2';
+                                    itemEl.innerHTML = `
+                                        <span class="text-[#593822] text-sm mt-0.5">📍</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-bold text-[#593822] text-xs truncate">${place.title}</p>
+                                            <p class="text-[11px] text-[#796b62] truncate">${place.description}</p>
+                                        </div>
+                                    `;
+                                    itemEl.addEventListener('click', () => {
+                                        map.setView([place.lat, place.lng], 16);
+                                        marker.setLatLng([place.lat, place.lng]);
+                                        onCoordinateChanged(place.lat, place.lng, true);
+                                        document.getElementById('delivery_address').value = place.title + ', ' + place.description;
+                                        searchInput.value = place.title + ', ' + place.description;
+                                        resultsBox.classList.add('hidden');
+                                        showSearchMessage(`✓ Titik dipindahkan ke: <strong>${place.title}</strong>`, 'success');
+                                    });
+                                    resultsBox.appendChild(itemEl);
+                                });
+
+                                // Geser otomatis ke hasil teratas jika relevan
+                                const top = places[0];
+                                map.setView([top.lat, top.lng], 15);
+                                marker.setLatLng([top.lat, top.lng]);
+                                onCoordinateChanged(top.lat, top.lng, true);
+                            } else {
+                                showSearchMessage(`
+                                    <p class="font-semibold text-amber-800">Nama tempat spesifik tidak ditemukan di database peta.</p>
+                                    <p class="mt-1 text-[11px] text-amber-700">
+                                        💡 <strong>Saran:</strong> Coba cari nama jalan utama terdekat (misal: <em>Pulosari Surabaya</em>), atau geser marker merah langsung di atas peta, atau salin titik dari Google Maps.
+                                    </p>
+                                `, 'warning');
+                            }
+                        } catch (err) {
+                            console.error('Pencarian peta gagal:', err);
+                            showSearchMessage('Terjadi gangguan saat mencari alamat. Anda tetap dapat menggeser pin peta secara manual.', 'error');
+                        } finally {
+                            if (searchBtn) searchBtn.disabled = false;
+                            if (searchSpinner) searchSpinner.classList.add('hidden');
+                        }
+                    };
+
+                    searchBtn?.addEventListener('click', executeMapSearch);
+                    searchInput?.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            executeMapSearch();
+                        }
+                    });
+
+                    onCoordinateChanged(startLat, startLng, false);
                 }
             });
         </script>

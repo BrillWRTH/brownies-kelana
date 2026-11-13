@@ -186,9 +186,20 @@
                                         required placeholder="Contoh: Pak Budi (Kurir Internal / Lalamove)" class="kelana-input text-xs">
                                 </div>
                                 <div>
-                                    <label for="courier_phone" class="kelana-label">Nomor HP Kurir</label>
-                                    <input id="courier_phone" name="courier_phone" type="text" value="{{ old('courier_phone', $order->courier_phone) }}"
-                                        placeholder="0812xxxxxxxx" class="kelana-input text-xs">
+                                    <label for="courier_phone" class="kelana-label">Nomor HP Kurir (Hanya Angka) *</label>
+                                    <input id="courier_phone" name="courier_phone" type="tel" inputmode="numeric" pattern="[0-9]*"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                        value="{{ old('courier_phone', $order->courier_phone) }}"
+                                        placeholder="081234567890" class="kelana-input text-xs">
+                                    @if($order->courier_phone)
+                                        <a href="https://wa.me/{{ \App\Models\StoreSetting::normalizePhone($order->courier_phone) }}" target="_blank" rel="noopener"
+                                            class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:underline">
+                                            <span>Hubungi WA Kurir</span>
+                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                                            </svg>
+                                        </a>
+                                    @endif
                                 </div>
                                 <div>
                                     <label for="courier_vehicle_plate" class="kelana-label">Plat Nomor Kendaraan</label>

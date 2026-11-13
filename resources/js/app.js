@@ -104,25 +104,90 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Hero Slider Landing Page
-    const heroSlides = Array.from(document.querySelectorAll('[data-hero-slide]'));
-    const heroDots = Array.from(document.querySelectorAll('[data-hero-dot]'));
-    const heroPrev = document.querySelector('[data-hero-prev]');
-    const heroNext = document.querySelector('[data-hero-next]');
-    if (heroSlides.length > 0) {
+    // Hero Slider Carousel Landing Page (Auto-slide 5 detik, slide mulus, sentuhan & jeda saat hover)
+    const heroCarousel = document.getElementById('hero-carousel-container');
+    const heroTrack = document.getElementById('hero-slider-track');
+    const heroDots = Array.from(document.querySelectorAll('[data-hero-dot-index]'));
+    const heroPrevBtn = document.getElementById('hero-prev-btn');
+    const heroNextBtn = document.getElementById('hero-next-btn');
+
+    if (heroTrack && heroDots.length > 0) {
         let currentSlide = 0;
-        const showSlide = (idx) => {
-            currentSlide = (idx + heroSlides.length) % heroSlides.length;
-            heroSlides.forEach((slide, i) => {
-                slide.classList.toggle('hidden', i !== currentSlide);
-            });
+        const totalSlides = heroDots.length;
+        let autoSlideTimer = null;
+
+        const updateDots = (activeIdx) => {
             heroDots.forEach((dot, i) => {
-                dot.classList.toggle('bg-white', i === currentSlide);
-                dot.classList.toggle('bg-white/45', i !== currentSlide);
+                if (i === activeIdx) {
+                    dot.className = 'h-2.5 w-8 rounded-full bg-white transition-all duration-300';
+                } else {
+                    dot.className = 'h-2.5 w-2.5 rounded-full bg-white/50 hover:bg-white/80 transition-all duration-300';
+                }
             });
         };
-        heroPrev?.addEventListener('click', () => showSlide(currentSlide - 1));
-        heroNext?.addEventListener('click', () => showSlide(currentSlide + 1));
-        heroDots.forEach((dot, i) => dot.addEventListener('click', () => showSlide(i)));
+
+        const goToSlide = (idx) => {
+            currentSlide = (idx + totalSlides) % totalSlides;
+            heroTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+            updateDots(currentSlide);
+        };
+
+        const startAutoSlide = () => {
+            stopAutoSlide();
+            autoSlideTimer = setInterval(() => {
+                goToSlide(currentSlide + 1);
+            }, 5000);
+        };
+
+        const stopAutoSlide = () => {
+            if (autoSlideTimer) {
+                clearInterval(autoSlideTimer);
+                autoSlideTimer = null;
+            }
+        };
+
+        const userTriggerSlide = (idx) => {
+            goToSlide(idx);
+            startAutoSlide(); // Reset timer setelah interaksi pengguna
+        };
+
+        heroPrevBtn?.addEventListener('click', () => userTriggerSlide(currentSlide - 1));
+        heroNextBtn?.addEventListener('click', () => userTriggerSlide(currentSlide + 1));
+
+        heroDots.forEach((dot) => {
+            dot.addEventListener('click', () => {
+                const targetIdx = parseInt(dot.getAttribute('data-hero-dot-index') || '0', 10);
+                userTriggerSlide(targetIdx);
+            });
+        });
+
+        // Jeda auto slide saat mouse berada di atas banner
+        heroCarousel?.addEventListener('mouseenter', stopAutoSlide);
+        heroCarousel?.addEventListener('mouseleave', startAutoSlide);
+
+        // Dukungan usapan layar sentuh di ponsel (Touch swipe)
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        heroCarousel?.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            stopAutoSlide();
+        }, { passive: true });
+
+        heroCarousel?.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diffX = touchStartX - touchEndX;
+            if (Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                    goToSlide(currentSlide + 1); // Swipe kiri -> next
+                } else {
+                    goToSlide(currentSlide - 1); // Swipe kanan -> prev
+                }
+            }
+            startAutoSlide();
+        }, { passive: true });
+
+        // Mulai auto slide 5 detik pertama
+        startAutoSlide();
     }
 });

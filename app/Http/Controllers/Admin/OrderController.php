@@ -342,10 +342,7 @@ class OrderController extends Controller
             ];
 
         // 4. Siapkan tautan WhatsApp langsung menuju nomor pelanggan
-        $digits = preg_replace('/[^0-9]/', '', $order->customer_phone) ?? '';
-        if (str_starts_with($digits, '0')) {
-            $digits = '62'.substr($digits, 1);
-        }
+        $digits = StoreSetting::normalizePhone($order->customer_phone);
         $waText = 'Halo Kak '.$order->customer_name.', kami dari Brownies Kelana ingin mengonfirmasi pesanan '.$order->order_number.' ('.$order->orderStatusLabel().').';
         $customerWhatsappUrl = $digits !== '' ? 'https://wa.me/'.$digits.'?text='.urlencode($waText) : StoreSetting::current()->whatsappUrl($waText);
 
@@ -572,7 +569,7 @@ class OrderController extends Controller
         // 1. Validasi data pengemudi, penerima, dan file foto bukti pengiriman
         $validated = $request->validate([
             'courier_name' => ['required', 'string', 'max:150'],
-            'courier_phone' => ['nullable', 'string', 'max:25'],
+            'courier_phone' => ['nullable', 'string', 'regex:/^[0-9]+$/', 'max:25'],
             'courier_vehicle_plate' => ['nullable', 'string', 'max:40'],
             'received_by' => ['nullable', 'string', 'max:150'],
             'delivery_proof' => ['nullable', 'image', 'max:2048'],
@@ -580,6 +577,7 @@ class OrderController extends Controller
             'mark_delivered' => ['nullable', 'boolean'],
         ], [
             'courier_name.required' => 'Nama kurir/driver wajib diisi.',
+            'courier_phone.regex' => 'Nomor HP kurir harus berupa angka saja tanpa huruf atau simbol.',
             'delivery_proof.image' => 'Foto bukti pengiriman harus berupa gambar.',
             'delivery_proof.max' => 'Ukuran foto bukti maksimal 2MB.',
         ]);
@@ -833,6 +831,119 @@ class OrderController extends Controller
             'endDate',
             'dailyGroups'
         ));
+    }
+
+    /**
+     * Mengunduh rekap produksi dapur dalam format file CSV (.csv).
+     */
+    public function downloadProductionRecap(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $startDate = $request->query('start_date', Carbon::today()->toDateString());
+        $endDate = $request->query('end_date', Carbon::today()->addDays(7)->toDateString());
+
+        $orders = Order::query()
+            ->with(['items.product', 'pickupLocation'])
+            ->whereBetween('scheduled_date', [$startDate, $endDate])
+            ->whereNotIn('order_status', ['dibatalkan', 'kedaluwarsa'])
+            ->orderBy('scheduled_date')
+            ->orderBy('scheduled_time_slot')
+            ->get();
+
+        $filename = 'rekap-produksi-'.$startDate.'-sd-'.$endDate.'.csv';
+
+        return response()->streamDownload(function () use ($orders, $startDate, $endDate): void {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['REKAP PRODUKSI DAPUR BROWNIES KELANA']);
+            fputcsv($handle, ['Rentang Jadwal', $startDate.' s/d '.$endDate]);
+            fputcsv($handle, ['Waktu Unduh', now()->format('Y-m-d H:i:s').' WIB']);
+            fputcsv($handle, ['Total Pesanan Aktif', $orders->count()]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['=== 1. RINGKASAN JUMLAH ITEM PRODUKSI ===']);
+            fputcsv($handle, ['Tanggal Jadwal', 'Nama Produk', 'Varian', 'Total Qty (pcs)']);
+
+            $itemAggregation = [];
+            foreach ($orders as $order) {
+                $dateKey = $order->scheduled_date->toDateString();
+                foreach ($order->items as $item) {
+                    $key = $dateKey.'|'.$item->product_name.'|'.($item->variant_name ?? 'Standar');
+                    $itemAggregation[$key] = ($itemAggregation[$key] ?? 0) + $item->quantity;
+                }
+            }
+
+            foreach ($itemAggregation as $aggKey => $qty) {
+                [$d, $pName, $vName] = explode('|', $aggKey);
+                fputcsv($handle, [$d, $pName, $vName, $qty]);
+            }
+
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['=== 2. DAFTAR TULISAN DI ATAS KUE ===']);
+            fputcsv($handle, ['Tanggal Jadwal', 'No. Pesanan', 'Nama Pemesan', 'Produk', 'Tulisan di Atas Kue']);
+            $hasNotes = false;
+            foreach ($orders as $order) {
+                foreach ($order->items as $item) {
+                    if ($item->custom_note) {
+                        $hasNotes = true;
+                        fputcsv($handle, [
+                            $order->scheduled_date->toDateString(),
+                            $order->order_number,
+                            $order->customer_name,
+                            $item->product_name,
+                            $item->custom_note,
+                        ]);
+                    }
+                }
+            }
+            if (! $hasNotes) {
+                fputcsv($handle, ['-', '-', '-', '-', 'Tidak ada tulisan kustom pada rentang ini']);
+            }
+
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['=== 3. DETAIL ANTREAN PENGIRIMAN & PENGAMBILAN ===']);
+            fputcsv($handle, [
+                'Tanggal Jadwal',
+                'Slot Jam',
+                'No. Pesanan',
+                'Pelanggan',
+                'No. Telepon',
+                'Metode',
+                'Tujuan / Lokasi Pickup',
+                'Rincian Item',
+                'Status Pesanan',
+                'Status Bayar',
+                'Catatan Pesanan',
+            ]);
+
+            foreach ($orders as $order) {
+                $itemStr = $order->items->map(fn ($it) => $it->product_name.' ('.($it->variant_name ?? 'Standar').') x'.$it->quantity)->join('; ');
+                $locationStr = $order->delivery_type === 'pickup'
+                    ? 'Pickup: '.($order->pickupLocation?->name ?? 'Toko')
+                    : $order->delivery_address;
+
+                fputcsv($handle, [
+                    $order->scheduled_date->toDateString(),
+                    $order->scheduled_time_slot,
+                    $order->order_number,
+                    $order->customer_name,
+                    $order->customer_phone,
+                    $order->delivery_type === 'pickup' ? 'Ambil Sendiri' : 'Pengiriman Kurir',
+                    $locationStr,
+                    $itemStr,
+                    $order->orderStatusLabel(),
+                    $order->paymentStatusLabel(),
+                    $order->customer_note ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 
     /**
