@@ -215,23 +215,55 @@
                             </div>
                         @endif
 
+                        @if($userAddresses->isNotEmpty())
+                            <div class="rounded-xl border border-[#efe2ce] bg-[#fcf3e3] p-3 text-xs">
+                                <label for="saved_address_selector" class="kelana-label mb-1.5 font-bold text-[#593822]">Pilih dari Alamat Tersimpan:</label>
+                                <select id="saved_address_selector" class="kelana-input text-xs py-2 bg-white">
+                                    <option value="">-- Pilih Buku Alamat Anda --</option>
+                                    @foreach($userAddresses as $addr)
+                                        <option value="{{ $addr->id }}"
+                                            data-address="{{ $addr->full_address }}"
+                                            data-detail="{{ $addr->location_notes }}"
+                                            data-recipient="{{ $addr->recipient_name }}"
+                                            data-phone="{{ $addr->recipient_phone }}"
+                                            data-lat="{{ $addr->latitude }}"
+                                            data-lng="{{ $addr->longitude }}">
+                                            {{ $addr->label }} &middot; {{ $addr->recipient_name }} ({{ \Illuminate\Support\Str::limit($addr->full_address, 45) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         {{-- Peta Interaktif Leaflet.js dengan Pencarian Real & Sinkronisasi Alamat Dua Arah --}}
                         <div class="rounded-2xl border border-[#efe2ce] bg-[#fcf3e3]/70 p-4">
                             <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
                                 <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#593822] px-3 py-1.5 text-xs font-bold text-white">
-                                    Pilih Lokasi Tujuan di Peta
+                                    Pilih Titik Lokasi Antar di Peta
                                 </span>
                                 <span id="distance-badge" class="rounded-full bg-[#e8decb] px-3 py-1 text-[11px] font-bold text-[#593822]">
-                                    Menghitung titik...
+                                    Menghitung rute...
                                 </span>
                             </div>
 
-                            {{-- Input Pencarian Alamat Peta (Pencarian Cerdas POI & Koordinat Google Maps) --}}
-                            <div class="mb-2 space-y-1.5">
+                            {{-- Tombol Gunakan Lokasi Saya (GPS) & Pencarian Alamat --}}
+                            <div class="mb-3 space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" id="btn-use-gps"
+                                        class="inline-flex items-center gap-2 rounded-xl bg-[#593822] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#432917] shadow-xs shrink-0">
+                                        <svg id="gps-icon" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3m10-10h-3M5 12H2m15 0a5 5 0 11-10 0 5 5 0 0110 0z"/>
+                                        </svg>
+                                        <span id="gps-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                        <span id="gps-btn-text">Gunakan Lokasi Saya (GPS)</span>
+                                    </button>
+                                    <span class="text-[11px] text-[#796b62]">atau cari titik jalan/patokan di bawah</span>
+                                </div>
+
                                 <div class="flex items-center gap-2">
                                     <div class="relative flex-1">
                                         <input type="text" id="map-search-query"
-                                            placeholder="Cari jalan, patokan, apotek, toko, atau tempel link/koordinat Google Maps..."
+                                            placeholder="Cari jalan, patokan, toko, apotek, atau tempel link/koordinat Google Maps..."
                                             value="{{ old('delivery_address', $user->saved_address) }}"
                                             class="kelana-input text-xs py-2 pr-8">
                                         <span id="map-search-spinner" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#593822] border-t-transparent"></span>
@@ -241,12 +273,13 @@
                                     </button>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] text-[#796b62]">
-                                    <span>Tip: Bisa cari nama tempat (contoh: <em>Pulosari Surabaya</em>) atau tempel link Google Maps</span>
+                                    <span>Tip: Anda juga dapat menggeser pin merah di peta ke titik rumah Anda secara manual</span>
                                     <a id="open-gmaps-link" href="https://maps.google.com" target="_blank" rel="noopener" class="font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
                                         <span>Buka Google Maps</span> &nearr;
                                     </a>
                                 </div>
                             </div>
+
                             <div id="map-search-message" class="hidden mb-2 rounded-xl p-2.5 text-xs"></div>
                             <div id="map-search-results" class="hidden mb-2 max-h-52 overflow-y-auto rounded-xl border border-[#d9c8b4] bg-white p-1 text-xs shadow-md space-y-1"></div>
 
@@ -256,7 +289,29 @@
                             <input type="hidden" name="delivery_longitude" id="delivery_longitude" value="{{ old('delivery_longitude', $user->saved_longitude ?? 112.7244100) }}">
                             <input type="hidden" name="delivery_distance_km" id="delivery_distance_km" value="{{ old('delivery_distance_km') }}">
 
-                            <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#6f5a4a]">
+                            {{-- Rincian Transparan Estimator Ongkos Kirim Rute Jalan --}}
+                            <div id="shipping-breakdown-card" class="mt-3 rounded-xl border border-[#d9c8b4] bg-[#fdfbf6] p-3 text-xs space-y-2">
+                                <div class="flex items-center justify-between border-b border-[#efe2ce] pb-2">
+                                    <span class="font-bold text-[#593822] flex items-center gap-1.5">
+                                        <span>🚚</span> <span id="breakdown-service-name">{{ $storeSetting->shipping_service_name ?? 'Kurir Kelana / GoSend' }}</span>
+                                    </span>
+                                    <span id="breakdown-source-badge" class="rounded-full bg-[#f4ece1] px-2.5 py-0.5 text-[10px] font-semibold text-[#593822]">
+                                        Rute Jalan Nyata (ORS)
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-[11px] text-[#6f5a4a]">
+                                    <div>Jarak rute: <strong id="breakdown-distance" class="text-[#2f2118]">{{ $initialShipping['distance_km'] ? number_format($initialShipping['distance_km'], 1, ',', '.') . ' km' : '- km' }}</strong></div>
+                                    <div>Estimasi waktu: <strong id="breakdown-duration" class="text-[#2f2118]">{{ $initialShipping['duration_minutes'] ? '~' . $initialShipping['duration_minutes'] . ' menit' : '- menit' }}</strong></div>
+                                </div>
+                                <div class="flex flex-wrap items-center justify-between gap-1 pt-1.5 border-t border-[#f1e7d9] text-[11px]">
+                                    <span class="text-[#796b62]">Tarif ongkir otomatis:</span>
+                                    <strong id="breakdown-fee" class="text-sm font-bold text-[#593822]">
+                                        Rp {{ number_format($initialShipping['fee'], 0, ',', '.') }}
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#6f5a4a]">
                                 <span id="coord-preview">Koordinat terpilih siap dikirim ke kurir.</span>
                                 <a id="google-maps-preview-link" href="https://maps.google.com/?q={{ old('delivery_latitude', $user->saved_latitude ?? -7.3318500) }},{{ old('delivery_longitude', $user->saved_longitude ?? 112.7244100) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-bold text-[#593822] hover:underline">
                                     <span>Lihat titik di Google Maps</span>
@@ -270,14 +325,19 @@
                         </div>
 
                         <div>
-                            <label for="delivery_address" class="kelana-label">Alamat tujuan *</label>
+                            <label for="delivery_address" class="kelana-label">Alamat tujuan lengkap *</label>
                             <textarea id="delivery_address" name="delivery_address" rows="2" placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan/kecamatan..." class="kelana-input">{{ old('delivery_address', $user->saved_address) }}</textarea>
                         </div>
 
                         <div>
-                            <label for="delivery_address_detail" class="kelana-label">Detail alamat pengiriman</label>
+                            <label for="delivery_address_detail" class="kelana-label">Detail patokan &amp; petunjuk kurir (opsional)</label>
                             <input id="delivery_address_detail" name="delivery_address_detail" type="text" value="{{ old('delivery_address_detail', $user->saved_address_detail) }}"
-                                placeholder="Rumah nomor 18, pagar putih. Mohon hubungi penerima saat tiba." class="kelana-input">
+                                placeholder="Pagar hitam nomor 18, seberang masjid. Mohon hubungi penerima saat tiba." class="kelana-input">
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" id="save_to_profile" name="save_to_profile" value="1" class="h-4 w-4 rounded text-[#593822] focus:ring-[#8f6743]" checked>
+                            <label for="save_to_profile" class="text-xs text-[#593822]">Simpan titik lokasi dan alamat ini sebagai alamat utama saya</label>
                         </div>
                     </div>
 
@@ -435,6 +495,8 @@
                 const storeLng = {{ (float) $storeSetting->store_longitude }};
                 const shippingMethod = @json($storeSetting->shipping_method);
                 const checkShippingUrl = @json(route('checkout.check-shipping'));
+                const geocodeUrl = @json(route('checkout.geocode'));
+                const reverseGeocodeUrl = @json(route('checkout.reverse-geocode'));
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
                 const deliverySection = document.getElementById('delivery-section');
@@ -450,16 +512,29 @@
                 const latInput = document.getElementById('delivery_latitude');
                 const lngInput = document.getElementById('delivery_longitude');
                 const distInput = document.getElementById('delivery_distance_km');
+                const addressInput = document.getElementById('delivery_address');
+                const addressDetailInput = document.getElementById('delivery_address_detail');
                 const mapsPreviewLink = document.getElementById('google-maps-preview-link');
                 const coordPreview = document.getElementById('coord-preview');
 
+                const breakdownServiceName = document.getElementById('breakdown-service-name');
+                const breakdownSourceBadge = document.getElementById('breakdown-source-badge');
+                const breakdownDistance = document.getElementById('breakdown-distance');
+                const breakdownDuration = document.getElementById('breakdown-duration');
+                const breakdownFee = document.getElementById('breakdown-fee');
+
                 const formatRp = (num) => 'Rp ' + parseInt(num || 0, 10).toLocaleString('id-ID');
 
+                // 1. Fungsi Cek & Perhitungan Ongkir Otoritatif via Server
                 const updateShippingSummary = async () => {
                     const deliveryType = document.querySelector('.delivery-type-radio:checked')?.value || 'delivery';
                     const zoneSelect = document.getElementById('shipping_zone_id');
+                    const selectedPickupRadio = document.querySelector('input[name="pickup_location_id"]:checked');
+                    const pickupLocationId = selectedPickupRadio ? selectedPickupRadio.value : null;
+
                     const payload = {
                         delivery_type: deliveryType,
+                        pickup_location_id: pickupLocationId,
                         shipping_zone_id: zoneSelect ? zoneSelect.value : null,
                         latitude: latInput ? latInput.value : null,
                         longitude: lngInput ? lngInput.value : null,
@@ -480,35 +555,72 @@
                             return;
                         }
 
+                        const shipping = data.shipping;
+
                         if (distInput) {
-                            distInput.value = data.shipping.distance_km ?? '';
-                        }
-                        if (distanceBadge) {
-                            distanceBadge.textContent = data.shipping.distance_km
-                                ? `Jarak estimasi server: ${data.shipping.distance_km} km`
-                                : (shippingMethod === 'distance' ? 'Estimasi jarak otomatis' : 'Titik lokasi tersimpan');
+                            distInput.value = shipping.distance_km ?? '';
                         }
 
-                        const formattedTotal = formatRp(subtotal + data.shipping.fee);
-                        shippingLabelEl.textContent = data.shipping.label;
-                        shippingFeeEl.textContent = formatRp(data.shipping.fee);
+                        // Update rincian breakdown kartu
+                        if (breakdownServiceName && shipping.service_name) {
+                            breakdownServiceName.textContent = shipping.service_name;
+                        }
+                        if (breakdownSourceBadge) {
+                            if (shipping.method === 'pickup') {
+                                breakdownSourceBadge.textContent = 'Ambil Sendiri';
+                            } else if (shipping.source === 'openrouteservice') {
+                                breakdownSourceBadge.textContent = 'Rute Nyata (ORS)';
+                            } else {
+                                breakdownSourceBadge.textContent = 'Rute Jalan Raya';
+                            }
+                        }
+                        if (breakdownDistance) {
+                            breakdownDistance.textContent = shipping.distance_km
+                                ? `${shipping.distance_km} km`
+                                : (shipping.method === 'pickup' ? '0 km (Pickup)' : '- km');
+                        }
+                        if (breakdownDuration) {
+                            breakdownDuration.textContent = shipping.duration_minutes
+                                ? `~${shipping.duration_minutes} menit`
+                                : (shipping.method === 'pickup' ? 'Langsung di outlet' : '- menit');
+                        }
+                        if (breakdownFee) {
+                            breakdownFee.textContent = formatRp(shipping.fee);
+                        }
+
+                        if (distanceBadge) {
+                            if (shipping.method === 'pickup') {
+                                distanceBadge.textContent = 'Ambil di outlet · Gratis Ongkir';
+                            } else if (shipping.distance_km) {
+                                distanceBadge.textContent = `Jarak rute: ${shipping.distance_km} km`;
+                            } else {
+                                distanceBadge.textContent = 'Titik lokasi tersimpan';
+                            }
+                        }
+
+                        const formattedTotal = formatRp(subtotal + shipping.fee);
+                        shippingLabelEl.textContent = shipping.label;
+                        shippingFeeEl.textContent = formatRp(shipping.fee);
                         totalAmountEl.textContent = formattedTotal;
                         if (submitBtnTotalEl) {
                             submitBtnTotalEl.textContent = formattedTotal;
                         }
 
-                        if (data.shipping.within_range) {
+                        if (shipping.within_range) {
                             outOfRangeWarn.classList.add('hidden');
                             submitBtn.disabled = false;
                         } else {
-                            outOfRangeWarn.textContent = data.shipping.label + '. Silakan pilih titik lokasi lebih dekat atau pilih Ambil Sendiri (Pick-up).';
+                            outOfRangeWarn.textContent = shipping.label + '. Silakan pilih titik lokasi lebih dekat atau pilih Ambil Sendiri (Pick-up).';
                             outOfRangeWarn.classList.remove('hidden');
                             submitBtn.disabled = true;
                         }
                     } catch (err) {
-                        console.error(err);
+                        console.error('Gagal memperbarui kalkulasi ongkir:', err);
                     }
                 };
+
+                // 2. Daftar Lokasi Pickup Resmi untuk Peta
+                const pickupLocationsData = @json($pickupLocations);
 
                 // Toggle Kirim ke Alamat vs Pickup
                 document.querySelectorAll('.delivery-type-radio').forEach((radio) => {
@@ -527,6 +639,16 @@
                     });
                 });
 
+                document.querySelectorAll('input[name="pickup_location_id"]').forEach((radio) => {
+                    radio.addEventListener('change', () => {
+                        updateShippingSummary();
+                        const selectedLoc = pickupLocationsData.find(l => l.id == radio.value);
+                        if (selectedLoc && window.kelanaMap && selectedLoc.latitude && selectedLoc.longitude) {
+                            window.kelanaMap.panTo([selectedLoc.latitude, selectedLoc.longitude]);
+                        }
+                    });
+                });
+
                 document.getElementById('shipping_zone_id')?.addEventListener('change', () => updateShippingSummary());
 
                 // Salin data pemesan ke penerima
@@ -534,6 +656,28 @@
                     document.getElementById('recipient_name').value = document.getElementById('customer_name').value;
                     document.getElementById('recipient_phone').value = document.getElementById('customer_phone').value;
                 });
+
+                // Pilih dari Buku Alamat Tersimpan
+                const savedAddressSelector = document.getElementById('saved_address_selector');
+                if (savedAddressSelector) {
+                    savedAddressSelector.addEventListener('change', () => {
+                        const opt = savedAddressSelector.options[savedAddressSelector.selectedIndex];
+                        if (opt && opt.value) {
+                            if (addressInput) addressInput.value = opt.dataset.address || '';
+                            if (addressDetailInput && opt.dataset.detail) addressDetailInput.value = opt.dataset.detail;
+                            if (opt.dataset.recipient) document.getElementById('recipient_name').value = opt.dataset.recipient;
+                            if (opt.dataset.phone) document.getElementById('recipient_phone').value = opt.dataset.phone;
+
+                            const lat = parseFloat(opt.dataset.lat);
+                            const lng = parseFloat(opt.dataset.lng);
+                            if (!isNaN(lat) && !isNaN(lng) && window.kelanaMap && window.kelanaMarker) {
+                                window.kelanaMap.setView([lat, lng], 15);
+                                window.kelanaMarker.setLatLng([lat, lng]);
+                                onCoordinateChanged(lat, lng, false);
+                            }
+                        }
+                    });
+                }
 
                 // Kalender interaktif H-1
                 const scheduledDateInput = document.getElementById('scheduled_date_input');
@@ -561,7 +705,7 @@
                     });
                 });
 
-                // Peta Interaktif Leaflet.js dengan Pencarian Real & Reverse Geocoding Dua Arah
+                // 3. Peta Interaktif Leaflet.js dengan OpenStreetMap
                 const mapEl = document.getElementById('checkout-map');
                 if (mapEl && typeof L !== 'undefined') {
                     const startLat = parseFloat(latInput.value || -7.33185);
@@ -570,44 +714,74 @@
                     const map = L.map('checkout-map').setView([startLat, startLng], 14);
                     window.kelanaMap = map;
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    // Tile OpenStreetMap Resmi
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
-                        attribution: '&copy; OpenStreetMap',
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
                     }).addTo(map);
 
-                    // Marker Dapur Brownies Kelana
-                    L.circleMarker([storeLat, storeLng], {
-                        radius: 8, color: '#593822', fillColor: '#a4804f', fillOpacity: 0.9,
-                    }).addTo(map).bindPopup('Dapur Brownies Kelana (Titik Asal)');
+                    // Marker Dapur Utama Brownies Kelana (Grand Royal Regency)
+                    const storeIcon = L.divIcon({
+                        className: 'kelana-store-icon',
+                        html: '<div style="background:#593822;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.35);">🎂</div>',
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13],
+                    });
 
-                    // Marker Tujuan Pengiriman (Draggable)
+                    L.marker([storeLat, storeLng], { icon: storeIcon }).addTo(map)
+                        .bindPopup('<b>Dapur Utama Brownies Kelana</b><br>Grand Royal Regency, Taman, Sidoarjo (Titik Asal Kurir)');
+
+                    // Marker Titik Pickup Tambahan
+                    pickupLocationsData.forEach(loc => {
+                        if (loc.latitude && loc.longitude && (Math.abs(loc.latitude - storeLat) > 0.001 || Math.abs(loc.longitude - storeLng) > 0.001)) {
+                            const pickupIcon = L.divIcon({
+                                className: 'kelana-pickup-icon',
+                                html: '<div style="background:#a4804f;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,0.3);">🏪</div>',
+                                iconSize: [22, 22],
+                                iconAnchor: [11, 11],
+                            });
+                            L.marker([loc.latitude, loc.longitude], { icon: pickupIcon }).addTo(map)
+                                .bindPopup(`<b>Pickup: ${loc.name}</b><br>${loc.address}`);
+                        }
+                    });
+
+                    // Marker Tujuan Pengiriman Pelanggan (Draggable Pin)
                     const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
+                    window.kelanaMarker = marker;
 
                     let reverseGeoTimeout = null;
                     const triggerReverseGeocode = (lat, lng) => {
                         clearTimeout(reverseGeoTimeout);
                         reverseGeoTimeout = setTimeout(async () => {
                             try {
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-                                    headers: { 'Accept': 'application/json' }
+                                const res = await fetch(reverseGeocodeUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken,
+                                    },
+                                    body: JSON.stringify({ latitude: lat, longitude: lng }),
                                 });
                                 if (res.ok) {
-                                    const data = await res.json();
+                                    const json = await res.json();
+                                    const data = json.data;
                                     if (data && data.display_name) {
-                                        const addressTextarea = document.getElementById('delivery_address');
-                                        if (addressTextarea) {
-                                            addressTextarea.value = data.display_name;
+                                        if (addressInput && (!addressInput.value || addressInput.value.includes('Titik Koordinat') || addressInput.dataset.autoFilled === '1')) {
+                                            addressInput.value = data.display_name;
+                                            addressInput.dataset.autoFilled = '1';
                                         }
                                         const searchInput = document.getElementById('map-search-query');
-                                        if (searchInput) {
+                                        if (searchInput && (!searchInput.value || searchInput.dataset.autoFilled === '1')) {
                                             searchInput.value = data.display_name;
+                                            searchInput.dataset.autoFilled = '1';
                                         }
                                     }
                                 }
                             } catch (e) {
-                                console.warn('Nominatim reverse error:', e);
+                                console.warn('Reverse geocode error:', e);
                             }
-                        }, 400);
+                        }, 350);
                     };
 
                     const onCoordinateChanged = (lat, lng, doReverse = true) => {
@@ -633,7 +807,70 @@
                         onCoordinateChanged(event.latlng.lat, event.latlng.lng, true);
                     });
 
-                    // Integrasi Pencarian Cerdas Titik Peta (Photon Komoot + Google Maps Regex + Nominatim)
+                    // 4. Tombol "Gunakan Lokasi Saya" (GPS Browser Geolocation API)
+                    const btnUseGps = document.getElementById('btn-use-gps');
+                    const gpsIcon = document.getElementById('gps-icon');
+                    const gpsSpinner = document.getElementById('gps-spinner');
+                    const gpsBtnText = document.getElementById('gps-btn-text');
+
+                    const setGpsLoading = (isLoading) => {
+                        if (!btnUseGps) return;
+                        btnUseGps.disabled = isLoading;
+                        if (isLoading) {
+                            gpsIcon?.classList.add('hidden');
+                            gpsSpinner?.classList.remove('hidden');
+                            if (gpsBtnText) gpsBtnText.textContent = 'Mendeteksi GPS...';
+                        } else {
+                            gpsIcon?.classList.remove('hidden');
+                            gpsSpinner?.classList.add('hidden');
+                            if (gpsBtnText) gpsBtnText.textContent = 'Gunakan Lokasi Saya (GPS)';
+                        }
+                    };
+
+                    btnUseGps?.addEventListener('click', () => {
+                        if (!navigator.geolocation) {
+                            showSearchMessage('Perangkat/browser Anda tidak mendukung fitur deteksi lokasi GPS. Silakan ketik nama jalan atau geser pin di peta.', 'warning');
+                            return;
+                        }
+
+                        setGpsLoading(true);
+                        hideSearchMessage();
+
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                setGpsLoading(false);
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
+                                map.setView([lat, lng], 16);
+                                marker.setLatLng([lat, lng]);
+                                onCoordinateChanged(lat, lng, true);
+                                showSearchMessage('✓ Lokasi Anda berhasil dideteksi via GPS. Silakan lengkapi nomor rumah atau detail patokan alamat.', 'success');
+                            },
+                            (error) => {
+                                setGpsLoading(false);
+                                let errorMsg = 'Gagal mendeteksi lokasi GPS.';
+                                switch (error.code) {
+                                    case error.PERMISSION_DENIED:
+                                        errorMsg = 'Izin akses lokasi (GPS) ditolak browser. Anda dapat mengizinkannya di setelan browser, atau cukup cari nama jalan / geser pin di peta.';
+                                        break;
+                                    case error.POSITION_UNAVAILABLE:
+                                        errorMsg = 'Sinyal GPS / informasi lokasi tidak tersedia saat ini. Silakan cari nama jalan atau geser pin di peta.';
+                                        break;
+                                    case error.TIMEOUT:
+                                        errorMsg = 'Waktu permintaan lokasi GPS habis. Silakan coba lagi atau gunakan kolom pencarian.';
+                                        break;
+                                }
+                                showSearchMessage(errorMsg, 'warning');
+                            },
+                            {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 0,
+                            }
+                        );
+                    });
+
+                    // 5. Integrasi Pencarian Titik Peta Cerdas (Server Proxy OpenRouteService + Google Maps Coords)
                     const searchInput = document.getElementById('map-search-query');
                     const searchBtn = document.getElementById('map-search-btn');
                     const searchSpinner = document.getElementById('map-search-spinner');
@@ -674,103 +911,35 @@
                         if (searchSpinner) searchSpinner.classList.remove('hidden');
 
                         try {
-                            // 1. Periksa apakah pengguna menempelkan koordinat langsung atau URL Google Maps
-                            // Contoh: "-7.3038, 112.7198", "@-7.3038,112.7198", "q=-7.3038,112.7198"
+                            // Deteksi langsung koordinat numerik atau tautan Google Maps
                             const coordRegex = /(-?\d{1,2}\.\d+)[,\s/]+(\d{2,3}\.\d+)/;
                             const coordMatch = rawQuery.match(coordRegex);
                             if (coordMatch) {
                                 const lat = parseFloat(coordMatch[1]);
                                 const lng = parseFloat(coordMatch[2]);
-                                if (lat >= -11 && lat <= 6 && lng >= 95 && lng <= 141) { // Wilayah Indonesia
+                                if (lat >= -11 && lat <= 6 && lng >= 95 && lng <= 141) {
                                     map.setView([lat, lng], 16);
                                     marker.setLatLng([lat, lng]);
                                     onCoordinateChanged(lat, lng, true);
-                                    showSearchMessage(`✓ Titik berhasil diset dari koordinat Google Maps: <strong>${lat}, ${lng}</strong>`, 'success');
+                                    showSearchMessage(`✓ Titik berhasil diset dari koordinat: <strong>${lat}, ${lng}</strong>`, 'success');
                                     return;
                                 }
                             }
 
-                            // 2. Normalisasi kata pencarian (Hapus preposisi bahasa Indonesia)
-                            let cleanQuery = rawQuery
-                                .replace(/\b(di|ke|dari|pada|sebelah|dekat|depan|area|wilayah)\b/gi, ' ')
-                                .replace(/\s+/g, ' ')
-                                .trim();
+                            // Panggil server-side geocoding proxy
+                            const res = await fetch(geocodeUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                },
+                                body: JSON.stringify({ query: rawQuery }),
+                            });
 
-                            let places = [];
+                            const json = await res.json();
+                            const places = json.results || [];
 
-                            // Tahap A: Cari via Photon API (Elasticsearch POI dengan prioritas koordinat Surabaya/Dapur)
-                            try {
-                                const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanQuery)}&lat=${storeLat}&lon=${storeLng}&limit=6`;
-                                const pRes = await fetch(photonUrl, { headers: { 'Accept': 'application/json' } });
-                                if (pRes.ok) {
-                                    const pData = await pRes.json();
-                                    if (pData && pData.features && pData.features.length > 0) {
-                                        places = pData.features.map(f => {
-                                            const p = f.properties || {};
-                                            const name = p.name || p.street || 'Lokasi';
-                                            const parts = [p.street, p.district, p.city || p.locality, p.state].filter(Boolean);
-                                            return {
-                                                title: name,
-                                                description: parts.join(', '),
-                                                lat: f.geometry.coordinates[1],
-                                                lng: f.geometry.coordinates[0],
-                                            };
-                                        });
-                                    }
-                                }
-                            } catch (e) {
-                                console.warn('Photon lookup warning:', e);
-                            }
-
-                            // Tahap B: Jika kata kunci mengandung "apotek/toko/kantor" dan belum ketemu, coba cari nama intinya (contoh: "pulosari surabaya")
-                            if (places.length === 0) {
-                                const stripped = cleanQuery.replace(/\b(apotek|toko|warung|cafe|kedai|pt|cv|klinik|rumah|masjid)\b/gi, '').trim();
-                                if (stripped.length > 2 && stripped !== cleanQuery) {
-                                    try {
-                                        const pFallbackUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(stripped)}&lat=${storeLat}&lon=${storeLng}&limit=6`;
-                                        const pfRes = await fetch(pFallbackUrl, { headers: { 'Accept': 'application/json' } });
-                                        if (pfRes.ok) {
-                                            const pfData = await pfRes.json();
-                                            if (pfData && pfData.features && pfData.features.length > 0) {
-                                                places = pfData.features.map(f => {
-                                                    const p = f.properties || {};
-                                                    const name = p.name || p.street || 'Lokasi';
-                                                    const parts = [p.street, p.district, p.city || p.locality, p.state].filter(Boolean);
-                                                    return {
-                                                        title: name,
-                                                        description: parts.join(', '),
-                                                        lat: f.geometry.coordinates[1],
-                                                        lng: f.geometry.coordinates[0],
-                                                    };
-                                                });
-                                            }
-                                        }
-                                    } catch (e) {}
-                                }
-                            }
-
-                            // Tahap C: Fallback ke Nominatim OSM jika masih kosong
-                            if (places.length === 0) {
-                                try {
-                                    const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=5&viewbox=112.55,-7.48,112.85,-7.15&bounded=0&q=${encodeURIComponent(cleanQuery)}`;
-                                    const nRes = await fetch(nomUrl, { headers: { 'Accept': 'application/json' } });
-                                    if (nRes.ok) {
-                                        const nItems = await nRes.json();
-                                        if (nItems && nItems.length > 0) {
-                                            places = nItems.map(item => ({
-                                                title: item.display_name.split(',')[0],
-                                                description: item.display_name,
-                                                lat: parseFloat(item.lat),
-                                                lng: parseFloat(item.lon),
-                                            }));
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.warn('Nominatim lookup warning:', e);
-                                }
-                            }
-
-                            // Tampilkan hasil pencarian
                             if (places.length > 0) {
                                 resultsBox.innerHTML = '';
                                 resultsBox.classList.remove('hidden');
@@ -788,31 +957,31 @@
                                     itemEl.addEventListener('click', () => {
                                         map.setView([place.lat, place.lng], 16);
                                         marker.setLatLng([place.lat, place.lng]);
-                                        onCoordinateChanged(place.lat, place.lng, true);
-                                        document.getElementById('delivery_address').value = place.title + ', ' + place.description;
-                                        searchInput.value = place.title + ', ' + place.description;
+                                        onCoordinateChanged(place.lat, place.lng, false);
+                                        if (addressInput) addressInput.value = place.title + ', ' + place.description;
+                                        if (searchInput) searchInput.value = place.title;
                                         resultsBox.classList.add('hidden');
                                         showSearchMessage(`✓ Titik dipindahkan ke: <strong>${place.title}</strong>`, 'success');
                                     });
                                     resultsBox.appendChild(itemEl);
                                 });
 
-                                // Geser otomatis ke hasil teratas jika relevan
+                                // Geser otomatis ke hasil pertama
                                 const top = places[0];
                                 map.setView([top.lat, top.lng], 15);
                                 marker.setLatLng([top.lat, top.lng]);
-                                onCoordinateChanged(top.lat, top.lng, true);
+                                onCoordinateChanged(top.lat, top.lng, false);
                             } else {
                                 showSearchMessage(`
                                     <p class="font-semibold text-amber-800">Nama tempat spesifik tidak ditemukan di database peta.</p>
                                     <p class="mt-1 text-[11px] text-amber-700">
-                                        💡 <strong>Saran:</strong> Coba cari nama jalan utama terdekat (misal: <em>Pulosari Surabaya</em>), atau geser marker merah langsung di atas peta, atau salin titik dari Google Maps.
+                                        💡 <strong>Saran:</strong> Coba cari nama jalan utama atau kelurahan terdekat (misal: <em>Pulosari Surabaya</em>), atau geser pin merah langsung di atas peta ke lokasi Anda.
                                     </p>
                                 `, 'warning');
                             }
                         } catch (err) {
                             console.error('Pencarian peta gagal:', err);
-                            showSearchMessage('Terjadi gangguan saat mencari alamat. Anda tetap dapat menggeser pin peta secara manual.', 'error');
+                            showSearchMessage('Terjadi gangguan jaringan saat mencari alamat. Anda tetap dapat menggeser pin peta secara manual.', 'error');
                         } finally {
                             if (searchBtn) searchBtn.disabled = false;
                             if (searchSpinner) searchSpinner.classList.add('hidden');

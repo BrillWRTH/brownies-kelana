@@ -9,8 +9,10 @@ use App\Models\Payment;
 use App\Models\PickupLocation;
 use App\Models\ShippingZone;
 use App\Models\StoreSetting;
+use App\Models\UserAddress;
 use App\Models\UserNotification;
 use App\Notifications\OrderLifecycleNotification;
+use App\Services\OpenRouteService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +31,7 @@ class CheckoutController extends Controller
     /**
      * Menampilkan halaman checkout pemesanan pelanggan.
      */
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, OpenRouteService $ors): View|RedirectResponse
     {
         // 1. Ambil keranjang pengguna dan pastikan tidak kosong serta item masih tersedia
         $user = Auth::user();
@@ -67,17 +69,25 @@ class CheckoutController extends Controller
             ->where('is_active', true)
             ->orderBy('fee')
             ->get();
+        $userAddresses = $user->addresses()->get();
 
         // 3. Susun data kalender untuk bulan berjalan dan bulan depan beserta kuota H-1
         $calendarDays = $this->buildCalendarDays($storeSetting);
         $defaultAvailableDay = collect($calendarDays)->firstWhere('available', true);
         $defaultLat = (float) ($user->saved_latitude ?? -7.3318500);
         $defaultLng = (float) ($user->saved_longitude ?? 112.7244100);
-        $defaultDistance = $storeSetting->shipping_method === 'distance'
-            ? $storeSetting->calculateDistanceKm($defaultLat, $defaultLng)
-            : null;
+
+        $defaultRoute = $ors->getDrivingRoute(
+            (float) $storeSetting->store_latitude,
+            (float) $storeSetting->store_longitude,
+            $defaultLat,
+            $defaultLng
+        );
+        $defaultDistance = $defaultRoute['distance_km'];
 
         $initialShipping = $storeSetting->calculateShippingFee('delivery', $shippingZones->first()?->id, $defaultDistance);
+        $initialShipping['duration_minutes'] = $defaultRoute['duration_minutes'];
+        $initialShipping['source'] = $defaultRoute['source'];
 
         return view('checkout.index', compact(
             'user',
@@ -87,18 +97,20 @@ class CheckoutController extends Controller
             'shippingZones',
             'calendarDays',
             'defaultAvailableDay',
-            'initialShipping'
+            'initialShipping',
+            'userAddresses'
         ));
     }
 
     /**
      * Menghitung estimasi ongkos kirim dan ketersediaan kuota tanggal via AJAX.
      */
-    public function checkShipping(Request $request): JsonResponse
+    public function checkShipping(Request $request, OpenRouteService $ors): JsonResponse
     {
         // 1. Validasi parameter cek ongkir dan tanggal dari form checkout
         $validated = $request->validate([
             'delivery_type' => ['required', 'in:delivery,pickup'],
+            'pickup_location_id' => ['nullable', 'integer'],
             'shipping_zone_id' => ['nullable', 'integer'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
@@ -106,29 +118,65 @@ class CheckoutController extends Controller
             'scheduled_date' => ['nullable', 'date'],
         ]);
 
-        // 2. Hitung jarak otoritatif dari koordinat lat/lng apabila tersedia (fallback distance_km hanya jika koordinat tidak dikirim)
         $storeSetting = StoreSetting::current();
         $distanceKm = null;
-        if (
-            $validated['delivery_type'] === 'delivery'
-            && isset($validated['latitude'], $validated['longitude'])
-            && $validated['latitude'] !== ''
-            && $validated['longitude'] !== ''
-        ) {
-            $distanceKm = $storeSetting->calculateDistanceKm(
-                (float) $validated['latitude'],
-                (float) $validated['longitude']
-            );
-        } elseif (isset($validated['distance_km']) && $validated['distance_km'] !== '') {
-            $distanceKm = (float) $validated['distance_km'];
-        }
+        $durationMinutes = null;
+        $routeSource = 'default';
 
-        // 3. Hitung ongkos kirim dan ketersediaan jadwal tanggal
-        $shipping = $storeSetting->calculateShippingFee(
-            $validated['delivery_type'],
-            $validated['shipping_zone_id'] ?? null,
-            $distanceKm
-        );
+        if ($validated['delivery_type'] === 'pickup') {
+            $pickup = null;
+            if (! empty($validated['pickup_location_id'])) {
+                $pickup = PickupLocation::find($validated['pickup_location_id']);
+            }
+            $shipping = [
+                'fee' => 0,
+                'raw_fee' => 0,
+                'base_fee' => 0,
+                'additional_fee' => 0,
+                'margin_fee' => 0,
+                'method' => 'pickup',
+                'service_name' => 'Ambil Sendiri (Pick-up)',
+                'label' => 'Ambil sendiri (pick-up) · Gratis ongkir',
+                'within_range' => true,
+                'distance_km' => null,
+                'duration_minutes' => null,
+                'pickup_location' => $pickup ? [
+                    'id' => $pickup->id,
+                    'name' => $pickup->name,
+                    'address' => $pickup->address,
+                    'latitude' => (float) $pickup->latitude,
+                    'longitude' => (float) $pickup->longitude,
+                ] : null,
+            ];
+        } else {
+            // Delivery
+            if (
+                isset($validated['latitude'], $validated['longitude'])
+                && $validated['latitude'] !== ''
+                && $validated['longitude'] !== ''
+            ) {
+                $destLat = (float) $validated['latitude'];
+                $destLng = (float) $validated['longitude'];
+                $originLat = (float) $storeSetting->store_latitude;
+                $originLng = (float) $storeSetting->store_longitude;
+
+                $route = $ors->getDrivingRoute($originLat, $originLng, $destLat, $destLng);
+                $distanceKm = $route['distance_km'];
+                $durationMinutes = $route['duration_minutes'];
+                $routeSource = $route['source'];
+            } elseif (isset($validated['distance_km']) && $validated['distance_km'] !== '') {
+                $distanceKm = (float) $validated['distance_km'];
+            }
+
+            $shipping = $storeSetting->calculateShippingFee(
+                'delivery',
+                $validated['shipping_zone_id'] ?? null,
+                $distanceKm
+            );
+
+            $shipping['duration_minutes'] = $durationMinutes;
+            $shipping['source'] = $routeSource;
+        }
 
         $scheduleInfo = null;
         if (! empty($validated['scheduled_date'])) {
@@ -142,9 +190,84 @@ class CheckoutController extends Controller
     }
 
     /**
+     * Endpoint server-side geocoding pencarian tempat/alamat (aman tanpa ekspos API key).
+     */
+    public function geocode(Request $request, OpenRouteService $ors): JsonResponse
+    {
+        $validated = $request->validate([
+            'query' => ['required', 'string', 'max:255'],
+        ]);
+
+        $storeSetting = StoreSetting::current();
+        $results = $ors->geocode(
+            $validated['query'],
+            (float) $storeSetting->store_latitude,
+            (float) $storeSetting->store_longitude
+        );
+
+        return response()->json([
+            'success' => true,
+            'results' => $results,
+        ]);
+    }
+
+    /**
+     * Endpoint server-side reverse geocoding dari koordinat GPS ke teks alamat.
+     */
+    public function reverseGeocode(Request $request, OpenRouteService $ors): JsonResponse
+    {
+        $validated = $request->validate([
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $data = $ors->reverseGeocode((float) $validated['latitude'], (float) $validated['longitude']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Menyimpan alamat baru ke daftar buku alamat pelanggan.
+     */
+    public function saveAddress(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:50'],
+            'recipient_name' => ['required', 'string', 'max:150'],
+            'recipient_phone' => ['required', 'string', 'max:25'],
+            'full_address' => ['required', 'string', 'max:1000'],
+            'street' => ['nullable', 'string', 'max:255'],
+            'district' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'location_notes' => ['nullable', 'string', 'max:500'],
+            'is_default' => ['nullable', 'boolean'],
+        ]);
+
+        if (! empty($validated['is_default'])) {
+            $user->addresses()->update(['is_default' => false]);
+        }
+
+        $address = $user->addresses()->create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Alamat berhasil disimpan.',
+            'address' => $address,
+        ]);
+    }
+
+    /**
      * Memvalidasi checkout, menghitung tarif otoritatif di server, membuat pesanan, dan meminta token Midtrans Snap asli.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, OpenRouteService $ors): RedirectResponse
     {
         $user = Auth::user();
         $storeSetting = StoreSetting::current();
@@ -244,23 +367,33 @@ class CheckoutController extends Controller
             ]);
         }
 
-        // 5. Hitung jarak otoritatif di backend (abaikan delivery_distance_km dari frontend agar tidak dapat dimanipulasi)
+        // 5. Hitung jarak otoritatif rute jalan di backend menggunakan OpenRouteService
         $distanceKm = null;
-        if ($validated['delivery_type'] === 'delivery' && $storeSetting->shipping_method === 'distance') {
-            if (
-                ! isset($validated['delivery_latitude'], $validated['delivery_longitude'])
-                || $validated['delivery_latitude'] === ''
-                || $validated['delivery_longitude'] === ''
-            ) {
-                return back()->withInput()->withErrors([
-                    'delivery_address' => 'Tentukan titik koordinat alamat di peta terlebih dahulu untuk menghitung ongkir jarak.',
-                ]);
-            }
+        $durationMinutes = null;
+        $routeSource = 'default';
 
-            $distanceKm = $storeSetting->calculateDistanceKm(
-                (float) $validated['delivery_latitude'],
-                (float) $validated['delivery_longitude']
-            );
+        if ($validated['delivery_type'] === 'delivery') {
+            if ($storeSetting->shipping_method === 'distance' || $storeSetting->shipping_method === 'internal_estimator') {
+                if (
+                    ! isset($validated['delivery_latitude'], $validated['delivery_longitude'])
+                    || $validated['delivery_latitude'] === ''
+                    || $validated['delivery_longitude'] === ''
+                ) {
+                    return back()->withInput()->withErrors([
+                        'delivery_address' => 'Tentukan titik koordinat alamat di peta terlebih dahulu untuk menghitung ongkir jarak.',
+                    ]);
+                }
+
+                $destLat = (float) $validated['delivery_latitude'];
+                $destLng = (float) $validated['delivery_longitude'];
+                $originLat = (float) $storeSetting->store_latitude;
+                $originLng = (float) $storeSetting->store_longitude;
+
+                $route = $ors->getDrivingRoute($originLat, $originLng, $destLat, $destLng);
+                $distanceKm = $route['distance_km'];
+                $durationMinutes = $route['duration_minutes'];
+                $routeSource = $route['source'];
+            }
         }
 
         $shipping = $storeSetting->calculateShippingFee(
@@ -274,6 +407,21 @@ class CheckoutController extends Controller
                 'delivery_address' => $shipping['label'].'. Silakan pilih metode Pickup atau alamat lain.',
             ]);
         }
+
+        $quotationSnapshot = [
+            'method' => $shipping['method'],
+            'service_name' => $shipping['service_name'] ?? 'Kurir Kelana / GoSend',
+            'fee' => (int) $shipping['fee'],
+            'raw_fee' => $shipping['raw_fee'] ?? (int) $shipping['fee'],
+            'base_fee' => $shipping['base_fee'] ?? 0,
+            'additional_fee' => $shipping['additional_fee'] ?? 0,
+            'margin_fee' => $shipping['margin_fee'] ?? 0,
+            'distance_km' => $distanceKm,
+            'duration_minutes' => $durationMinutes,
+            'route_source' => $routeSource,
+            'breakdown' => $shipping['breakdown'] ?? null,
+            'calculated_at' => now()->toIso8601String(),
+        ];
 
         $mapsUrl = null;
         if ($validated['delivery_type'] === 'pickup' && $pickupLocation) {
@@ -293,7 +441,8 @@ class CheckoutController extends Controller
                 $shipping,
                 $selectedZoneId,
                 $mapsUrl,
-                $serverKey
+                $serverKey,
+                $quotationSnapshot
             ): Order {
                 $lockedCart = Cart::query()
                     ->with(['items.product', 'items.variant'])
@@ -374,6 +523,7 @@ class CheckoutController extends Controller
                     'delivery_distance_km' => $shipping['distance_km'],
                     'shipping_zone_id' => $validated['delivery_type'] === 'delivery' && $shipping['method'] === 'zone' ? $selectedZoneId : null,
                     'shipping_method_snapshot' => $shipping['method'],
+                    'shipping_quotation_snapshot' => $quotationSnapshot,
                     'maps_url' => $mapsUrl,
                     'scheduled_date' => $validated['scheduled_date'],
                     'scheduled_time_slot' => $validated['scheduled_time_slot'],
@@ -548,7 +698,19 @@ class CheckoutController extends Controller
             throw $exception;
         }
 
-        // 10. Kirim email konfirmasi pesanan dibuat tanpa mengganggu redirect checkout
+        // 10. Perbarui data alamat tersimpan profil jika belum ada atau diminta
+        if ($user && $order->delivery_type === 'delivery' && ! empty($order->delivery_address)) {
+            if (empty($user->saved_address) || $request->boolean('save_to_profile')) {
+                $user->update([
+                    'saved_address' => $order->delivery_address,
+                    'saved_address_detail' => $order->delivery_address_detail,
+                    'saved_latitude' => $order->delivery_latitude,
+                    'saved_longitude' => $order->delivery_longitude,
+                ]);
+            }
+        }
+
+        // 11. Kirim email konfirmasi pesanan dibuat tanpa mengganggu redirect checkout
         if (! empty($order->customer_email)) {
             try {
                 Notification::route('mail', $order->customer_email)->notify(

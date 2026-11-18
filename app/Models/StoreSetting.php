@@ -31,6 +31,10 @@ class StoreSetting extends Model
         'distance_base_km',
         'distance_base_fee',
         'distance_per_km_fee',
+        'safety_margin_percentage',
+        'safety_margin_flat',
+        'shipping_rounding',
+        'shipping_service_name',
         'distance_max_km',
         'payment_timeout_minutes',
         'auto_cancel_status',
@@ -54,6 +58,9 @@ class StoreSetting extends Model
             'distance_base_km' => 'float',
             'distance_base_fee' => 'integer',
             'distance_per_km_fee' => 'integer',
+            'safety_margin_percentage' => 'integer',
+            'safety_margin_flat' => 'integer',
+            'shipping_rounding' => 'integer',
             'distance_max_km' => 'float',
             'payment_timeout_minutes' => 'integer',
             'operating_hours' => 'array',
@@ -199,27 +206,62 @@ class StoreSetting extends Model
             ];
         }
 
-        if ($this->shipping_method === 'distance') {
-            $jarak = $distanceKm ?? $this->distance_base_km;
-            if ($jarak > $this->distance_max_km) {
+        if ($this->shipping_method === 'distance' || $this->shipping_method === 'internal_estimator') {
+            $jarak = (float) ($distanceKm ?? $this->distance_base_km);
+            if ($jarak > (float) $this->distance_max_km) {
                 return [
                     'fee' => 0,
                     'method' => 'distance',
-                    'label' => 'Di luar jangkauan maksimal (maks '.(int) $this->distance_max_km.' km)',
+                    'label' => 'Di luar jangkauan pengiriman (maks '.(int) $this->distance_max_km.' km)',
                     'within_range' => false,
                     'distance_km' => $jarak,
+                    'duration_minutes' => null,
+                    'breakdown' => null,
                 ];
             }
 
-            $extraKm = max(0, (int) ceil($jarak - $this->distance_base_km));
-            $fee = (int) $this->distance_base_fee + ($extraKm * (int) $this->distance_per_km_fee);
+            $baseKm = (float) ($this->distance_base_km ?: 3.0);
+            $baseFee = (int) ($this->distance_base_fee ?: 10000);
+            $perKmFee = (int) ($this->distance_per_km_fee ?: 2500);
+            $extraKm = (float) max(0.0, ceil($jarak - $baseKm));
+            $additionalFee = (int) ($extraKm * $perKmFee);
+            $subtotalFee = $baseFee + $additionalFee;
+
+            $marginPct = (int) ($this->safety_margin_percentage ?? 10);
+            $marginFlat = (int) ($this->safety_margin_flat ?? 0);
+            $marginFee = (int) (ceil(($subtotalFee * $marginPct) / 100) + $marginFlat);
+
+            $rawFee = $subtotalFee + $marginFee;
+
+            $rounding = (int) ($this->shipping_rounding ?: 500);
+            $finalFee = $rounding > 0 ? (int) (ceil($rawFee / $rounding) * $rounding) : $rawFee;
+
+            $serviceName = $this->shipping_service_name ?: 'Kurir Kelana / GoSend';
 
             return [
-                'fee' => $fee,
+                'fee' => $finalFee,
+                'raw_fee' => $rawFee,
+                'base_fee' => $baseFee,
+                'additional_fee' => $additionalFee,
+                'margin_fee' => $marginFee,
                 'method' => 'distance',
-                'label' => 'Jarak · '.number_format($jarak, 1, ',', '.').' km',
+                'service_name' => $serviceName,
+                'label' => $serviceName.' · '.number_format($jarak, 1, ',', '.').' km',
                 'within_range' => true,
                 'distance_km' => $jarak,
+                'breakdown' => [
+                    'distance_km' => $jarak,
+                    'base_km' => $baseKm,
+                    'base_fee' => $baseFee,
+                    'extra_km' => $extraKm,
+                    'per_km_fee' => $perKmFee,
+                    'additional_fee' => $additionalFee,
+                    'margin_percentage' => $marginPct,
+                    'margin_flat' => $marginFlat,
+                    'margin_fee' => $marginFee,
+                    'rounding' => $rounding,
+                    'final_fee' => $finalFee,
+                ],
             ];
         }
 

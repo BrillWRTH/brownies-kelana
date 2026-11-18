@@ -90,6 +90,9 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware(['auth', 'active'])->group(function (): void {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/cek-ongkir', [CheckoutController::class, 'checkShipping'])->middleware('throttle:45,1')->name('checkout.check-shipping');
+    Route::post('/checkout/geocode', [CheckoutController::class, 'geocode'])->middleware('throttle:60,1')->name('checkout.geocode');
+    Route::post('/checkout/reverse-geocode', [CheckoutController::class, 'reverseGeocode'])->middleware('throttle:60,1')->name('checkout.reverse-geocode');
+    Route::post('/checkout/simpan-alamat', [CheckoutController::class, 'saveAddress'])->name('checkout.save-address');
     Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:15,1')->name('checkout.store');
 
     Route::get('/pembayaran/{order}', [PaymentController::class, 'show'])->name('payments.show');
@@ -173,6 +176,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::put('/settings/pickup/{pickup}', [AdminSettingController::class, 'updatePickup'])->name('settings.pickups.update');
         Route::delete('/settings/pickup/{pickup}', [AdminSettingController::class, 'destroyPickup'])->name('settings.pickups.destroy');
         Route::put('/settings/ongkir', [AdminSettingController::class, 'updateShipping'])->name('settings.shipping.update');
+        Route::post('/settings/kalibrasi-gosend', [AdminSettingController::class, 'storeGosendCalibration'])->name('settings.gosend-calibration.store');
+        Route::delete('/settings/kalibrasi-gosend/{calibration}', [AdminSettingController::class, 'destroyGosendCalibration'])->name('settings.gosend-calibration.destroy');
         Route::post('/settings/zona', [AdminSettingController::class, 'storeZone'])->name('settings.zones.store');
         Route::delete('/settings/zona/{zone}', [AdminSettingController::class, 'destroyZone'])->name('settings.zones.destroy');
         Route::put('/settings/pembayaran', [AdminSettingController::class, 'updatePaymentTimeout'])->name('settings.payment.update');

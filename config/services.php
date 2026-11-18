@@ -43,4 +43,9 @@ return [
         'is_3ds' => env('MIDTRANS_IS_3DS', true),
     ],
 
+    'openrouteservice' => [
+        'api_key' => env('ORS_API_KEY', ''),
+        'timeout' => (int) env('ORS_TIMEOUT', 5),
+    ],
+
 ];

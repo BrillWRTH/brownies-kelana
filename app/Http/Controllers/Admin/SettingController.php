@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\GosendCalibration;
 use App\Models\Holiday;
 use App\Models\PickupLocation;
 use App\Models\ShippingZone;
 use App\Models\StoreSetting;
+use App\Services\OpenRouteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +27,7 @@ class SettingController extends Controller
         $holidays = Holiday::query()->orderBy('holiday_date')->get();
         $pickupLocations = PickupLocation::query()->orderBy('sort_order')->orderBy('id')->get();
         $shippingZones = ShippingZone::query()->orderBy('fee')->get();
+        $gosendCalibrations = GosendCalibration::query()->with('creator')->latest('date')->latest('id')->take(25)->get();
         $adminUser = Auth::user();
 
         return view('admin.settings.index', compact(
@@ -32,6 +35,7 @@ class SettingController extends Controller
             'holidays',
             'pickupLocations',
             'shippingZones',
+            'gosendCalibrations',
             'adminUser'
         ));
     }
@@ -233,7 +237,7 @@ class SettingController extends Controller
     }
 
     /**
-     * Memperbarui metode perhitungan ongkir aktif (Flat, Zona, atau Jarak) beserta tarifnya.
+     * Memperbarui metode perhitungan ongkir aktif (Flat, Zona, atau Jarak) beserta parameter estimator & safety margin.
      */
     public function updateShipping(Request $request): RedirectResponse
     {
@@ -245,6 +249,10 @@ class SettingController extends Controller
             'distance_base_fee' => ['required', 'integer', 'min:0'],
             'distance_per_km_fee' => ['required', 'integer', 'min:0'],
             'distance_max_km' => ['required', 'numeric', 'min:1', 'max:100'],
+            'safety_margin_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'safety_margin_flat' => ['nullable', 'integer', 'min:0'],
+            'shipping_rounding' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'shipping_service_name' => ['nullable', 'string', 'max:100'],
         ]);
 
         // 2. Simpan metode ongkir aktif ke pengaturan toko
@@ -256,9 +264,74 @@ class SettingController extends Controller
             'distance_base_fee' => (int) $validated['distance_base_fee'],
             'distance_per_km_fee' => (int) $validated['distance_per_km_fee'],
             'distance_max_km' => (float) $validated['distance_max_km'],
+            'safety_margin_percentage' => isset($validated['safety_margin_percentage']) ? (int) $validated['safety_margin_percentage'] : (int) ($storeSetting->safety_margin_percentage ?? 0),
+            'safety_margin_flat' => isset($validated['safety_margin_flat']) ? (int) $validated['safety_margin_flat'] : (int) ($storeSetting->safety_margin_flat ?? 0),
+            'shipping_rounding' => isset($validated['shipping_rounding']) ? (int) $validated['shipping_rounding'] : (int) ($storeSetting->shipping_rounding ?? 500),
+            'shipping_service_name' => isset($validated['shipping_service_name']) ? trim($validated['shipping_service_name']) : ($storeSetting->shipping_service_name ?? 'Kurir Kelana / GoSend'),
         ]);
 
-        return back()->with('success', 'Pengaturan metode ongkos kirim berhasil diperbarui.');
+        return back()->with('success', 'Pengaturan tarif ongkos kirim dan estimator berhasil diperbarui.');
+    }
+
+    /**
+     * Menyimpan data pengujian kalibrasi tarif GoSend riil vs estimasi internal.
+     */
+    public function storeGosendCalibration(Request $request, OpenRouteService $ors): RedirectResponse
+    {
+        $validated = $request->validate([
+            'date' => ['required', 'date'],
+            'service_type' => ['required', 'in:Instant,SameDay'],
+            'origin_address' => ['required', 'string', 'max:500'],
+            'destination_address' => ['required', 'string', 'max:500'],
+            'origin_latitude' => ['required', 'numeric', 'between:-90,90'],
+            'origin_longitude' => ['required', 'numeric', 'between:-180,180'],
+            'destination_latitude' => ['required', 'numeric', 'between:-90,90'],
+            'destination_longitude' => ['required', 'numeric', 'between:-180,180'],
+            'actual_gosend_price' => ['required', 'integer', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $route = $ors->getDrivingRoute(
+            (float) $validated['origin_latitude'],
+            (float) $validated['origin_longitude'],
+            (float) $validated['destination_latitude'],
+            (float) $validated['destination_longitude']
+        );
+
+        $distanceKm = $route['distance_km'];
+        $storeSetting = StoreSetting::current();
+        $internalQuotation = $storeSetting->calculateShippingFee('delivery', null, $distanceKm);
+        $estimatedPrice = (int) $internalQuotation['fee'];
+        $diff = (int) $validated['actual_gosend_price'] - $estimatedPrice;
+
+        GosendCalibration::create([
+            'date' => $validated['date'],
+            'service_type' => $validated['service_type'],
+            'origin_address' => trim($validated['origin_address']),
+            'destination_address' => trim($validated['destination_address']),
+            'origin_latitude' => $validated['origin_latitude'],
+            'origin_longitude' => $validated['origin_longitude'],
+            'destination_latitude' => $validated['destination_latitude'],
+            'destination_longitude' => $validated['destination_longitude'],
+            'distance_km' => $distanceKm,
+            'actual_gosend_price' => (int) $validated['actual_gosend_price'],
+            'estimated_internal_price' => $estimatedPrice,
+            'price_difference' => $diff,
+            'notes' => trim((string) ($validated['notes'] ?? '')) ?: null,
+            'created_by' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Data kalibrasi GoSend berhasil dicatat. Selisih: ' . ($diff >= 0 ? '+' : '') . 'Rp ' . number_format($diff, 0, ',', '.'));
+    }
+
+    /**
+     * Menghapus catatan kalibrasi GoSend.
+     */
+    public function destroyGosendCalibration(GosendCalibration $calibration): RedirectResponse
+    {
+        $calibration->delete();
+
+        return back()->with('success', 'Catatan kalibrasi GoSend berhasil dihapus.');
     }
 
     /**

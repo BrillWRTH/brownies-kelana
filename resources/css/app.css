@@ -5,9 +5,10 @@
 @source '../views/**/*.blade.php';
 
 @theme {
-    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    --font-sans: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
         sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-serif: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-cocoa-950: #28211c;
     --color-cocoa-900: #492d1a;
@@ -33,17 +34,29 @@
     body {
         background-color: #fcf3e3;
         color: #2f2118;
-        font-family: var(--font-sans);
-        font-weight: 500;
+        font-family: 'Lato', var(--font-sans);
+        font-weight: 400;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-serif);
-        font-weight: 800;
-        letter-spacing: -0.015em;
+        font-family: 'Lato', var(--font-sans) !important;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    p, span, a, input, textarea, select, button, label, li, td, th {
+        font-family: 'Lato', var(--font-sans);
+    }
+}
+
+@layer utilities {
+    .font-serif,
+    .font-sans,
+    .font-display {
+        font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     }
 }
 

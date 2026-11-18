@@ -42,12 +42,12 @@
                                     <span class="inline-block rounded-full bg-[#a67251]/95 px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-xs">
                                         {{ $slide['badge'] }}
                                     </span>
-                                    <h1 class="mt-2 max-w-lg font-serif text-xl font-black leading-snug text-white drop-shadow sm:text-3xl">
+                                    <h1 class="mt-2 max-w-lg text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl">
                                         {{ $slide['title'] }}
                                     </h1>
                                 </div>
                                 <a href="{{ route('products.index') }}"
-                                    class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-black text-[#593822] shadow-md transition hover:scale-105 hover:bg-[#fcf3e3]">
+                                    class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#593822] shadow-md transition hover:scale-105 hover:bg-[#fcf3e3]">
                                     Pesan Sekarang &rarr;
                                 </a>
                             </div>

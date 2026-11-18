@@ -263,7 +263,7 @@
                 </div>
 
                 <div class="rounded-xl border border-[#efe7dc] bg-[#fdfbf6] p-4 space-y-3">
-                    <p class="text-xs font-bold text-[#52311a]">Rumus Tarif Jarak Pengiriman (Peta Leaflet + Haversine Server)</p>
+                    <p class="text-xs font-bold text-[#52311a]">Rumus Tarif Jarak Pengiriman (OpenRouteService + Internal Estimator)</p>
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
                             <label for="distance_base_km" class="kelana-label">Jarak Dasar Termasuk (Km) *</label>
@@ -284,6 +284,30 @@
                             <label for="distance_max_km" class="kelana-label">Batas Jangkauan Maksimal (Km) *</label>
                             <input id="distance_max_km" name="distance_max_km" type="number" step="0.5" min="1"
                                 value="{{ old('distance_max_km', $storeSetting->distance_max_km) }}" required class="kelana-input text-xs">
+                        </div>
+                        <div>
+                            <label for="safety_margin_percentage" class="kelana-label">Safety Margin (%) *</label>
+                            <input id="safety_margin_percentage" name="safety_margin_percentage" type="number" min="0" max="100"
+                                value="{{ old('safety_margin_percentage', $storeSetting->safety_margin_percentage ?? 10) }}" required class="kelana-input text-xs">
+                        </div>
+                        <div>
+                            <label for="safety_margin_flat" class="kelana-label">Safety Margin Nominal (Rp) *</label>
+                            <input id="safety_margin_flat" name="safety_margin_flat" type="number" min="0"
+                                value="{{ old('safety_margin_flat', $storeSetting->safety_margin_flat ?? 0) }}" required class="kelana-input text-xs">
+                        </div>
+                        <div>
+                            <label for="shipping_rounding" class="kelana-label">Pembulatan Tarif Terdekat (Rp) *</label>
+                            <select id="shipping_rounding" name="shipping_rounding" class="kelana-input text-xs">
+                                <option value="1" @selected(($storeSetting->shipping_rounding ?? 500) == 1)>Tanpa pembulatan (1)</option>
+                                <option value="100" @selected(($storeSetting->shipping_rounding ?? 500) == 100)>100</option>
+                                <option value="500" @selected(($storeSetting->shipping_rounding ?? 500) == 500)>500 (Rekomendasi)</option>
+                                <option value="1000" @selected(($storeSetting->shipping_rounding ?? 500) == 1000)>1.000</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="shipping_service_name" class="kelana-label">Nama Layanan Pengiriman *</label>
+                            <input id="shipping_service_name" name="shipping_service_name" type="text"
+                                value="{{ old('shipping_service_name', $storeSetting->shipping_service_name ?? 'Kurir Kelana / GoSend') }}" required class="kelana-input text-xs">
                         </div>
                     </div>
                 </div>
@@ -319,6 +343,114 @@
                     @endforeach
                 </div>
             </div>
+        </div>
+
+        {{-- Panel Kalibrasi Referensi Tarif GoSend Riil --}}
+        <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-sm font-semibold text-[#52311a]">Kalibrasi Tarif GoSend Riil (Benchmarking Ongkir)</h2>
+                    <p class="mt-0.5 text-xs text-[#796b62]">Bandingkan tarif riil GoSend dengan estimasi internal untuk menjaga akurasi tarif dan margin keamanan.</p>
+                </div>
+                <span class="rounded-full bg-[#f4ece1] px-3 py-1 text-[11px] font-bold text-[#52311a]">
+                    {{ count($gosendCalibrations) }} Catatan Kalibrasi
+                </span>
+            </div>
+
+            <form method="POST" action="{{ route('admin.settings.gosend-calibration.store') }}" class="grid gap-3 rounded-xl bg-[#fdfbf6] p-4 text-xs sm:grid-cols-12">
+                @csrf
+                <div class="sm:col-span-2">
+                    <label class="kelana-label">Tanggal *</label>
+                    <input type="date" name="date" value="{{ date('Y-m-d') }}" required class="kelana-input py-1.5 text-xs">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="kelana-label">Layanan *</label>
+                    <select name="service_type" class="kelana-input py-1.5 text-xs">
+                        <option value="Instant">GoSend Instant</option>
+                        <option value="SameDay">GoSend SameDay</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-4">
+                    <label class="kelana-label">Alamat Asal *</label>
+                    <input type="text" name="origin_address" value="{{ $storeSetting->store_address }}" required class="kelana-input py-1.5 text-xs">
+                    <input type="hidden" name="origin_latitude" value="{{ $storeSetting->store_latitude }}">
+                    <input type="hidden" name="origin_longitude" value="{{ $storeSetting->store_longitude }}">
+                </div>
+                <div class="sm:col-span-4">
+                    <label class="kelana-label">Alamat Tujuan Pengujian *</label>
+                    <input type="text" name="destination_address" placeholder="Contoh: Jl. Basuki Rahmat No. 10 Surabaya" required class="kelana-input py-1.5 text-xs">
+                </div>
+                <div class="sm:col-span-3">
+                    <label class="kelana-label">Lat Tujuan *</label>
+                    <input type="number" step="any" name="destination_latitude" placeholder="-7.265..." required class="kelana-input py-1.5 text-xs">
+                </div>
+                <div class="sm:col-span-3">
+                    <label class="kelana-label">Lng Tujuan *</label>
+                    <input type="number" step="any" name="destination_longitude" placeholder="112.745..." required class="kelana-input py-1.5 text-xs">
+                </div>
+                <div class="sm:col-span-3">
+                    <label class="kelana-label">Tarif Riil GoSend (Rp) *</label>
+                    <input type="number" min="0" name="actual_gosend_price" placeholder="Contoh: 18000" required class="kelana-input py-1.5 text-xs">
+                </div>
+                <div class="sm:col-span-3 flex items-end">
+                    <button type="submit" class="btn-kelana-primary w-full py-2 text-xs font-bold">+ Simpan &amp; Uji Estimasi</button>
+                </div>
+            </form>
+
+            @if(count($gosendCalibrations) > 0)
+                <div class="overflow-x-auto rounded-xl border border-[#efe7dc]">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[#fdfbf6] text-[#52311a]">
+                            <tr>
+                                <th class="p-2.5">Tanggal &middot; Layanan</th>
+                                <th class="p-2.5">Tujuan</th>
+                                <th class="p-2.5">Jarak ORS</th>
+                                <th class="p-2.5">Harga GoSend Riil</th>
+                                <th class="p-2.5">Estimasi Internal</th>
+                                <th class="p-2.5">Selisih</th>
+                                <th class="p-2.5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#efe7dc]">
+                            @foreach($gosendCalibrations as $cal)
+                                <tr>
+                                    <td class="p-2.5 whitespace-nowrap">
+                                        <p class="font-bold text-[#28211c]">{{ \Carbon\Carbon::parse($cal->date)->isoFormat('D MMM Y') }}</p>
+                                        <p class="text-[10px] text-[#796b62]">{{ $cal->service_type }}</p>
+                                    </td>
+                                    <td class="p-2.5 max-w-xs truncate" title="{{ $cal->destination_address }}">
+                                        {{ $cal->destination_address }}
+                                    </td>
+                                    <td class="p-2.5 whitespace-nowrap font-semibold">
+                                        {{ number_format($cal->distance_km, 1, ',', '.') }} km
+                                    </td>
+                                    <td class="p-2.5 whitespace-nowrap font-bold text-[#52311a]">
+                                        Rp {{ number_format($cal->actual_gosend_price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="p-2.5 whitespace-nowrap font-bold text-emerald-800">
+                                        Rp {{ number_format($cal->estimated_internal_price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="p-2.5 whitespace-nowrap">
+                                        @php
+                                            $diff = $cal->price_difference;
+                                        @endphp
+                                        <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $diff >= 0 ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900' }}">
+                                            {{ $diff >= 0 ? '+' : '' }}Rp {{ number_format($diff, 0, ',', '.') }}
+                                        </span>
+                                    </td>
+                                    <td class="p-2.5 text-right whitespace-nowrap">
+                                        <form method="POST" action="{{ route('admin.settings.gosend-calibration.destroy', $cal) }}" onsubmit="return confirm('Hapus catatan kalibrasi ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-[11px] font-bold text-red-700 hover:underline">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
 
         {{-- 7. Lokasi Pengambilan (Pickup) --}}

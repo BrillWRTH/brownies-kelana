@@ -82,6 +82,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relasi ke seluruh alamat tersimpan milik pelanggan.
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(UserAddress::class)->latest();
+    }
+
+    /**
      * Relasi ke seluruh ulasan yang dibuat pelanggan.
      */
     public function reviews(): HasMany

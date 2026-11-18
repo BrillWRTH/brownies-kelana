@@ -7,7 +7,7 @@
     <title>@yield('title', 'Brownies Kelana — Dibuat Untuk Dinikmati')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -34,28 +34,28 @@
         </div>
 
         <div class="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-            {{-- Logo Circular + Wordmark Serif --}}
+            {{-- Logo Circular + Wordmark --}}
             <a href="{{ route('home') }}" class="group relative z-10 flex items-center gap-3 pl-12 sm:pl-16">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#a4804f] bg-white p-0.5 shadow-sm transition group-hover:scale-105 sm:h-11 sm:w-11">
                     <img src="{{ asset('images/kelana/logo-kelana.png') }}" alt="Logo Brownies Kelana" class="h-full w-full rounded-full object-cover">
                 </div>
-                <span class="font-serif text-xl sm:text-2xl font-black tracking-tight text-[#4a2e1b] group-hover:text-[#311c10] transition">
+                <span class="text-xl sm:text-2xl font-bold tracking-tight text-[#4a2e1b] group-hover:text-[#311c10] transition">
                     {{ $store->store_name }}
                 </span>
             </a>
 
             {{-- Menu Navigasi Tengah Desktop --}}
-            <nav class="hidden items-center gap-9 text-[13px] font-extrabold uppercase tracking-widest md:flex">
+            <nav class="hidden items-center gap-9 text-[13px] font-bold uppercase tracking-wider md:flex">
                 <a href="{{ route('home') }}"
-                    class="relative py-1 transition {{ request()->routeIs('home') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('home') ? 'text-[#4a2e1b] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Home
                 </a>
                 <a href="{{ route('products.index') }}"
-                    class="relative py-1 transition {{ request()->routeIs('products.*') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('products.*') ? 'text-[#4a2e1b] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Produk
                 </a>
                 <a href="{{ route('about') }}"
-                    class="relative py-1 transition {{ request()->routeIs('about') ? 'text-[#4a2e1b] font-black after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
+                    class="relative py-1 transition {{ request()->routeIs('about') ? 'text-[#4a2e1b] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#8f5e40]' : 'text-[#593822] hover:text-[#4a2e1b]' }}">
                     Tentang Kami
                 </a>
             </nav>
