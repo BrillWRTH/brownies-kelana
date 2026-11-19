@@ -47,7 +47,7 @@
                 </div>
                 <p class="mt-2 font-serif text-3xl font-bold lining-nums text-[#593822]">{{ $totalOrders }}</p>
                 <p class="mt-1 text-[11px] text-[#8f6743]">
-                    {{ $pendingPaymentCount }} menunggu pembayaran Midtrans
+                    {{ $pendingPaymentCount }} menunggu bayar / verifikasi QRIS
                 </p>
             </div>
 
@@ -219,7 +219,7 @@
                                     <a href="{{ route('admin.orders.show', $pending) }}" class="mt-2 block text-[#2f2118] hover:underline">
                                         <span class="font-bold">{{ $pending->order_number }}</span> &middot; {{ $pending->customer_name }}<br>
                                         <span class="text-[11px] text-[#6f5a4a]">
-                                            {{ $pending->latestPayment?->channel_label ?? 'Midtrans' }} &middot; Rp {{ number_format($pending->total_amount, 0, ',', '.') }}
+                                            {{ $pending->latestPayment?->channel_label ?? 'QRIS Brownies Kelana' }} &middot; {{ $pending->paymentStatusLabel() }} &middot; Rp {{ number_format($pending->total_amount, 0, ',', '.') }}
                                         </span>
                                     </a>
                                 @endforeach

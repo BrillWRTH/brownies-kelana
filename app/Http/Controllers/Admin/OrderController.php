@@ -84,6 +84,7 @@ class OrderController extends Controller
 
         $orders = $ordersQuery->paginate(15)->withQueryString();
         $unpaidCount = Order::query()->where('payment_status', 'belum_dibayar')->count();
+        $waitingVerificationCount = Order::query()->where('payment_status', 'menunggu_verifikasi')->count();
         $processingCount = Order::query()->whereIn('order_status', ['diproses', 'dikemas'])->count();
 
         return view('admin.orders.index', compact(
@@ -95,6 +96,7 @@ class OrderController extends Controller
             'statusFilter',
             'dateFilter',
             'unpaidCount',
+            'waitingVerificationCount',
             'processingCount'
         ));
     }
@@ -317,7 +319,7 @@ class OrderController extends Controller
         // 1. Periksa batas kedaluwarsa dan muat seluruh relasi pesanan
         $order->expireIfPastDeadline();
         $order->refresh();
-        $order->load(['user', 'pickupLocation', 'shippingZone', 'items.product', 'logs.actor', 'payments', 'latestPayment', 'review']);
+        $order->load(['user', 'pickupLocation', 'shippingZone', 'items.product', 'logs.actor', 'payments', 'latestPayment.verifier', 'review']);
 
         // 2. Hitung riwayat pesanan pelanggan untuk menandai pelanggan baru vs berulang
         $customerOrderCount = $order->user_id
@@ -518,7 +520,7 @@ class OrderController extends Controller
         }
 
         if ($newStatus !== 'menunggu_pembayaran' && $order->payment_status !== 'lunas') {
-            return back()->with('error', 'Pesanan belum lunas. Tunggu konfirmasi Midtrans atau gunakan tombol Tandai Lunas untuk pesanan WhatsApp.');
+            return back()->with('error', 'Pesanan belum lunas. Verifikasi pembayaran QRIS secara manual terlebih dahulu menggunakan tombol Verifikasi Pembayaran Berhasil.');
         }
 
         // 3. Simpan pembaruan status beserta waktu selesai apabila mencapai tahap akhir
@@ -651,7 +653,7 @@ class OrderController extends Controller
 
         // 2. Perbarui status pesanan dan status pembayaran terkait
         $newPaymentStatus = $order->payment_status;
-        if ($order->payment_status === 'belum_dibayar') {
+        if (in_array($order->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true)) {
             $newPaymentStatus = 'dibatalkan';
         } elseif ($order->payment_status === 'lunas' && $request->boolean('mark_refund')) {
             $newPaymentStatus = 'refund';
@@ -690,7 +692,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Menandai pesanan sebagai Lunas secara manual (untuk pesanan WhatsApp atau rekonsiliasi admin).
+     * Memverifikasi pembayaran QRIS secara manual oleh Admin menjadi Lunas & memajukan pesanan ke antrean produksi.
      */
     public function markManualPaid(Order $order): RedirectResponse
     {
@@ -700,51 +702,141 @@ class OrderController extends Controller
         }
 
         if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
-            return back()->with('error', 'Pesanan yang sudah dibatalkan atau kedaluwarsa tidak dapat ditandai Lunas.');
+            return back()->with('error', 'Pesanan yang sudah dibatalkan atau kedaluwarsa tidak dapat diverifikasi Lunas.');
         }
 
         // 2. Tandai pesanan lunas dan majukan status menunggu pembayaran menjadi diproses
+        $now = now();
         $order->update([
             'payment_status' => 'lunas',
             'order_status' => $order->order_status === 'menunggu_pembayaran' ? 'diproses' : $order->order_status,
-            'paid_at' => now(),
+            'paid_at' => $now,
         ]);
 
         if ($order->latestPayment) {
             $order->latestPayment->update([
-                'status' => 'settlement',
-                'paid_at' => now(),
+                'status' => 'verified',
+                'paid_at' => $now,
+                'verified_by' => Auth::id(),
+                'verified_at' => $now,
+                'rejection_reason' => null,
             ]);
         } else {
             Payment::create([
                 'order_id' => $order->id,
-                'gateway' => $order->source === 'whatsapp' ? 'manual_whatsapp' : 'midtrans',
-                'payment_method' => $order->source === 'whatsapp' ? 'whatsapp_manual' : 'midtrans_snap',
-                'channel_label' => 'Dikonfirmasi Admin · '.$order->order_number,
+                'gateway' => $order->source === 'whatsapp' ? 'manual_whatsapp' : 'qris_manual',
+                'payment_method' => 'qris',
+                'channel_label' => 'QRIS Brownies Kelana',
+                'qris_url' => 'images/kelana/qris-brownies-kelana.jpg',
                 'amount' => $order->total_amount,
-                'status' => 'settlement',
-                'paid_at' => now(),
+                'status' => 'verified',
+                'paid_at' => $now,
+                'verified_by' => Auth::id(),
+                'verified_at' => $now,
             ]);
         }
 
-        // 3. Catat log pelunasan admin dan kabari pelanggan melalui notifikasi dashboard
+        // 3. Catat log verifikasi manual admin dan kabari pelanggan melalui notifikasi dashboard & email
         $order->logs()->create([
             'user_id' => Auth::id(),
             'actor_name' => Auth::user()->name,
             'event_type' => 'payment_settled',
-            'title' => 'Pembayaran Ditandai Lunas oleh Admin',
-            'description' => 'Pelunasan dikonfirmasi Admin. Pesanan mulai masuk antrean produksi.',
+            'title' => 'Pembayaran QRIS Diverifikasi Berhasil oleh Admin',
+            'description' => 'Bukti pembayaran QRIS telah diperiksa dan diverifikasi manual oleh Admin. Pesanan mulai masuk antrean produksi.',
         ]);
 
         $this->notifyCustomerFromTemplate(
             $order,
             'lunas',
-            'Pembayaran Dikonfirmasi',
-            'Pembayaran pesanan '.$order->order_number.' telah dikonfirmasi lunas dan sedang diproses.'
+            'Pembayaran QRIS Terverifikasi',
+            'Pembayaran QRIS untuk pesanan '.$order->order_number.' telah diverifikasi berhasil oleh Admin dan pesanan mulai diproses.'
         );
 
         return redirect()->route('admin.orders.show', $order)
-            ->with('success', 'Pesanan '.$order->order_number.' ditandai Lunas dan siap diproses.');
+            ->with('success', 'Pembayaran pesanan '.$order->order_number.' berhasil diverifikasi Lunas dan siap diproses.');
+    }
+
+    /**
+     * Menolak bukti pembayaran QRIS yang tidak valid agar pelanggan dapat mengunggah ulang bukti bayar.
+     */
+    public function rejectPayment(Request $request, Order $order): RedirectResponse
+    {
+        if ($order->payment_status === 'lunas') {
+            return back()->with('error', 'Pesanan ini sudah tercatat Lunas sehingga bukti tidak dapat ditolak.');
+        }
+
+        if (in_array($order->order_status, ['dibatalkan', 'kedaluwarsa'], true)) {
+            return back()->with('error', 'Pesanan yang sudah ditutup tidak dapat diproses penolakan buktinya.');
+        }
+
+        $validated = $request->validate([
+            'rejection_reason' => ['required', 'string', 'min:4', 'max:300'],
+        ], [
+            'rejection_reason.required' => 'Alasan penolakan bukti pembayaran wajib diisi.',
+            'rejection_reason.min' => 'Tuliskan alasan penolakan minimal 4 karakter agar jelas bagi pelanggan.',
+        ]);
+
+        $reason = trim($validated['rejection_reason']);
+        $storeSetting = StoreSetting::current();
+        $extendedDeadline = now()->addMinutes(max(15, (int) $storeSetting->payment_timeout_minutes));
+
+        $order->update([
+            'payment_status' => 'belum_dibayar',
+            'payment_deadline_at' => $order->payment_deadline_at && $order->payment_deadline_at->gt($extendedDeadline)
+                ? $order->payment_deadline_at
+                : $extendedDeadline,
+        ]);
+
+        if ($order->latestPayment) {
+            $order->latestPayment->update([
+                'status' => 'rejected',
+                'rejection_reason' => $reason,
+                'verified_by' => Auth::id(),
+                'verified_at' => now(),
+            ]);
+        }
+
+        $order->logs()->create([
+            'user_id' => Auth::id(),
+            'actor_name' => Auth::user()->name,
+            'event_type' => 'payment_rejected',
+            'title' => 'Bukti Pembayaran QRIS Ditolak Admin',
+            'description' => 'Alasan: '.$reason.'. Pelanggan diminta mengunggah ulang bukti bayar yang valid.',
+        ]);
+
+        if ($order->user_id) {
+            UserNotification::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order->id,
+                'audience' => 'customer',
+                'category' => 'pesanan',
+                'channel' => 'dashboard',
+                'title' => 'Bukti Pembayaran Perlu Diperbaiki',
+                'message' => 'Bukti bayar pesanan '.$order->order_number.' ditolak admin. Alasan: '.$reason.'. Silakan unggah ulang bukti bayar QRIS.',
+                'delivery_status' => 'terkirim',
+                'action_url' => route('payments.show', $order),
+            ]);
+        }
+
+        if (! empty($order->customer_email)) {
+            try {
+                Notification::route('mail', $order->customer_email)->notify(
+                    new OrderLifecycleNotification(
+                        $order,
+                        'Bukti Pembayaran '.$order->order_number.' Perlu Diunggah Ulang — Brownies Kelana',
+                        'Bukti pembayaran QRIS Anda belum dapat diverifikasi.',
+                        'Alasan admin: '.$reason.'. Silakan unggah ulang bukti pembayaran yang jelas melalui halaman pembayaran QRIS.',
+                        'Unggah Ulang Bukti Bayar',
+                        route('payments.show', $order)
+                    )
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Gagal mengirim email penolakan bukti bayar '.$order->order_number.': '.$exception->getMessage());
+            }
+        }
+
+        return redirect()->route('admin.orders.show', $order)
+            ->with('success', 'Bukti pembayaran ditolak dan pelanggan telah diberitahu untuk mengunggah ulang.');
     }
 
     /**

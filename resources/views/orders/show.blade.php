@@ -164,17 +164,22 @@
                         {{-- Kartu Metode Pembayaran --}}
                         <div class="kelana-card p-5">
                             <h2 class="font-serif text-base font-semibold text-[#2f2118]">Metode Pembayaran</h2>
-                            <p class="mt-2 text-xs font-bold text-[#593822]">{{ $order->latestPayment?->channel_label ?? 'Midtrans Snap' }}</p>
+                            <p class="mt-2 text-xs font-bold text-[#593822]">{{ $order->latestPayment?->channel_label ?? 'QRIS Brownies Kelana' }}</p>
 
                             @if($order->payment_status === 'lunas')
                                 <div class="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-900">
-                                    <p class="font-bold">&#10003; Pembayaran Berhasil &middot; {{ $order->paymentStatusLabel() }}</p>
+                                    <p class="font-bold">&#10003; Pembayaran Terverifikasi &middot; {{ $order->paymentStatusLabel() }}</p>
                                     <p class="mt-0.5 text-[11px]">
                                         Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                                         @if($order->paid_at)
                                             &middot; {{ $order->paid_at->locale('id')->isoFormat('D MMMM YYYY · HH:mm') }} WIB
                                         @endif
                                     </p>
+                                </div>
+                            @elseif($order->payment_status === 'menunggu_verifikasi')
+                                <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3.5 text-xs text-blue-900">
+                                    <p class="font-bold">Status Pembayaran: {{ $order->paymentStatusLabel() }}</p>
+                                    <p class="mt-0.5 text-[11px]">Bukti pembayaran QRIS sudah dilampirkan dan sedang diverifikasi manual oleh Admin Brownies Kelana.</p>
                                 </div>
                             @else
                                 <div class="mt-3 rounded-xl border border-[#d9c8b4] bg-[#f7ebd5] p-3.5 text-xs text-[#593822]">
@@ -185,10 +190,25 @@
                                 </div>
                             @endif
 
-                            <div class="mt-4">
-                                @if($order->payment_status === 'belum_dibayar' && ! $isTerminated)
+                            @if($order->latestPayment?->proof_path)
+                                <div class="mt-3 flex items-center gap-3 rounded-xl border border-[#efe2ce] bg-[#fcf3e3]/60 p-2.5 text-[11px]">
+                                    <a href="{{ asset($order->latestPayment->proof_path) }}" target="_blank" rel="noopener" class="shrink-0">
+                                        <img src="{{ asset($order->latestPayment->proof_path) }}" alt="Bukti Bayar"
+                                            class="h-12 w-12 rounded-lg border border-[#d9c8b4] object-cover">
+                                    </a>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold text-[#593822]">Bukti Bayar Terlampir</p>
+                                        <a href="{{ asset($order->latestPayment->proof_path) }}" target="_blank" rel="noopener" class="text-[#8f6743] underline">
+                                            Lihat bukti bayar &nearr;
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="mt-4 space-y-2">
+                                @if(in_array($order->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true) && ! $isTerminated)
                                     <a href="{{ route('payments.show', $order) }}" class="btn-kelana-primary w-full rounded-lg text-xs">
-                                        Bayar Sekarang via Midtrans &rarr;
+                                        {{ $order->payment_status === 'menunggu_verifikasi' ? 'Lihat QRIS & Bukti Bayar →' : 'Bayar via QRIS & Lampirkan Bukti →' }}
                                     </a>
                                 @else
                                     <a href="{{ route('payments.show', $order) }}" class="btn-kelana-outline w-full rounded-lg text-xs">

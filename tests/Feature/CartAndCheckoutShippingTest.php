@@ -99,7 +99,7 @@ class CartAndCheckoutShippingTest extends TestCase
             'recipient_name' => $customer->name,
             'recipient_phone' => '081234567890',
             'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'midtrans_snap',
+            'payment_method' => 'qris',
         ];
 
         // 1. Tolak hari ini (melanggar aturan H-1)
@@ -268,7 +268,7 @@ class CartAndCheckoutShippingTest extends TestCase
             'delivery_distance_km' => 0.5,
             'scheduled_date' => $openDate,
             'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'midtrans_snap',
+            'payment_method' => 'qris',
         ])->assertSessionHasErrors('delivery_address');
 
         // 3. Pickup nonaktif ditolak
@@ -285,7 +285,7 @@ class CartAndCheckoutShippingTest extends TestCase
             'recipient_phone' => '081234567890',
             'scheduled_date' => $openDate,
             'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'midtrans_snap',
+            'payment_method' => 'qris',
         ])->assertSessionHasErrors('pickup_location_id');
     }
 

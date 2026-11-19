@@ -295,6 +295,7 @@ class Order extends Model
     {
         return match ($this->payment_status) {
             'belum_dibayar' => 'Belum Dibayar',
+            'menunggu_verifikasi' => 'Menunggu Verifikasi',
             'lunas' => 'Lunas',
             'gagal' => 'Gagal',
             'kedaluwarsa' => 'Kedaluwarsa',

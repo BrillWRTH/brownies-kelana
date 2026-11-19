@@ -15,7 +15,7 @@
                         ['2. Periksa keranjang', 'Tambahkan produk ke keranjang. Gunakan tombol tambah atau kurang untuk mengatur jumlah, hapus produk bila perlu, dan isi catatan pesanan. Pilih Lanjut Checkout.'],
                         ['3. Lengkapi checkout', 'Isi nama, email dan nomor telepon pemesan. Pilih Kirim ke alamat dan lengkapi data penerima serta alamat tujuan, atau Ambil sendiri (pick-up) dan pilih lokasi pengambilan.'],
                         ['4. Tentukan jadwal H-'.$storeSetting->preorder_min_days, 'Pemesanan menerapkan sistem Pre-order minimal H-'.$storeSetting->preorder_min_days.'. Pilih tanggal operasional yang tersedia dan slot jam pengiriman. Kuota maksimal '.$storeSetting->daily_quota.' pesanan per hari.'],
-                        ['5. Selesaikan pembayaran Midtrans', 'Periksa ringkasan checkout dan pilih kanal pembayaran Midtrans (Snap, QRIS, Kartu Kredit/Debit, Mandiri VA, BCA VA, atau GoPay). Selesaikan dalam '.$storeSetting->payment_timeout_minutes.' menit setelah pesanan dibuat.'],
+                        ['5. Selesaikan pembayaran QRIS', 'Periksa ringkasan checkout, lalu scan kode QRIS resmi Brownies Kelana dari semua aplikasi bank atau e-wallet. Lampirkan bukti bayar di halaman pembayaran atau hubungi penjual via WhatsApp dalam '.$storeSetting->payment_timeout_minutes.' menit setelah pesanan dibuat.'],
                         ['6. Pantau pesanan', 'Buka Dashboard untuk melihat progres pesanan (Menunggu Pembayaran -> Diproses -> Dikemas -> Dikirim/Siap Diambil), detail kurir, dan notifikasi. Saat pickup, tunjukkan nomor pesanan kepada petugas.'],
                     ];
                 @endphp

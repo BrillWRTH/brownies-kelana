@@ -4,23 +4,26 @@
 
 @section('content')
     @php
+        $isWaitingVerification = $order->payment_status === 'menunggu_verifikasi';
         $stateMeta = [
             'berhasil' => [
                 'badgeBg' => 'bg-emerald-100 text-emerald-700',
                 'icon' => '&#10003;',
-                'title' => 'Pembayaran Berhasil',
-                'desc' => 'Terima kasih telah memesan di Brownies Kelana! Pembayaranmu sebesar Rp '.number_format($order->total_amount, 0, ',', '.').' telah terkonfirmasi otomatis dan pesanan mulai diproses.',
+                'title' => 'Pembayaran Terverifikasi',
+                'desc' => 'Terima kasih telah memesan di Brownies Kelana! Pembayaran QRIS sebesar Rp '.number_format($order->total_amount, 0, ',', '.').' telah diverifikasi oleh admin dan pesananmu mulai diproses.',
                 'primaryText' => 'Lihat Detail Pesanan',
                 'primaryUrl' => route('orders.show', $order->order_number),
                 'secondaryText' => 'Kembali ke Beranda',
                 'secondaryUrl' => route('home'),
             ],
             'pending' => [
-                'badgeBg' => 'bg-amber-100 text-amber-700',
+                'badgeBg' => $isWaitingVerification ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700',
                 'icon' => '&#9201;',
-                'title' => 'Menunggu Pembayaran',
-                'desc' => 'Pesanan '.$order->order_number.' menunggu penyelesaian pembayaran sebelum batas waktu '.$order->payment_deadline_at?->locale('id')->isoFormat('HH:mm').' WIB.',
-                'primaryText' => 'Bayar Sekarang',
+                'title' => $isWaitingVerification ? 'Menunggu Verifikasi Admin' : 'Menunggu Pembayaran QRIS',
+                'desc' => $isWaitingVerification
+                    ? 'Bukti pembayaran QRIS untuk pesanan '.$order->order_number.' sudah kami terima dan sedang menunggu verifikasi manual oleh Admin Brownies Kelana.'
+                    : 'Pesanan '.$order->order_number.' menunggu pembayaran QRIS sebelum batas waktu '.$order->payment_deadline_at?->locale('id')->isoFormat('HH:mm').' WIB.',
+                'primaryText' => $isWaitingVerification ? 'Lihat Halaman Pembayaran & Bukti' : 'Bayar via QRIS Sekarang',
                 'primaryUrl' => route('payments.show', $order),
                 'secondaryText' => 'Lihat Detail Pesanan',
                 'secondaryUrl' => route('orders.show', $order->order_number),
@@ -29,8 +32,8 @@
                 'badgeBg' => 'bg-red-100 text-red-700',
                 'icon' => '&#10005;',
                 'title' => 'Pembayaran Gagal',
-                'desc' => 'Maaf, pembayaran kamu belum berhasil diproses. Silakan coba kembali atau gunakan kanal Midtrans lain.',
-                'primaryText' => 'Coba Bayar Lagi',
+                'desc' => 'Maaf, pembayaran kamu belum berhasil diverifikasi. Silakan coba kembali atau hubungi penjual via WhatsApp.',
+                'primaryText' => 'Kembali ke Halaman QRIS',
                 'primaryUrl' => route('payments.show', $order),
                 'secondaryText' => 'Lihat Detail Pesanan',
                 'secondaryUrl' => route('orders.show', $order->order_number),

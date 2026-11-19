@@ -426,42 +426,28 @@
                     </div>
                 </div>
 
-                {{-- Kartu 3: Pilih Metode Pembayaran (100% Midtrans) --}}
+                {{-- Kartu 3: Metode Pembayaran Resmi QRIS Brownies Kelana --}}
                 <div class="kelana-card">
-                    <div class="kelana-card-header">Pilih Metode Pembayaran</div>
-                    <div class="p-5">
-                        <p class="mb-3 text-xs font-bold text-[#593822]">Midtrans Snap &amp; Gateway Resmi</p>
+                    <div class="kelana-card-header">Metode Pembayaran</div>
+                    <div class="p-5 space-y-3">
+                        <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border-2 border-[#593822] bg-[#fcf3e3]/80 px-4 py-3.5">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" name="payment_method" value="qris" checked
+                                    class="h-4 w-4 text-[#593822] focus:ring-[#a4804f]">
+                                <img src="{{ asset('images/kelana/pay-qris.png') }}" alt="QRIS Brownies Kelana" class="h-6 w-12 shrink-0 object-contain">
+                                <div>
+                                    <p class="text-xs font-bold text-[#2f2118]">QRIS Brownies Kelana</p>
+                                    <p class="text-[11px] text-[#6f5a4a]">Menerima semua bank (BCA, Mandiri, BRI, BNI, dll.) &amp; e-wallet (GoPay, OVO, DANA, ShopeePay)</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-[#593822] px-2.5 py-0.5 text-[10px] font-bold text-white">Aktif</span>
+                        </label>
 
-                        @php
-                            $midtransChannels = [
-                                ['midtrans_snap', 'Midtrans Snap', 'Semua metode instan dalam popup Snap', null],
-                                ['qris', 'QRIS', 'Scan kode QR dari semua e-wallet & bank', 'images/kelana/pay-qris.png'],
-                                ['credit_card', 'Kartu kredit/debit', 'Visa, Mastercard, JCB & Amex', 'images/kelana/pay-cards.png'],
-                                ['mandiri_va', 'VA Mandiri', 'Mandiri Bill Payment & Livin’', null],
-                                ['bca_va', 'VA BCA', 'Transfer cepat BCA Mobile & ATM', 'images/kelana/pay-bca.png'],
-                                ['gopay', 'GoPay', 'Konfirmasi otomatis aplikasi GoPay', 'images/kelana/pay-gopay.png'],
-                            ];
-                        @endphp
-
-                        <div class="space-y-2.5">
-                            @foreach($midtransChannels as [$key, $title, $subtitle, $iconPath])
-                                <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#efe2ce] bg-white px-3.5 py-2.5 transition hover:border-[#8f6743]">
-                                    <div class="flex items-center gap-3">
-                                        <input type="radio" name="payment_method" value="{{ $key }}"
-                                            class="h-4 w-4 text-[#593822] focus:ring-[#a4804f]"
-                                            {{ old('payment_method', 'midtrans_snap') === $key ? 'checked' : '' }}>
-                                        @if($iconPath)
-                                            <img src="{{ asset($iconPath) }}" alt="{{ $title }}" class="h-5 w-10 shrink-0 object-contain">
-                                        @else
-                                            <span class="flex h-5 w-10 shrink-0 items-center justify-center rounded bg-[#f7ebd5] text-[9px] font-bold text-[#593822]">MID</span>
-                                        @endif
-                                        <div>
-                                            <p class="text-xs font-bold text-[#2f2118]">{{ $title }}</p>
-                                            <p class="text-[10px] text-[#796b62]">{{ $subtitle }}</p>
-                                        </div>
-                                    </div>
-                                </label>
-                            @endforeach
+                        <div class="rounded-xl border border-[#efe2ce] bg-[#fdfbf6] p-3 text-[11px] leading-relaxed text-[#5e4d3e]">
+                            <p class="font-bold text-[#593822]">NMID: ID1025429266147 &middot; a.n. BROWNIES KELANA</p>
+                            <p class="mt-1">
+                                Setelah menekan tombol <strong>BAYAR</strong>, kode QRIS resmi akan tampil di halaman berikutnya. Scan QRIS, lampirkan bukti pembayaran (atau hubungi penjual via WhatsApp), lalu admin akan memverifikasi pesananmu.
+                            </p>
                         </div>
                     </div>
                 </div>

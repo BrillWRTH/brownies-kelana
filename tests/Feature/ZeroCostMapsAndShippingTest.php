@@ -237,16 +237,6 @@ class ZeroCostMapsAndShippingTest extends TestCase
             'quantity' => 1,
         ]);
 
-        config(['services.midtrans.server_key' => 'SB-Mid-server-test']);
-
-        // Mock HTTP request ke Midtrans Snap agar mengembalikan token sukses
-        Http::fake([
-            'https://app.sandbox.midtrans.com/snap/v1/transactions' => Http::response([
-                'token' => 'mock-snap-token-12345',
-                'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v2/vtweb/mock-snap-token-12345',
-            ], 201),
-        ]);
-
         $tomorrow = now()->addDay()->toDateString();
         $response = $this->actingAs($this->customer)->post(route('checkout.store'), [
             'customer_name' => 'Sinta Maharani',
@@ -260,14 +250,8 @@ class ZeroCostMapsAndShippingTest extends TestCase
             'delivery_longitude' => 112.738580,
             'scheduled_date' => $tomorrow,
             'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'midtrans_snap',
+            'payment_method' => 'qris',
         ]);
-
-        file_put_contents('test_debug.txt', json_encode([
-            'session_errors' => session('errors') ? session('errors')->all() : null,
-            'session_error' => session('error'),
-            'location' => $response->headers->get('Location'),
-        ]));
 
         $response->assertRedirect();
 

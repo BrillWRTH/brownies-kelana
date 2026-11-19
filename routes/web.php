@@ -96,6 +96,7 @@ Route::middleware(['auth', 'active'])->group(function (): void {
     Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:15,1')->name('checkout.store');
 
     Route::get('/pembayaran/{order}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::post('/pembayaran/{order}/bukti-bayar', [PaymentController::class, 'uploadProof'])->middleware('throttle:15,1')->name('payments.upload-proof');
     Route::match(['GET', 'POST'], '/pembayaran/{order}/cek-status', [PaymentController::class, 'checkStatus'])->middleware('throttle:20,1')->name('payments.check-status');
     Route::get('/pembayaran/{order}/status/{state}', [PaymentController::class, 'result'])->name('payments.result');
 
@@ -136,6 +137,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/orders/{order}/kurir', [AdminOrderController::class, 'updateCourier'])->name('orders.update-courier');
         Route::post('/orders/{order}/batal', [AdminOrderController::class, 'cancelOrder'])->name('orders.cancel');
         Route::post('/orders/{order}/tandai-lunas', [AdminOrderController::class, 'markManualPaid'])->name('orders.mark-paid');
+        Route::post('/orders/{order}/tolak-pembayaran', [AdminOrderController::class, 'rejectPayment'])->name('orders.reject-payment');
         Route::resource('orders', AdminOrderController::class);
 
         // Pengelolaan Produk

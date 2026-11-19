@@ -11,7 +11,10 @@
                 <h1 class="font-serif text-3xl font-bold text-[#593822]">Kelola Pesanan</h1>
                 <p class="mt-1 text-xs text-[#796b62]">
                     {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY · HH:mm') }} WIB &middot;
-                    <span class="font-semibold text-amber-800">{{ $unpaidCount }} menunggu pembayaran</span> &bull;
+                    @if(($waitingVerificationCount ?? 0) > 0)
+                        <span class="font-bold text-blue-700">{{ $waitingVerificationCount }} perlu verifikasi bukti QRIS</span> &bull;
+                    @endif
+                    <span class="font-semibold text-amber-800">{{ $unpaidCount }} belum dibayar</span> &bull;
                     <span class="font-semibold text-[#593822]">{{ $processingCount }} sedang diproduksi/dikemas</span>
                 </p>
             </div>
@@ -58,6 +61,7 @@
                 <label for="filter-order-payment" class="kelana-label">Status Bayar</label>
                 <select id="filter-order-payment" name="payment_status" class="kelana-input py-2 text-xs">
                     <option value="">Bayar: Semua</option>
+                    <option value="menunggu_verifikasi" @selected($paymentFilter === 'menunggu_verifikasi')>Menunggu Verifikasi</option>
                     <option value="belum_dibayar" @selected($paymentFilter === 'belum_dibayar')>Belum Dibayar</option>
                     <option value="lunas" @selected($paymentFilter === 'lunas')>Lunas</option>
                     <option value="gagal" @selected($paymentFilter === 'gagal')>Gagal</option>
@@ -124,6 +128,7 @@
                             @php
                                 $payBadge = match($order->payment_status) {
                                     'lunas' => 'text-emerald-800',
+                                    'menunggu_verifikasi' => 'text-blue-700',
                                     'belum_dibayar' => 'text-amber-800',
                                     default => 'text-red-700',
                                 };
@@ -176,7 +181,12 @@
                                     <span class="font-bold {{ $payBadge }}">
                                         {{ $order->paymentStatusLabel() }}
                                     </span>
-                                    <p class="mt-0.5 text-[10px] text-[#8f7968]">{{ $order->latestPayment?->channel_label ?? '-' }}</p>
+                                    @if($order->latestPayment?->proof_path && $order->payment_status !== 'lunas')
+                                        <span class="mt-0.5 inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-800">
+                                            Bukti Terlampir
+                                        </span>
+                                    @endif
+                                    <p class="mt-0.5 text-[10px] text-[#8f7968]">{{ $order->latestPayment?->channel_label ?? 'QRIS Brownies Kelana' }}</p>
                                 </td>
                                 <td class="px-4 py-3.5 align-top">
                                     <span class="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ $orderBadge }}">

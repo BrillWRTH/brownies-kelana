@@ -1,17 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Pembayaran '.$order->order_number.' — Brownies Kelana')
-
-@push('head')
-    @if(! empty($midtransClientKey) && $payment?->snap_token)
-        <link rel="preconnect" href="{{ $isProduction ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com' }}">
-        <link rel="preload" href="{{ $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}" as="script">
-        <script src="{{ $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-            data-client-key="{{ $midtransClientKey }}" defer></script>
-    @endif
-@endpush
+@section('title', 'Pembayaran QRIS '.$order->order_number.' — Brownies Kelana')
 
 @section('content')
+    @php
+        $isWaitingVerification = $order->payment_status === 'menunggu_verifikasi';
+    @endphp
+
     <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
@@ -19,160 +14,238 @@
                     class="flex h-8 w-8 items-center justify-center rounded-full border border-[#8f6743]/50 bg-white text-[#593822] transition hover:bg-[#f7ebd5]">
                     &larr;
                 </a>
-                <h1 class="font-serif text-2xl font-bold text-[#593822] sm:text-3xl">Pembayaran Midtrans</h1>
+                <div>
+                    <h1 class="font-serif text-2xl font-bold text-[#593822] sm:text-3xl">Pembayaran QRIS</h1>
+                    <p class="text-xs text-[#6f5a4a]">Scan QRIS Brownies Kelana, lampirkan bukti bayar, lalu tunggu verifikasi admin.</p>
+                </div>
             </div>
 
-            <div class="rounded-2xl border border-[#8f6743]/60 bg-[#f7ebd5] px-4 py-2 text-right">
-                <p class="text-[10px] font-bold text-[#593822] uppercase">Sisa Waktu Pembayaran</p>
-                <p id="payment-countdown" data-deadline="{{ $order->payment_deadline_at?->timestamp ?? 0 }}"
-                    class="text-lg font-bold tabular-nums text-[#593822]">
-                    Memuat waktu...
-                </p>
-            </div>
+            @if($isWaitingVerification)
+                <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-right">
+                    <p class="text-[10px] font-bold text-blue-800 uppercase">Status Pembayaran</p>
+                    <p class="text-sm font-bold text-blue-900">Menunggu Verifikasi Admin</p>
+                </div>
+            @else
+                <div class="rounded-2xl border border-[#8f6743]/60 bg-[#f7ebd5] px-4 py-2 text-right">
+                    <p class="text-[10px] font-bold text-[#593822] uppercase">Sisa Waktu Pembayaran</p>
+                    <p id="payment-countdown" data-deadline="{{ $order->payment_deadline_at?->timestamp ?? 0 }}"
+                        class="text-lg font-bold tabular-nums text-[#593822]">
+                        Memuat waktu...
+                    </p>
+                </div>
+            @endif
         </div>
 
         <div class="grid gap-6 lg:grid-cols-12">
-            {{-- Kolom Kiri: Sesi Resmi Midtrans Snap --}}
+            {{-- Kolom Kiri: QRIS Resmi, Form Lampirkan Bukti Bayar & Hubungi Penjual --}}
             <div class="space-y-6 lg:col-span-7">
+
+                {{-- Notifikasi Bukti Ditolak oleh Admin --}}
+                @if($payment?->rejection_reason)
+                    <div class="rounded-2xl border border-red-300 bg-red-50 p-4 text-xs text-red-900">
+                        <p class="font-bold">Bukti pembayaran sebelumnya ditolak oleh Admin</p>
+                        <p class="mt-1">Alasan: <strong>{{ $payment->rejection_reason }}</strong></p>
+                        <p class="mt-1 text-[11px] text-red-700">Silakan unggah ulang bukti pembayaran yang jelas dan sesuai nominal tagihan, atau hubungi penjual via WhatsApp.</p>
+                    </div>
+                @endif
+
+                {{-- Notifikasi Bukti Sudah Diunggah --}}
+                @if($isWaitingVerification)
+                    <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs text-blue-900">
+                        <p class="font-bold">&#10003; Bukti pembayaran QRIS kamu sudah diterima!</p>
+                        <p class="mt-1 leading-relaxed text-blue-800">
+                            Admin Brownies Kelana sedang memeriksa mutasi masuk dan akan memverifikasi pesananmu secara manual. Kamu juga bisa klik <strong>Hubungi Penjual via WhatsApp</strong> untuk mempercepat konfirmasi.
+                        </p>
+                    </div>
+                @endif
+
+                {{-- Kartu 1: Scan QRIS Brownies Kelana --}}
                 <div class="kelana-card p-6">
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe2ce] pb-4">
                         <div>
                             <span class="rounded-full bg-[#e8decb] px-3 py-0.5 text-[11px] font-bold text-[#593822]">
-                                {{ $isProduction ? 'Midtrans Resmi' : 'Midtrans Sandbox' }}
+                                QRIS Resmi Brownies Kelana
                             </span>
-                            <h2 class="mt-2 font-serif text-xl font-bold text-[#2f2118]">{{ $payment?->channel_label ?? 'Midtrans Snap' }}</h2>
+                            <h2 class="mt-2 font-serif text-xl font-bold text-[#2f2118]">BROWNIES KELANA</h2>
                             <p class="mt-0.5 text-xs text-[#6f5a4a]">
-                                Pesanan {{ $order->order_number }}
-                                @if($payment?->midtrans_order_id)
-                                    &middot; ID Transaksi {{ $payment->midtrans_order_id }}
-                                @endif
+                                NMID: <strong class="font-mono text-[#593822]">ID1025429266147</strong> &middot; Pesanan {{ $order->order_number }}
                             </p>
                         </div>
-                        <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Menunggu Pembayaran</span>
+                        <span class="rounded-full px-3 py-1 text-xs font-bold {{ $isWaitingVerification ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800' }}">
+                            {{ $order->paymentStatusLabel() }}
+                        </span>
                     </div>
 
-                    @if(! empty($snapError))
-                        <div class="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-800">
-                            <p class="font-bold">Sesi Midtrans belum dapat dimuat</p>
-                            <p class="mt-1">{{ $snapError }}</p>
+                    {{-- Nominal Tagihan & Tombol Salin --}}
+                    <div class="mt-5 rounded-2xl border border-[#efe2ce] bg-[#fcf3e3] p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-semibold text-[#6f5a4a]">Total Nominal yang Harus Dibayar</p>
+                                <p class="mt-0.5 text-2xl font-bold tabular-nums text-[#593822] sm:text-3xl">
+                                    Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                                </p>
+                            </div>
+                            <button type="button" id="copy-amount-btn" data-amount="{{ (int) $order->total_amount }}"
+                                class="rounded-xl border border-[#8f6743] bg-white px-4 py-2 text-xs font-bold text-[#593822] transition hover:bg-[#f7ebd5]">
+                                Salin Nominal
+                            </button>
                         </div>
-                    @endif
-
-                    {{-- Panel Utama Pembayaran Inline Midtrans Snap & QRIS di Halaman Langsung --}}
-                    <div class="mt-6 rounded-2xl border border-[#efe2ce] bg-[#fcf3e3] p-5 text-center">
-                        <p class="text-xs font-semibold text-[#6f5a4a]">Total Tagihan Pembayaran</p>
-                        <p class="mt-1 text-3xl font-bold text-[#593822]">
-                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                        <p class="mt-2 text-[11px] text-[#796b62]">
+                            Pastikan nominal yang dibayarkan <strong>sama persis</strong> hingga digit terakhir agar verifikasi lebih cepat.
                         </p>
-                        <p class="mt-2 text-xs leading-relaxed text-[#5e4d3e]">
-                            Kode QRIS, Virtual Account, GoPay, dan metode lainnya terbuka langsung di halaman ini tanpa membuka tab/halaman baru.
+                    </div>
+
+                    {{-- Gambar QRIS Brownies Kelana --}}
+                    <div class="mt-5 flex flex-col items-center rounded-2xl border border-[#d9c8b4] bg-[#fdfbf6] p-5 text-center">
+                        <div class="w-full max-w-sm overflow-hidden rounded-2xl border border-[#e8decb] bg-white shadow-sm">
+                            <img src="{{ asset($qrisImagePath) }}"
+                                alt="QRIS Resmi Brownies Kelana NMID ID1025429266147"
+                                class="h-auto w-full object-contain">
+                        </div>
+
+                        <p class="mt-3 text-xs font-semibold text-[#593822]">
+                            Menerima pembayaran QRIS dari semua bank &amp; e-wallet (BCA, Mandiri, BRI, BNI, GoPay, OVO, DANA, ShopeePay, LinkAja)
                         </p>
 
                         <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
-                            @if(! empty($midtransClientKey) && $payment?->snap_token)
-                                <button type="button" id="pay-with-snap-btn" class="btn-kelana-primary rounded-xl px-5 py-2.5 text-xs font-bold shadow-md hover:scale-[1.02] transition">
-                                    Buka Pembayaran / QRIS Sekarang &rarr;
-                                </button>
-                            @endif
-
-                            <form method="POST" action="{{ route('payments.check-status', $order) }}" class="inline-block">
-                                @csrf
-                                <button type="submit" class="btn-kelana-outline rounded-xl px-4 py-2.5 text-xs font-bold hover:bg-[#f7ebd5] transition">
-                                    Cek Status Pembayaran
-                                </button>
-                            </form>
+                            <a href="{{ asset($qrisImagePath) }}" download="QRIS-Brownies-Kelana-{{ $order->order_number }}.jpg"
+                                class="btn-kelana-outline rounded-xl px-4 py-2 text-xs font-bold">
+                                Unduh Gambar QRIS
+                            </a>
+                            <a href="{{ $sellerWhatsappUrl }}" target="_blank" rel="noopener"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-800">
+                                <span>Hubungi Penjual (WhatsApp)</span>
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                                </svg>
+                            </a>
                         </div>
 
-                        <p class="mt-3 text-[11px] text-[#796b62]">
-                            Batas akhir pembayaran: <strong>{{ $order->payment_deadline_at?->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</strong>.
-                        </p>
-                    </div>
-
-                    {{-- Kontainer Snap Embed Langsung di Halaman (Tanpa Tab Baru) --}}
-                    @if(! empty($midtransClientKey) && $payment?->snap_token)
-                        <div class="mt-4 overflow-hidden rounded-2xl border border-[#d9c8b4] bg-white p-3 shadow-inner">
-                            <p class="mb-2 text-center text-[11px] font-bold text-[#593822]">Jendela Pembayaran Langsung</p>
-                            <div id="snap-container" class="relative min-h-[460px] w-full rounded-xl bg-[#fdfbf6]">
-                                <div id="snap-loading-placeholder" class="flex min-h-[420px] flex-col items-center justify-center p-6 text-center">
-                                    <div class="h-10 w-10 animate-spin rounded-full border-3 border-[#d9c8b4] border-t-[#593822]"></div>
-                                    <p class="mt-4 font-serif text-sm font-bold text-[#593822]">Menghubungkan ke Pembayaran Midtrans...</p>
-                                    <p class="mt-1 text-xs text-[#796b62]">Memuat metode QRIS, GoPay, Virtual Account & Bank Transfer</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
-                    {{-- Rincian Kanal Resmi Apabila Sudah Dikirim oleh API Midtrans --}}
-                    @if($payment && ($payment->va_number || $payment->bill_key || $payment->qris_url))
-                        <div class="mt-5 rounded-2xl border border-[#d9c8b4] bg-white p-5">
-                            <p class="text-xs font-bold text-[#593822]">Detail Kanal Pembayaran Resmi dari Midtrans</p>
-
-                            @if($payment->va_number)
-                                <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-                                    <div>
-                                        <p class="text-[11px] text-[#6f5a4a]">Nomor Virtual Account ({{ strtoupper($payment->va_bank ?? 'Bank') }})</p>
-                                        <p id="va-number-text" class="mt-0.5 font-mono text-xl font-bold text-[#2f2118]">{{ $payment->va_number }}</p>
-                                    </div>
-                                    <button type="button" onclick="copyText('va-number-text', this)"
-                                        class="rounded-lg border border-[#8f6743] bg-white px-4 py-1.5 text-xs font-bold text-[#593822] hover:bg-[#f7ebd5]">
-                                        Salin
-                                    </button>
-                                </div>
-                            @endif
-
-                            @if($payment->biller_code && $payment->bill_key)
-                                <div class="mt-3 space-y-1.5 border-t border-[#efe2ce] pt-3 text-xs">
-                                    <div class="flex justify-between">
-                                        <span class="text-[#6f5a4a]">Kode Perusahaan (Biller Code)</span>
-                                        <span class="font-mono font-bold text-[#2f2118]">{{ $payment->biller_code }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-[#6f5a4a]">Kode Pembayaran (Bill Key)</span>
-                                        <span id="bill-key-text" class="font-mono font-bold text-[#2f2118]">{{ $payment->bill_key }}</span>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($payment->qris_url)
-                                <div class="mt-4 flex flex-col items-center text-center">
-                                    <img src="{{ $payment->qris_url }}" alt="Kode QRIS Resmi Midtrans" class="h-52 w-52 rounded-xl border border-[#d9c8b4] bg-white p-2">
-                                    <p class="mt-2 text-[11px] text-[#6f5a4a]">Kode QRIS resmi yang dihasilkan oleh server Midtrans.</p>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-
-                    <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#efe2ce] pt-5">
-                        <form method="POST" action="{{ route('payments.check-status', $order) }}">
-                            @csrf
-                            <button type="submit" class="btn-kelana-primary rounded-lg text-xs">
-                                Cek Status Pembayaran
-                            </button>
-                        </form>
-                        <a href="{{ route('orders.show', $order->order_number) }}" class="text-xs font-semibold text-[#6f5a4a] hover:text-[#593822] hover:underline">
-                            Kembali ke Detail Pesanan
-                        </a>
+                        @if(! $isWaitingVerification && $order->payment_deadline_at)
+                            <p class="mt-3 text-[11px] text-[#796b62]">
+                                Batas akhir pembayaran: <strong>{{ $order->payment_deadline_at->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</strong>.
+                            </p>
+                        @endif
                     </div>
                 </div>
 
-                {{-- Panduan Singkat Pembayaran Otomatis Midtrans --}}
+                {{-- Kartu 2: Lampirkan Bukti Bayar --}}
+                <div class="kelana-card" id="bukti-bayar">
+                    <div class="kelana-card-header flex items-center justify-between">
+                        <span>Lampirkan Bukti Pembayaran</span>
+                        @if($payment?->proof_path)
+                            <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-white">Sudah Diunggah</span>
+                        @endif
+                    </div>
+
+                    <div class="p-6 space-y-5">
+                        @if($payment?->proof_path)
+                            <div class="rounded-2xl border border-[#d9c8b4] bg-[#fcf3e3]/60 p-4">
+                                <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+                                    <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener" class="shrink-0">
+                                        <img src="{{ asset($payment->proof_path) }}" alt="Bukti Pembayaran QRIS"
+                                            class="h-36 w-36 rounded-xl border border-[#d9c8b4] bg-white object-cover shadow-xs transition hover:opacity-90">
+                                    </a>
+                                    <div class="flex-1 space-y-1.5 text-xs">
+                                        <p class="font-bold text-[#593822]">Bukti Pembayaran Tersimpan</p>
+                                        <p class="text-[11px] text-[#6f5a4a]">
+                                            Diunggah: <strong>{{ $payment->proof_uploaded_at?->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</strong>
+                                        </p>
+                                        @if($payment->sender_name)
+                                            <p class="text-[11px] text-[#5e4d3e]">Pengirim / Akun: <strong>{{ $payment->sender_name }}</strong></p>
+                                        @endif
+                                        @if($payment->customer_payment_note)
+                                            <p class="text-[11px] text-[#5e4d3e]">Catatan: {{ $payment->customer_payment_note }}</p>
+                                        @endif
+                                        <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener"
+                                            class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-[#593822] underline">
+                                            <span>Lihat ukuran penuh</span> &nearr;
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('payments.upload-proof', $order) }}" enctype="multipart/form-data" class="space-y-4">
+                            @csrf
+
+                            <div>
+                                <label for="payment_proof" class="kelana-label">
+                                    {{ $payment?->proof_path ? 'Unggah Ulang Foto / Screenshot Bukti Bayar (Opsional)' : 'Foto / Screenshot Bukti Pembayaran QRIS *' }}
+                                </label>
+                                <input id="payment_proof" name="payment_proof" type="file" accept="image/jpeg,image/png,image/webp" required
+                                    class="kelana-input py-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-[#593822] file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:bg-[#432917]">
+                                <p class="mt-1 text-[11px] text-[#796b62]">Format JPG, PNG, atau WEBP (maks. 5MB). Pastikan nominal dan status berhasil terlihat jelas.</p>
+                                @error('payment_proof')
+                                    <p class="mt-1 text-xs font-semibold text-red-700">{{ $message }}</p>
+                                @enderror
+
+                                <div id="proof-preview-wrap" class="mt-3 hidden">
+                                    <p class="mb-1 text-[11px] font-semibold text-[#593822]">Pratinjau bukti yang akan dikirim:</p>
+                                    <img id="proof-preview-img" src="#" alt="Pratinjau Bukti Bayar"
+                                        class="max-h-56 rounded-xl border border-[#d9c8b4] bg-white object-contain p-1">
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label for="sender_name" class="kelana-label">Nama Pengirim / Aplikasi Bank / E-Wallet</label>
+                                    <input id="sender_name" name="sender_name" type="text"
+                                        value="{{ old('sender_name', $payment?->sender_name) }}"
+                                        placeholder="Contoh: BCA a.n. Sinta / GoPay"
+                                        class="kelana-input text-xs">
+                                </div>
+                                <div>
+                                    <label for="customer_payment_note" class="kelana-label">Catatan Tambahan (Opsional)</label>
+                                    <input id="customer_payment_note" name="customer_payment_note" type="text"
+                                        value="{{ old('customer_payment_note', $payment?->customer_payment_note) }}"
+                                        placeholder="Contoh: Sudah bayar via Livin Mandiri"
+                                        class="kelana-input text-xs">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                                <button type="submit" class="btn-kelana-primary rounded-xl px-6 py-2.5 text-xs font-bold">
+                                    {{ $payment?->proof_path ? 'Perbarui Bukti Pembayaran' : 'Kirim Bukti Pembayaran' }}
+                                </button>
+
+                                <a href="{{ $sellerWhatsappUrl }}" target="_blank" rel="noopener"
+                                    class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+                                    <span>Kirim Bukti / Konfirmasi via WhatsApp Penjual</span> &nearr;
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Kartu 3: Panduan Singkat Pembayaran QRIS --}}
                 <div class="kelana-card">
-                    <div class="kelana-card-header">Alur Konfirmasi Pembayaran Otomatis</div>
+                    <div class="kelana-card-header">Cara Bayar &amp; Konfirmasi QRIS</div>
                     <div class="space-y-3 p-6 text-xs leading-relaxed text-[#5e4d3e]">
                         <ol class="list-decimal space-y-1.5 pl-4">
-                            <li>Klik tombol <strong>Bayar Sekarang via Midtrans Snap</strong> atau buka tautan halaman pembayaran Midtrans.</li>
-                            <li>Pilih metode pembayaran yang tersedia (QRIS, GoPay, BCA VA, Mandiri Bill, atau Kartu Kredit/Debit).</li>
-                            <li>Selesaikan pembayaran nominal <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong> sesuai instruksi resmi di layar Midtrans.</li>
-                            <li>Setelah transaksi terkonfirmasi, status pesanan otomatis diperbarui menjadi <strong>Lunas &amp; Diproses</strong> tanpa perlu mengirim bukti transfer.</li>
+                            <li>Buka aplikasi mobile banking atau e-wallet pilihanmu (BCA Mobile, Livin' by Mandiri, BRImo, BNI, GoPay, OVO, DANA, ShopeePay, dll.).</li>
+                            <li>Scan gambar <strong>QRIS BROWNIES KELANA (NMID: ID1025429266147)</strong> di atas atau pilih dari galeri setelah mengunduh gambar QRIS.</li>
+                            <li>Masukkan nominal pembayaran tepat sebesar <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong> dan selesaikan transaksi.</li>
+                            <li>Screenshot bukti transaksi berhasil, lalu unggah pada form <strong>Lampirkan Bukti Pembayaran</strong> di atas (atau klik <strong>Hubungi Penjual via WhatsApp</strong>).</li>
+                            <li>Admin Brownies Kelana akan memverifikasi pembayaran secara manual, lalu status pesananmu berubah menjadi <strong>Lunas &amp; Diproses</strong>.</li>
                         </ol>
-                        <div class="rounded-xl bg-[#f7ebd5] px-4 py-3 text-[11px] text-[#593822]">
-                            &#9432; Jika status belum langsung berubah setelah membayar, tekan tombol <strong>Cek Status Pembayaran</strong> di atas untuk menyinkronkan langsung dengan server Midtrans.
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[#efe2ce] pt-4">
+                            <form method="POST" action="{{ route('payments.check-status', $order) }}">
+                                @csrf
+                                <button type="submit" class="btn-kelana-outline rounded-lg px-4 py-2 text-xs font-bold">
+                                    Cek Status Verifikasi
+                                </button>
+                            </form>
+                            <a href="{{ route('orders.show', $order->order_number) }}" class="text-xs font-semibold text-[#6f5a4a] hover:text-[#593822] hover:underline">
+                                Kembali ke Detail Pesanan
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Kolom Kanan: Ringkasan Pemesanan & Detail Pesanan --}}
+            {{-- Kolom Kanan: Ringkasan Pemesanan, Detail Pesanan & Hubungi Penjual --}}
             <div class="space-y-5 lg:col-span-5">
                 <div class="kelana-card">
                     <div class="kelana-card-header">Ringkasan Pemesanan</div>
@@ -205,6 +278,24 @@
                     </div>
                 </div>
 
+                {{-- Kartu Hubungi Penjual Langsung --}}
+                <div class="kelana-card border-emerald-200 bg-emerald-50/40 p-5 text-xs">
+                    <h3 class="font-serif text-base font-bold text-emerald-900">Hubungi Penjual</h3>
+                    <p class="mt-1 leading-relaxed text-emerald-800">
+                        Butuh konfirmasi cepat setelah transfer QRIS atau ingin bertanya soal pesanan <strong>{{ $order->order_number }}</strong>? Chat langsung ke WhatsApp resmi Brownies Kelana.
+                    </p>
+                    <p class="mt-2 text-[11px] font-semibold text-emerald-900">
+                        WhatsApp Penjual: {{ $storeSetting->whatsapp_number }}
+                    </p>
+                    <a href="{{ $sellerWhatsappUrl }}" target="_blank" rel="noopener"
+                        class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-800">
+                        <span>Chat Penjual via WhatsApp</span>
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                        </svg>
+                    </a>
+                </div>
+
                 <div class="kelana-card p-6 text-xs">
                     <h3 class="font-serif text-base font-semibold text-[#2f2118]">Detail Pesanan</h3>
                     <dl class="mt-4 space-y-2.5">
@@ -221,13 +312,19 @@
                             <dd class="font-semibold text-[#593822]">{{ $order->recipient_name }}</dd>
                         </div>
                         <div class="flex justify-between gap-3">
+                            <dt class="text-[#796b62]">Metode bayar</dt>
+                            <dd class="font-bold text-[#593822]">QRIS Brownies Kelana</dd>
+                        </div>
+                        <div class="flex justify-between gap-3">
                             <dt class="text-[#796b62]">Dibuat</dt>
                             <dd class="text-right font-semibold text-[#593822]">{{ $order->created_at->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</dd>
                         </div>
-                        <div class="flex justify-between gap-3">
-                            <dt class="text-[#796b62]">Batas bayar</dt>
-                            <dd class="text-right font-semibold text-[#593822]">{{ $order->payment_deadline_at?->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</dd>
-                        </div>
+                        @if($order->payment_deadline_at)
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-[#796b62]">Batas bayar</dt>
+                                <dd class="text-right font-semibold text-[#593822]">{{ $order->payment_deadline_at->locale('id')->isoFormat('D MMMM YYYY · HH.mm') }} WIB</dd>
+                            </div>
+                        @endif
                     </dl>
                     <p class="mt-4 border-t border-[#efe2ce] pt-3 text-[11px] text-[#796b62]">
                         Jadwal {{ $order->delivery_type === 'pickup' ? 'ambil' : 'kirim' }}:
@@ -252,97 +349,53 @@
     </section>
 
     @push('scripts')
-        @if(! empty($midtransClientKey) && $payment?->snap_token)
-            <script>
-                const snapToken = @json($payment->snap_token);
-                const resultSuccessUrl = @json(route('payments.result', ['order' => $order, 'state' => 'berhasil']));
-                const resultPendingUrl = @json(route('payments.result', ['order' => $order, 'state' => 'pending']));
-                const resultErrorUrl = @json(route('payments.result', ['order' => $order, 'state' => 'gagal']));
-
-                const snapCallbacks = {
-                    onSuccess: (result) => window.location.href = resultSuccessUrl,
-                    onPending: (result) => window.location.href = resultPendingUrl,
-                    onError: (result) => window.location.href = resultErrorUrl,
-                    onClose: () => {
-                        console.log('Jendela pembayaran ditutup oleh pengguna.');
-                    }
-                };
-
-                let snapEmbedded = false;
-
-                function startSnapPayment(forcePopup = false) {
-                    if (! window.snap) {
-                        return false;
-                    }
-
-                    const container = document.getElementById('snap-container');
-                    if (!forcePopup && container && typeof window.snap.embed === 'function') {
-                        try {
-                            const placeholder = document.getElementById('snap-loading-placeholder');
-                            window.snap.embed(snapToken, Object.assign({ embedId: 'snap-container' }, snapCallbacks));
-                            snapEmbedded = true;
-                            if (placeholder) placeholder.style.display = 'none';
-                            return true;
-                        } catch (err) {
-                            console.warn('Embed Snap gagal, beralih ke popup modal:', err);
-                        }
-                    }
-
-                    // Fallback ke popup Snap modal di atas website langsung
-                    if (typeof window.snap.pay === 'function') {
-                        window.snap.pay(snapToken, snapCallbacks);
-                        return true;
-                    }
-
-                    return false;
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // 1. Tombol Salin Nominal Pembayaran
+                const copyAmountBtn = document.getElementById('copy-amount-btn');
+                if (copyAmountBtn) {
+                    copyAmountBtn.addEventListener('click', () => {
+                        const amount = copyAmountBtn.dataset.amount || '';
+                        if (!amount) return;
+                        navigator.clipboard?.writeText(amount).then(() => {
+                            const original = copyAmountBtn.textContent;
+                            copyAmountBtn.textContent = 'Nominal Tersalin ✓';
+                            setTimeout(() => copyAmountBtn.textContent = original, 1800);
+                        });
+                    });
                 }
 
-                document.getElementById('pay-with-snap-btn')?.addEventListener('click', () => {
-                    startSnapPayment(true);
-                });
-
-                // Inisialisasi secepat kilat: periksa snap.js setiap 50ms sehingga langsung aktif saat script selesai dimuat
-                let attempts = 0;
-                const snapCheckInterval = setInterval(() => {
-                    attempts++;
-                    if (window.snap) {
-                        clearInterval(snapCheckInterval);
-                        startSnapPayment(false);
-                    } else if (attempts > 100) { // Timeout 5 detik
-                        clearInterval(snapCheckInterval);
-                        const placeholder = document.getElementById('snap-loading-placeholder');
-                        if (placeholder) {
-                            placeholder.innerHTML = `
-                                <div class="p-4 text-center">
-                                    <p class="text-xs font-bold text-[#593822]">Memuat embed sedikit lambat di perangkat Anda?</p>
-                                    <button type="button" onclick="startSnapPayment(true)" class="btn-kelana-primary mt-3 rounded-xl px-5 py-2.5 text-xs font-bold">
-                                        Klik untuk Buka Pembayaran Popup Midtrans &rarr;
-                                    </button>
-                                </div>
-                            `;
+                // 2. Pratinjau Foto Bukti Pembayaran Sebelum Diunggah
+                const proofInput = document.getElementById('payment_proof');
+                const previewWrap = document.getElementById('proof-preview-wrap');
+                const previewImg = document.getElementById('proof-preview-img');
+                if (proofInput && previewWrap && previewImg) {
+                    proofInput.addEventListener('change', () => {
+                        const file = proofInput.files?.[0];
+                        if (!file) {
+                            previewWrap.classList.add('hidden');
+                            return;
                         }
-                    }
-                }, 50);
-            </script>
-        @endif
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewImg.src = e.target.result;
+                            previewWrap.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
 
-        <script>
-            function copyText(elementId, buttonEl) {
-                const text = document.getElementById(elementId)?.textContent?.trim() || '';
-                if (!text) return;
-                navigator.clipboard?.writeText(text);
-                const original = buttonEl.textContent;
-                buttonEl.textContent = 'Tersalin!';
-                setTimeout(() => buttonEl.textContent = original, 1500);
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
+                // 3. Hitung Mundur Batas Pembayaran (Jika Belum Unggah Bukti)
                 const countdownEl = document.getElementById('payment-countdown');
                 if (countdownEl) {
-                    const deadline = parseInt(countdownEl.dataset.deadline || '0', 10);
+                    const deadlineUnix = parseInt(countdownEl.dataset.deadline || '0', 10);
                     const tick = () => {
-                        const nowSec = Math.floor(Date.now() / 1000);
-                        const diff = Math.max(0, deadline - nowSec);
+                        const diff = deadlineUnix - Math.floor(Date.now() / 1000);
+                        if (diff <= 0) {
+                            countdownEl.textContent = '00:00';
+                            window.location.href = @json(route('payments.result', ['order' => $order, 'state' => 'kedaluwarsa']));
+                            return;
+                        }
                         const mins = String(Math.floor(diff / 60)).padStart(2, '0');
                         const secs = String(diff % 60).padStart(2, '0');
                         countdownEl.textContent = `${mins}:${secs}`;

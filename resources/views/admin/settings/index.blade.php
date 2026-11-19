@@ -87,15 +87,15 @@
                 <button type="submit" class="btn-kelana-primary px-5 py-2 text-xs">Simpan Identitas Toko</button>
             </form>
 
-            {{-- 2. Batas Pembayaran Midtrans & Keamanan Password Admin --}}
+            {{-- 2. Batas Pembayaran QRIS & Keamanan Password Admin --}}
             <div class="space-y-6 lg:col-span-6">
                 <form method="POST" action="{{ route('admin.settings.payment.update') }}"
                     class="space-y-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     @csrf
                     @method('PUT')
-                    <h2 class="text-sm font-semibold text-[#52311a]">2. Batas Waktu Pembayaran Midtrans</h2>
+                    <h2 class="text-sm font-semibold text-[#52311a]">2. Batas Waktu Pembayaran QRIS</h2>
                     <p class="text-xs text-[#796b62]">
-                        Pembayaran 100% dikelola otomatis melalui Midtrans (QRIS, Transfer Bank VA, GoPay, Kartu).
+                        Pembayaran menggunakan QRIS resmi Brownies Kelana (NMID: ID1025429266147) dengan lampiran bukti bayar dan verifikasi manual oleh Admin.
                     </p>
 
                     <div class="grid gap-3 sm:grid-cols-2">
@@ -113,7 +113,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-kelana-primary px-5 py-2 text-xs">Simpan Pengaturan Midtrans</button>
+                    <button type="submit" class="btn-kelana-primary px-5 py-2 text-xs">Simpan Pengaturan Pembayaran</button>
                 </form>
 
                 <form method="POST" action="{{ route('admin.settings.security.update') }}"

@@ -27,10 +27,17 @@ class Payment extends Model
         'biller_code',
         'qris_url',
         'qris_string',
+        'proof_path',
+        'proof_uploaded_at',
+        'sender_name',
+        'customer_payment_note',
         'amount',
         'status',
         'expires_at',
         'paid_at',
+        'verified_by',
+        'verified_at',
+        'rejection_reason',
         'raw_response',
     ];
 
@@ -45,6 +52,8 @@ class Payment extends Model
             'amount' => 'integer',
             'expires_at' => 'datetime',
             'paid_at' => 'datetime',
+            'proof_uploaded_at' => 'datetime',
+            'verified_at' => 'datetime',
             'raw_response' => 'array',
         ];
     }
@@ -55,5 +64,13 @@ class Payment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Relasi ke admin yang memverifikasi atau menolak bukti pembayaran.
+     */
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

@@ -283,7 +283,7 @@ class CheckoutController extends Controller
                 ->with('error', 'Keranjang belanja kamu kosong.');
         }
 
-        // 2. Validasi seluruh input pemesan, penerima/pengambil, jadwal, dan metode Midtrans
+        // 2. Validasi seluruh input pemesan, penerima/pengambil, jadwal, dan metode pembayaran QRIS
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['nullable', 'email', 'max:255'],
@@ -302,7 +302,7 @@ class CheckoutController extends Controller
             'scheduled_date' => ['required', 'date'],
             'scheduled_time_slot' => ['required', 'string', 'max:50'],
             'customer_note' => ['nullable', 'string', 'max:1000'],
-            'payment_method' => ['required', 'in:midtrans_snap,qris,credit_card,mandiri_va,bca_va,gopay'],
+            'payment_method' => ['required', 'in:qris'],
         ], [
             'customer_name.required' => 'Nama pemesan wajib diisi.',
             'customer_phone.required' => 'Nomor telepon pemesan wajib diisi.',
@@ -313,16 +313,11 @@ class CheckoutController extends Controller
             'delivery_latitude.between' => 'Koordinat lintang pengiriman tidak valid.',
             'delivery_longitude.between' => 'Koordinat bujur pengiriman tidak valid.',
             'scheduled_date.required' => 'Pilih tanggal pengiriman atau pengambilan.',
-            'payment_method.required' => 'Pilih metode pembayaran Midtrans.',
+            'payment_method.required' => 'Pilih metode pembayaran QRIS.',
+            'payment_method.in' => 'Metode pembayaran yang tersedia saat ini adalah QRIS Brownies Kelana.',
         ]);
 
-        // 3. Periksa kredensial Midtrans Snap sebelum memproses transaksi
-        $serverKey = (string) config('services.midtrans.server_key');
-        if (trim($serverKey) === '') {
-            return back()->withInput()->with('error', 'Konfigurasi gateway pembayaran Midtrans belum aktif. Hubungi admin toko.');
-        }
-
-        // 4. Periksa lokasi pickup aktif, zona ongkir aktif, serta slot waktu operasional
+        // 3. Periksa lokasi pickup aktif, zona ongkir aktif, serta slot waktu operasional
         $pickupLocation = null;
         if ($validated['delivery_type'] === 'pickup') {
             $pickupLocation = PickupLocation::query()
@@ -432,7 +427,7 @@ class CheckoutController extends Controller
             $mapsUrl = 'https://maps.google.com/?q='.urlencode($validated['delivery_address']);
         }
 
-        // 6. Simpan pesanan, rincian item, log awal, panggil API Midtrans Snap asli, dan kosongkan keranjang secara atomik
+        // 6. Simpan pesanan, rincian item, log awal, data pembayaran QRIS, dan kosongkan keranjang secara atomik
         try {
             $order = DB::transaction(function () use (
                 $user,
@@ -441,7 +436,6 @@ class CheckoutController extends Controller
                 $shipping,
                 $selectedZoneId,
                 $mapsUrl,
-                $serverKey,
                 $quotationSnapshot
             ): Order {
                 $lockedCart = Cart::query()
@@ -559,84 +553,16 @@ class CheckoutController extends Controller
                     'description' => 'Pesanan dibuat melalui checkout website. Batas pembayaran '.(int) $storeSetting->payment_timeout_minutes.' menit.',
                 ]);
 
-                // 7. Minta Snap Token resmi langsung dari Midtrans Snap API (tanpa simulasi/generator lokal)
-                $midtransOrderId = $orderNumber.'-'.now()->format('His');
-                $channelLabels = [
-                    'midtrans_snap' => 'Midtrans Snap',
-                    'qris' => 'Midtrans · QRIS',
-                    'credit_card' => 'Midtrans · Kartu Kredit/Debit',
-                    'mandiri_va' => 'Midtrans · Mandiri Virtual Account',
-                    'bca_va' => 'Midtrans · BCA Virtual Account',
-                    'gopay' => 'Midtrans · GoPay',
-                ];
-
-                $enabledPaymentsMap = [
-                    'qris' => ['other_qris', 'gopay'],
-                    'credit_card' => ['credit_card'],
-                    'mandiri_va' => ['echannel'],
-                    'bca_va' => ['bca_va'],
-                    'gopay' => ['gopay'],
-                ];
-
-                $snapBaseUrl = config('services.midtrans.is_production')
-                    ? 'https://app.midtrans.com/snap/v1/transactions'
-                    : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
-
-                $snapPayload = [
-                    'transaction_details' => [
-                        'order_id' => $midtransOrderId,
-                        'gross_amount' => $totalAmount,
-                    ],
-                    'item_details' => $itemDetails,
-                    'customer_details' => [
-                        'first_name' => $validated['customer_name'],
-                        'email' => $customerEmail,
-                        'phone' => $validated['customer_phone'],
-                    ],
-                    'credit_card' => [
-                        'secure' => (bool) config('services.midtrans.is_3ds', true),
-                    ],
-                    'expiry' => [
-                        'unit' => 'minutes',
-                        'duration' => (int) $storeSetting->payment_timeout_minutes,
-                    ],
-                    'callbacks' => [
-                        'finish' => route('payments.result', ['order' => $createdOrder, 'state' => 'pending']),
-                    ],
-                ];
-
-                if (isset($enabledPaymentsMap[$validated['payment_method']])) {
-                    $snapPayload['enabled_payments'] = $enabledPaymentsMap[$validated['payment_method']];
-                }
-
-                $response = Http::timeout(15)
-                    ->withBasicAuth($serverKey, '')
-                    ->acceptJson()
-                    ->post($snapBaseUrl, $snapPayload);
-
-                $json = $response->json();
-                if (! $response->successful() || empty($json['token'])) {
-                    Log::error('Midtrans Snap gagal membuat transaksi.', [
-                        'order_number' => $orderNumber,
-                        'midtrans_order_id' => $midtransOrderId,
-                        'http_status' => $response->status(),
-                        'error_messages' => $json['error_messages'] ?? null,
-                    ]);
-                    throw new RuntimeException('MIDTRANS_FAILED');
-                }
-
+                // 7. Buat catatan pembayaran QRIS Brownies Kelana (verifikasi manual admin)
                 Payment::create([
                     'order_id' => $createdOrder->id,
-                    'gateway' => 'midtrans',
-                    'payment_method' => $validated['payment_method'],
-                    'channel_label' => $channelLabels[$validated['payment_method']] ?? 'Midtrans Snap',
-                    'midtrans_order_id' => $midtransOrderId,
-                    'snap_token' => $json['token'],
-                    'snap_redirect_url' => $json['redirect_url'] ?? null,
+                    'gateway' => 'qris_manual',
+                    'payment_method' => 'qris',
+                    'channel_label' => 'QRIS Brownies Kelana',
+                    'qris_url' => 'images/kelana/qris-brownies-kelana.jpg',
                     'amount' => $totalAmount,
                     'status' => 'pending',
                     'expires_at' => $deadline,
-                    'raw_response' => $json,
                 ]);
 
                 // 8. Kirim notifikasi ke dashboard pelanggan & inbox admin
@@ -646,8 +572,8 @@ class CheckoutController extends Controller
                     'audience' => 'customer',
                     'category' => 'pesanan',
                     'channel' => 'dashboard',
-                    'title' => 'Menunggu Pembayaran',
-                    'message' => 'Pesanan '.$orderNumber.' berhasil dibuat. Selesaikan pembayaran Midtrans dalam '.(int) $storeSetting->payment_timeout_minutes.' menit.',
+                    'title' => 'Menunggu Pembayaran QRIS',
+                    'message' => 'Pesanan '.$orderNumber.' berhasil dibuat. Scan QRIS Brownies Kelana & lampirkan bukti bayar dalam '.(int) $storeSetting->payment_timeout_minutes.' menit.',
                     'delivery_status' => 'terkirim',
                     'action_url' => route('payments.show', $createdOrder),
                 ]);
@@ -659,12 +585,12 @@ class CheckoutController extends Controller
                     'category' => 'pesanan',
                     'channel' => 'dashboard',
                     'title' => 'Pesanan Baru Masuk',
-                    'message' => $orderNumber.' · '.$createdOrder->customer_name.' · Rp '.number_format($totalAmount, 0, ',', '.').' via Checkout Website.',
+                    'message' => $orderNumber.' · '.$createdOrder->customer_name.' · Rp '.number_format($totalAmount, 0, ',', '.').' via Checkout Website (QRIS).',
                     'delivery_status' => 'terkirim',
                     'action_url' => route('admin.orders.show', $createdOrder),
                 ]);
 
-                // 9. Kosongkan keranjang belanja setelah order dan token Snap tersimpan
+                // 9. Kosongkan keranjang belanja setelah order tersimpan
                 $lockedCart->items()->delete();
                 $lockedCart->update(['order_note' => null]);
 
@@ -691,10 +617,6 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            if ($msg === 'MIDTRANS_FAILED') {
-                return back()->withInput()->with('error', 'Gagal memulai sesi pembayaran Midtrans. Periksa koneksi atau coba beberapa saat lagi.');
-            }
-
             throw $exception;
         }
 
@@ -716,10 +638,10 @@ class CheckoutController extends Controller
                 Notification::route('mail', $order->customer_email)->notify(
                     new OrderLifecycleNotification(
                         $order,
-                        'Pesanan '.$order->order_number.' Menunggu Pembayaran — Brownies Kelana',
-                        'Pesanan Anda berhasil dibuat dan menunggu pembayaran melalui Midtrans.',
-                        'Silakan selesaikan pembayaran dalam '.(int) $storeSetting->payment_timeout_minutes.' menit sebelum pesanan kedaluwarsa otomatis.',
-                        'Lanjutkan Pembayaran Midtrans',
+                        'Pesanan '.$order->order_number.' Menunggu Pembayaran QRIS — Brownies Kelana',
+                        'Pesanan Anda berhasil dibuat dan menunggu pembayaran melalui QRIS Brownies Kelana.',
+                        'Silakan scan QRIS dan lampirkan bukti pembayaran dalam '.(int) $storeSetting->payment_timeout_minutes.' menit sebelum pesanan kedaluwarsa otomatis.',
+                        'Bayar via QRIS Sekarang',
                         route('payments.show', $order)
                     )
                 );
@@ -729,7 +651,7 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('payments.show', $order)
-            ->with('success', 'Pesanan '.$order->order_number.' berhasil dibuat! Silakan selesaikan pembayaran melalui Midtrans.');
+            ->with('success', 'Pesanan '.$order->order_number.' berhasil dibuat! Silakan scan QRIS Brownies Kelana dan lampirkan bukti bayar.');
     }
 
     /**

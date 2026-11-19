@@ -33,7 +33,7 @@
                     Akses khusus admin UMKM Kelana
                 </h1>
                 <p class="mt-3 max-w-xs text-xs leading-relaxed text-[#f7ebd5]/85">
-                    Kelola pesanan, jadwal produksi H-1, konfirmasi Midtrans, dan pengaturan UMKM Kelana melalui panel admin.
+                    Kelola pesanan, jadwal produksi H-1, verifikasi pembayaran QRIS, dan pengaturan UMKM Kelana melalui panel admin.
                 </p>
             </div>
 

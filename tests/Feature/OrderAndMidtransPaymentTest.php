@@ -13,9 +13,9 @@ use App\Models\UserNotification;
 use App\Notifications\OrderLifecycleNotification;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OrderAndMidtransPaymentTest extends TestCase
@@ -29,17 +29,15 @@ class OrderAndMidtransPaymentTest extends TestCase
     }
 
     /**
-     * Memastikan checkout 100% Midtrans Snap memanggil API resmi, rollback saat API gagal, dan sinkron status server-to-server.
+     * Memastikan checkout hanya menggunakan QRIS Brownies Kelana, menampilkan QRIS + tombol WhatsApp penjual, serta lampirkan bukti bayar.
      */
-    public function test_full_midtrans_checkout_rejects_cod_calls_snap_api_and_rolls_back_on_api_failure(): void
+    public function test_qris_checkout_upload_proof_and_admin_manual_verification_flow(): void
     {
-        Config::set('services.midtrans.server_key', 'SB-Mid-server-TESTKEY');
-        Config::set('services.midtrans.client_key', 'SB-Mid-client-TESTKEY');
-        Config::set('services.midtrans.is_production', false);
-
+        Storage::fake('public');
         Notification::fake();
 
         $customer = User::query()->where('email', 'sinta@example.com')->firstOrFail();
+        $admin = User::query()->where('role', 'admin')->firstOrFail();
         $fudgy = Product::query()->where('slug', 'brownies-original')->with('variants')->firstOrFail();
         $storeSetting = StoreSetting::current();
         $openDate = $this->findFirstAvailableDate($storeSetting);
@@ -50,50 +48,14 @@ class OrderAndMidtransPaymentTest extends TestCase
             'quantity' => 2,
         ]);
 
-        // Pastikan halaman checkout tidak menyediakan opsi COD
+        // 1. Pastikan halaman checkout menampilkan QRIS Brownies Kelana dan menolak kanal lain (COD / Midtrans VA)
         $this->get(route('checkout.index'))
             ->assertOk()
+            ->assertSee('QRIS Brownies Kelana')
+            ->assertSee('ID1025429266147')
+            ->assertDontSee('Midtrans Snap')
             ->assertDontSee('Bayar di Tempat (COD)');
 
-        // Tolak jika ada pengiriman payload payment_method selain kanal Midtrans resmi
-        $this->post(route('checkout.store'), [
-            'customer_name' => $customer->name,
-            'customer_email' => $customer->email,
-            'customer_phone' => '081234567890',
-            'delivery_type' => 'delivery',
-            'recipient_name' => $customer->name,
-            'recipient_phone' => '081234567890',
-            'delivery_address' => 'Jl. Raya Taman Sidoarjo No. 12',
-            'scheduled_date' => $openDate,
-            'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'cod',
-        ])->assertSessionHasErrors('payment_method');
-
-        $initialOrderCount = Order::query()->count();
-
-        // Daftarkan respons berurutan Midtrans: gagal (500) dulu, lalu berhasil (201) + sinkron status (404 lalu 200 settlement)
-        Http::fake([
-            'https://app.sandbox.midtrans.com/snap/v1/transactions' => Http::sequence()
-                ->push(['error_messages' => ['Gateway maintenance']], 500)
-                ->push([
-                    'token' => 'snap-token-real-123',
-                    'redirect_url' => 'https://app.sandbox.midtrans.com/snap/v4/redirection/snap-token-real-123',
-                ], 201),
-            'https://api.sandbox.midtrans.com/v2/*/status' => Http::sequence()
-                ->push(['status_code' => '404'], 404)
-                ->push([
-                    'status_code' => '200',
-                    'transaction_status' => 'settlement',
-                    'fraud_status' => 'accept',
-                    'transaction_id' => 'MT-REAL-SYNC-999',
-                    'payment_type' => 'echannel',
-                    'biller_code' => '70012',
-                    'bill_key' => '9988776655',
-                    'gross_amount' => '255000.00',
-                ], 200),
-        ]);
-
-        // Jika API Midtrans Snap gagal (HTTP 500), transaksi DB harus rollback & keranjang tetap aman
         $this->post(route('checkout.store'), [
             'customer_name' => $customer->name,
             'customer_email' => $customer->email,
@@ -107,13 +69,9 @@ class OrderAndMidtransPaymentTest extends TestCase
             'scheduled_date' => $openDate,
             'scheduled_time_slot' => '09.00-11.00 WIB',
             'payment_method' => 'mandiri_va',
-        ])->assertRedirect()
-            ->assertSessionHas('error');
+        ])->assertSessionHasErrors('payment_method');
 
-        $this->assertSame($initialOrderCount, Order::query()->count());
-        $this->assertCount(1, Cart::query()->where('user_id', $customer->id)->with('items')->firstOrFail()->items);
-
-        // Jika API Midtrans Snap berhasil (HTTP 201), token Snap asli disimpan dan halaman pembayaran tidak memakai simulasi lokal
+        // 2. Checkout dengan QRIS berhasil membuat pesanan tanpa memanggil Midtrans API
         $checkoutRes = $this->post(route('checkout.store'), [
             'customer_name' => $customer->name,
             'customer_email' => $customer->email,
@@ -126,146 +84,105 @@ class OrderAndMidtransPaymentTest extends TestCase
             'delivery_longitude' => 112.715000,
             'scheduled_date' => $openDate,
             'scheduled_time_slot' => '09.00-11.00 WIB',
-            'payment_method' => 'mandiri_va',
+            'payment_method' => 'qris',
         ]);
 
         $order = Order::query()->latest('id')->firstOrFail();
         $checkoutRes->assertRedirect(route('payments.show', $order));
 
-        Http::assertSent(function ($request): bool {
-            return str_contains($request->url(), '/snap/v1/transactions')
-                && ($request['enabled_payments'] ?? []) === ['echannel']
-                && ($request['transaction_details']['gross_amount'] ?? 0) === 255000;
-        });
-
         Notification::assertSentOnDemand(OrderLifecycleNotification::class);
 
         $this->assertSame('menunggu_pembayaran', $order->order_status);
         $this->assertSame('belum_dibayar', $order->payment_status);
-        $this->assertSame('snap-token-real-123', $order->latestPayment->snap_token);
-        $this->assertNull($order->latestPayment->va_number);
+        $this->assertSame('qris_manual', $order->latestPayment->gateway);
+        $this->assertSame('qris', $order->latestPayment->payment_method);
+        $this->assertSame('QRIS Brownies Kelana', $order->latestPayment->channel_label);
 
-        // Halaman pembayaran menampilkan tombol Midtrans Snap asli tanpa simulasi lokal maupun canvas QR palsu
+        // 3. Halaman pembayaran menampilkan QRIS resmi, tombol Hubungi Penjual (WA), dan form Lampirkan Bukti Bayar
         $this->get(route('payments.show', $order))
             ->assertOk()
-            ->assertSee('Bayar Sekarang via Midtrans Snap')
-            ->assertDontSee('Mode Simulasi Midtrans Lokal')
-            ->assertDontSee('kelana-qris-canvas');
+            ->assertSee('qris-brownies-kelana.jpg')
+            ->assertSee('ID1025429266147')
+            ->assertSee('Hubungi Penjual (WhatsApp)')
+            ->assertSee('Lampirkan Bukti Pembayaran')
+            ->assertDontSee('snap.js');
 
-        // Akses manual URL /status/berhasil saat order belum lunas di Midtrans TIDAK melunaskan order
+        // Akses manual URL /status/berhasil saat order belum diverifikasi admin TIDAK melunaskan order
         $this->get(route('payments.result', ['order' => $order, 'state' => 'berhasil']))
             ->assertRedirect(route('payments.result', ['order' => $order, 'state' => 'pending']));
         $this->assertSame('belum_dibayar', $order->fresh()->payment_status);
 
-        // Cek Status Pembayaran menyinkronkan settlement dari server API Midtrans v2 dan melunaskan pesanan
-        $this->post(route('payments.check-status', $order))
-            ->assertRedirect(route('payments.result', ['order' => $order, 'state' => 'berhasil']));
+        // 4. Pelanggan melampirkan foto bukti bayar QRIS
+        $sampleImageBytes = file_get_contents(public_path('images/kelana/qris-brownies-kelana.jpg'));
+        $fakeProof = UploadedFile::fake()->createWithContent('bukti-qris.jpg', $sampleImageBytes);
+        $this->post(route('payments.upload-proof', $order), [
+            'payment_proof' => $fakeProof,
+            'sender_name' => 'BCA a.n. Sinta',
+            'customer_payment_note' => 'Sudah bayar via m-BCA',
+        ])->assertRedirect(route('payments.show', $order))
+            ->assertSessionHas('success');
 
         $order->refresh();
-        $this->assertSame('lunas', $order->payment_status);
-        $this->assertSame('diproses', $order->order_status);
-        $this->assertSame('MT-REAL-SYNC-999', $order->latestPayment->transaction_id);
-        $this->assertSame('9988776655', $order->latestPayment->bill_key);
-        $this->assertNotNull($order->paid_at);
+        $this->assertSame('menunggu_verifikasi', $order->payment_status);
+        $this->assertSame('waiting_verification', $order->latestPayment->status);
+        $this->assertNotNull($order->latestPayment->proof_path);
+        $this->assertSame('BCA a.n. Sinta', $order->latestPayment->sender_name);
+
+        // Pesanan yang sudah melampirkan bukti TIDAK boleh kedaluwarsa otomatis
+        $order->update(['payment_deadline_at' => now()->subMinutes(10)]);
+        $this->assertFalse($order->expireIfPastDeadline());
+        $this->assertSame('menunggu_verifikasi', $order->fresh()->payment_status);
 
         $this->assertTrue(
             UserNotification::query()
                 ->where('audience', 'admin')
                 ->where('order_id', $order->id)
-                ->where('title', 'Pembayaran Lunas (Midtrans)')
+                ->where('title', 'Bukti Bayar QRIS Perlu Verifikasi')
                 ->exists()
         );
-    }
 
-    /**
-     * Memastikan webhook resmi Midtrans memverifikasi signature SHA-512, nominal gross_amount, dan idempoten saat duplikat.
-     */
-    public function test_midtrans_webhook_verifies_sha512_amount_mismatch_and_is_idempotent(): void
-    {
-        Config::set('services.midtrans.server_key', 'SB-Mid-server-TESTKEY');
-        Notification::fake();
+        // 5. Admin menolak bukti bayar yang kurang jelas -> status kembali belum_dibayar agar pelanggan bisa unggah ulang
+        $this->actingAs($admin)->post(route('admin.orders.reject-payment', $order), [
+            'rejection_reason' => 'Foto tangkapan layar terpotong, nominal belum terbaca.',
+        ])->assertRedirect(route('admin.orders.show', $order));
 
-        $customer = User::query()->where('email', 'sinta@example.com')->firstOrFail();
-        $order = Order::query()
-            ->where('user_id', $customer->id)
-            ->where('payment_status', 'belum_dibayar')
-            ->with('latestPayment')
-            ->firstOrFail();
+        $order->refresh();
+        $this->assertSame('belum_dibayar', $order->payment_status);
+        $this->assertSame('rejected', $order->latestPayment->status);
+        $this->assertSame('Foto tangkapan layar terpotong, nominal belum terbaca.', $order->latestPayment->rejection_reason);
 
-        $midtransOrderId = $order->latestPayment->midtrans_order_id;
-        $statusCode = '200';
-        $grossAmount = (string) $order->total_amount.'.00';
+        // 6. Pelanggan melihat alasan penolakan lalu mengunggah ulang bukti bayar yang jelas
+        $this->actingAs($customer)->get(route('payments.show', $order))
+            ->assertOk()
+            ->assertSee('Foto tangkapan layar terpotong, nominal belum terbaca.');
 
-        // 1. Tolak signature palsu
-        $this->postJson(route('midtrans.callback'), [
-            'order_id' => $midtransOrderId,
-            'status_code' => $statusCode,
-            'gross_amount' => $grossAmount,
-            'signature_key' => 'invalid-signature',
-            'transaction_status' => 'settlement',
-        ])->assertStatus(403);
+        $secondProof = UploadedFile::fake()->createWithContent('bukti-qris-jelas.jpg', $sampleImageBytes);
+        $this->actingAs($customer)->post(route('payments.upload-proof', $order), [
+            'payment_proof' => $secondProof,
+            'sender_name' => 'BCA a.n. Sinta',
+        ])->assertRedirect(route('payments.show', $order));
 
-        // 2. Tolak jika gross_amount dari webhook dimanipulasi walau signature valid
-        $mismatchAmount = '1000.00';
-        $mismatchSignature = hash('sha512', $midtransOrderId.$statusCode.$mismatchAmount.'SB-Mid-server-TESTKEY');
+        $this->assertSame('menunggu_verifikasi', $order->fresh()->payment_status);
 
-        $this->postJson(route('midtrans.callback'), [
-            'order_id' => $midtransOrderId,
-            'status_code' => $statusCode,
-            'gross_amount' => $mismatchAmount,
-            'signature_key' => $mismatchSignature,
-            'transaction_status' => 'settlement',
-        ])->assertStatus(422);
+        // 7. Admin memeriksa detail pesanan & melakukan verifikasi pembayaran berhasil secara manual
+        $this->actingAs($admin)->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertSee('Verifikasi Pembayaran Manual (QRIS)')
+            ->assertSee('Verifikasi Pembayaran Berhasil');
 
-        $this->assertSame('belum_dibayar', $order->fresh()->payment_status);
-
-        // 3. Terima signature SHA-512 yang valid dan nominal sesuai DB
-        $validSignature = hash('sha512', $midtransOrderId.$statusCode.$grossAmount.'SB-Mid-server-TESTKEY');
-
-        $this->postJson(route('midtrans.callback'), [
-            'order_id' => $midtransOrderId,
-            'status_code' => $statusCode,
-            'gross_amount' => $grossAmount,
-            'signature_key' => $validSignature,
-            'transaction_status' => 'settlement',
-            'transaction_id' => 'MT-HOOK-12345',
-            'payment_type' => 'bank_transfer',
-            'va_numbers' => [
-                ['bank' => 'bca', 'va_number' => '880001234567'],
-            ],
-        ])->assertOk();
+        $this->actingAs($admin)->post(route('admin.orders.mark-paid', $order))
+            ->assertRedirect(route('admin.orders.show', $order));
 
         $order->refresh();
         $this->assertSame('lunas', $order->payment_status);
         $this->assertSame('diproses', $order->order_status);
-        $this->assertSame('MT-HOOK-12345', $order->latestPayment->transaction_id);
-        $this->assertSame('880001234567', $order->latestPayment->va_number);
+        $this->assertSame('verified', $order->latestPayment->status);
+        $this->assertSame($admin->id, $order->latestPayment->verified_by);
+        $this->assertNotNull($order->paid_at);
 
-        $logCountAfterSettle = OrderLog::query()->where('order_id', $order->id)->count();
-
-        // 4. Kirim ulang webhook duplikat + webhook expire terlambat => harus idempoten & tidak menurunkan status lunas
-        $this->postJson(route('midtrans.callback'), [
-            'order_id' => $midtransOrderId,
-            'status_code' => $statusCode,
-            'gross_amount' => $grossAmount,
-            'signature_key' => $validSignature,
-            'transaction_status' => 'settlement',
-            'transaction_id' => 'MT-HOOK-12345',
-        ])->assertOk();
-
-        $expireSignature = hash('sha512', $midtransOrderId.'202'.$grossAmount.'SB-Mid-server-TESTKEY');
-        $this->postJson(route('midtrans.callback'), [
-            'order_id' => $midtransOrderId,
-            'status_code' => '202',
-            'gross_amount' => $grossAmount,
-            'signature_key' => $expireSignature,
-            'transaction_status' => 'expire',
-        ])->assertOk();
-
-        $order->refresh();
-        $this->assertSame('lunas', $order->payment_status);
-        $this->assertSame('diproses', $order->order_status);
-        $this->assertSame($logCountAfterSettle, OrderLog::query()->where('order_id', $order->id)->count());
+        // 8. Pelanggan diarahkan ke halaman hasil pembayaran terverifikasi
+        $this->actingAs($customer)->get(route('payments.show', $order))
+            ->assertRedirect(route('payments.result', ['order' => $order, 'state' => 'berhasil']));
     }
 
     /**

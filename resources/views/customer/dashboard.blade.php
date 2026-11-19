@@ -96,10 +96,10 @@
                                     <p class="text-lg font-bold text-[#2f2118]">
                                         Rp {{ number_format($activeOrder->total_amount, 0, ',', '.') }}
                                     </p>
-                                    @if($activeOrder->payment_status === 'belum_dibayar')
+                                    @if(in_array($activeOrder->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true))
                                         <a href="{{ route('payments.show', $activeOrder) }}"
                                             class="btn-kelana-primary rounded-lg px-5 py-2 text-xs">
-                                            Bayar Sekarang
+                                            {{ $activeOrder->payment_status === 'menunggu_verifikasi' ? 'Lihat Bukti Bayar' : 'Bayar via QRIS' }}
                                         </a>
                                     @else
                                         <a href="{{ route('orders.show', $activeOrder->order_number) }}"
@@ -264,10 +264,10 @@
                                                 class="rounded-lg border border-[#8f6743] bg-white px-4 py-1 text-center text-[11px] font-bold text-[#593822] hover:bg-[#f7ebd5]">
                                                 Detail
                                             </a>
-                                            @if($order->payment_status === 'belum_dibayar')
+                                            @if(in_array($order->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true))
                                                 <a href="{{ route('payments.show', $order) }}"
                                                     class="rounded-lg bg-[#593822] px-4 py-1 text-center text-[11px] font-bold text-white hover:bg-[#492d1a]">
-                                                    Bayar Sekarang
+                                                    {{ $order->payment_status === 'menunggu_verifikasi' ? 'Cek Bukti Bayar' : 'Bayar QRIS' }}
                                                 </a>
                                             @endif
                                         </div>

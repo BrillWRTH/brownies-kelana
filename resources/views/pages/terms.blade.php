@@ -22,8 +22,8 @@
                     <p class="mt-1">Pelanggan dapat memilih pengiriman ke alamat (dengan perhitungan ongkos kirim sesuai pengaturan toko aktif) atau ambil sendiri (pick-up) gratis ongkir di titik lokasi resmi kami dengan menunjukkan nomor pesanan.</p>
                 </div>
                 <div>
-                    <h2 class="text-sm font-semibold text-[#52311a]">4. Pembayaran Midtrans &amp; Batas Waktu</h2>
-                    <p class="mt-1">Pembayaran online diproses melalui Midtrans dan wajib diselesaikan dalam batas waktu {{ $storeSetting->payment_timeout_minutes }} menit sejak pesanan dibuat. Sesi pembayaran yang kedaluwarsa akan ditutup otomatis oleh sistem dan tidak dapat digunakan kembali.</p>
+                    <h2 class="text-sm font-semibold text-[#52311a]">4. Pembayaran QRIS &amp; Verifikasi Manual</h2>
+                    <p class="mt-1">Pembayaran dilakukan melalui QRIS resmi Brownies Kelana (NMID: ID1025429266147) dan bukti pembayaran wajib dilampirkan dalam batas waktu {{ $storeSetting->payment_timeout_minutes }} menit sejak pesanan dibuat. Verifikasi pembayaran dilakukan secara manual oleh Admin Brownies Kelana sebelum pesanan masuk antrean produksi.</p>
                 </div>
                 <div>
                     <h2 class="text-sm font-semibold text-[#52311a]">5. Pembatalan sebelum Diproses</h2>

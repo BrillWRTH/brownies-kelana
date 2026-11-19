@@ -7,6 +7,7 @@
     @php
         $payBadge = match($order->payment_status) {
             'lunas' => 'border-emerald-200 bg-emerald-50 text-emerald-800',
+            'menunggu_verifikasi' => 'border-blue-200 bg-blue-50 text-blue-800',
             'belum_dibayar' => 'border-amber-200 bg-amber-50 text-amber-800',
             default => 'border-red-200 bg-red-50 text-red-800',
         };
@@ -104,16 +105,64 @@
                         </div>
                     </div>
 
-                    {{-- Info Pembayaran Midtrans / Manual --}}
+                    {{-- Info Pembayaran QRIS & Bukti Transfer Pelanggan --}}
                     @if($order->latestPayment)
-                        <div class="mt-4 rounded-xl border border-[#e8dfd3] bg-[#fdfbf6] p-3.5 text-xs">
-                            <p class="font-bold text-[#52311a]">Informasi Transaksi Pembayaran</p>
-                            <div class="mt-1 grid gap-1 text-[#5e524a] sm:grid-cols-2">
-                                <p>Kanal: <strong>{{ $order->latestPayment->channel_label }}</strong></p>
-                                <p>Gateway: <strong>{{ strtoupper($order->latestPayment->gateway) }}</strong></p>
-                                <p>Status: <strong>{{ strtoupper($order->latestPayment->status) }}</strong></p>
-                                <p>Waktu Lunas: <strong>{{ $order->paid_at ? $order->paid_at->format('d M Y H:i').' WIB' : 'Belum lunas' }}</strong></p>
+                        @php $payment = $order->latestPayment; @endphp
+                        <div class="mt-4 rounded-xl border border-[#e8dfd3] bg-[#fdfbf6] p-4 text-xs space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <p class="font-bold text-[#52311a]">Informasi Pembayaran QRIS</p>
+                                <span class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold {{ $payBadge }}">
+                                    {{ $order->paymentStatusLabel() }}
+                                </span>
                             </div>
+                            <div class="grid gap-1.5 text-[#5e524a] sm:grid-cols-2">
+                                <p>Metode: <strong>{{ $payment->channel_label ?? 'QRIS Brownies Kelana' }}</strong></p>
+                                <p>Waktu Lunas: <strong>{{ $order->paid_at ? $order->paid_at->format('d M Y H:i').' WIB' : 'Belum diverifikasi' }}</strong></p>
+                                @if($payment->sender_name)
+                                    <p>Pengirim / Bank / E-Wallet: <strong>{{ $payment->sender_name }}</strong></p>
+                                @endif
+                                @if($payment->proof_uploaded_at)
+                                    <p>Waktu Unggah Bukti: <strong>{{ $payment->proof_uploaded_at->format('d M Y H:i') }} WIB</strong></p>
+                                @endif
+                                @if($payment->verifier)
+                                    <p>Diverifikasi Oleh: <strong>{{ $payment->verifier->name }} ({{ $payment->verified_at?->format('d M Y H:i') }} WIB)</strong></p>
+                                @endif
+                            </div>
+
+                            @if($payment->customer_payment_note)
+                                <p class="rounded-lg bg-white px-3 py-2 text-[11px] text-[#5e524a]">
+                                    <strong class="text-[#52311a]">Catatan Pembayaran Pelanggan:</strong> {{ $payment->customer_payment_note }}
+                                </p>
+                            @endif
+
+                            @if($payment->rejection_reason)
+                                <p class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-800">
+                                    <strong>Alasan Penolakan Terakhir:</strong> {{ $payment->rejection_reason }}
+                                </p>
+                            @endif
+
+                            @if($payment->proof_path)
+                                <div class="border-t border-[#efe7dc] pt-3">
+                                    <p class="mb-2 text-[11px] font-bold text-[#52311a]">Lampiran Bukti Pembayaran QRIS:</p>
+                                    <div class="flex flex-wrap items-start gap-4">
+                                        <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener" class="block shrink-0">
+                                            <img src="{{ asset($payment->proof_path) }}" alt="Bukti Pembayaran QRIS {{ $order->order_number }}"
+                                                class="h-44 w-44 rounded-xl border border-[#d6c5b3] bg-white object-cover shadow-xs transition hover:opacity-90">
+                                        </a>
+                                        <div class="space-y-2 text-[11px] text-[#5e524a]">
+                                            <p>Klik gambar di samping untuk melihat bukti transfer dalam ukuran penuh sebelum memverifikasi.</p>
+                                            <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener"
+                                                class="inline-flex items-center gap-1 rounded-lg border border-[#8f6743] bg-white px-3 py-1.5 font-bold text-[#52311a] hover:bg-[#f7ebd5]">
+                                                <span>Buka Gambar Ukuran Penuh</span> &nearr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($order->payment_status !== 'lunas')
+                                <p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                                    Pelanggan belum melampirkan foto bukti bayar di website (periksa mutasi QRIS atau chat WhatsApp jika pelanggan mengirim lewat WA).
+                                </p>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -267,19 +316,48 @@
 
             {{-- Kolom Kanan (4 kolom): Kontrol Status, Pelunasan Manual, Pembatalan & Ulasan --}}
             <div class="space-y-5 lg:col-span-4">
-                {{-- Konfirmasi Pembayaran Manual (Khusus Belum Dibayar) --}}
+                {{-- Verifikasi Pembayaran QRIS Manual oleh Admin --}}
                 @if($order->payment_status !== 'lunas' && !in_array($order->order_status, ['dibatalkan', 'kedaluwarsa']))
-                    <div class="rounded-2xl border border-amber-300 bg-amber-50 p-5 shadow-xs">
-                        <h3 class="text-sm font-semibold text-amber-900">Pelunasan Pembayaran</h3>
-                        <p class="mt-1 text-xs text-amber-800">
-                            Pesanan website biasanya lunas otomatis lewat webhook Midtrans. Untuk pesanan WhatsApp manual atau rekonsiliasi, tandai lunas di sini.
-                        </p>
-                        <form method="POST" action="{{ route('admin.orders.mark-paid', $order) }}" class="mt-3">
+                    <div class="rounded-2xl border {{ $order->payment_status === 'menunggu_verifikasi' ? 'border-blue-300 bg-blue-50/70' : 'border-amber-300 bg-amber-50' }} p-5 shadow-xs space-y-4">
+                        <div>
+                            <h3 class="text-sm font-bold {{ $order->payment_status === 'menunggu_verifikasi' ? 'text-blue-950' : 'text-amber-900' }}">
+                                Verifikasi Pembayaran Manual (QRIS)
+                            </h3>
+                            <p class="mt-1 text-xs {{ $order->payment_status === 'menunggu_verifikasi' ? 'text-blue-900' : 'text-amber-800' }}">
+                                @if($order->latestPayment?->proof_path)
+                                    Pelanggan telah melampirkan bukti pembayaran QRIS. Periksa kecocokan nominal <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong> di mutasi rekening/QRIS, lalu klik verifikasi berhasil.
+                                @else
+                                    Verifikasi pembayaran dilakukan secara manual oleh admin setelah dana masuk ke QRIS Brownies Kelana (baik lewat bukti unggahan website maupun WhatsApp).
+                                @endif
+                            </p>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.orders.mark-paid', $order) }}">
                             @csrf
-                            <button type="submit" class="w-full rounded-lg bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800">
-                                Tandai Lunas &amp; Proses Produksi
+                            <button type="submit"
+                                onclick="return confirm('Konfirmasi pembayaran QRIS untuk pesanan {{ $order->order_number }} sebesar Rp {{ number_format($order->total_amount, 0, ',', '.') }} sudah diterima & valid?');"
+                                class="w-full rounded-lg bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-800">
+                                &#10003; Verifikasi Pembayaran Berhasil (Lunas &amp; Proses)
                             </button>
                         </form>
+
+                        @if($order->latestPayment?->proof_path)
+                            <div class="border-t border-blue-200/80 pt-3">
+                                <form method="POST" action="{{ route('admin.orders.reject-payment', $order) }}" class="space-y-2">
+                                    @csrf
+                                    <label for="rejection_reason" class="block text-[11px] font-bold text-red-800">
+                                        Atau Tolak Bukti Pembayaran (Minta Unggah Ulang):
+                                    </label>
+                                    <input id="rejection_reason" name="rejection_reason" type="text" required
+                                        placeholder="Contoh: Nominal tidak sesuai / gambar buram"
+                                        class="kelana-input bg-white py-1.5 text-xs">
+                                    <button type="submit"
+                                        class="w-full rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-50">
+                                        Tolak Bukti Pembayaran
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 @endif
 

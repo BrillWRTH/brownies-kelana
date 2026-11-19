@@ -18,8 +18,8 @@
                     <p class="mt-1">Data digunakan untuk mengelola akun pelanggan, memproses pemesanan H-1, menghitung estimasi ongkos kirim, mengatur pengantaran atau pengambilan, serta mengirimkan pembaruan status pesanan di dashboard.</p>
                 </div>
                 <div>
-                    <h2 class="text-sm font-semibold text-[#52311a]">3. Penyedia Pembayaran (Midtrans)</h2>
-                    <p class="mt-1">Seluruh pembayaran online pada website diproses melalui gateway pembayaran resmi Midtrans (QRIS, Virtual Account, GoPay, Kartu Kredit/Debit, dan Snap). Informasi yang diperlukan untuk transaksi diteruskan secara terenkripsi kepada penyedia tersebut sesuai kebutuhan pemrosesan pembayaran.</p>
+                    <h2 class="text-sm font-semibold text-[#52311a]">3. Pembayaran QRIS &amp; Bukti Transaksi</h2>
+                    <p class="mt-1">Pembayaran pada website menggunakan QRIS resmi Brownies Kelana (NMID: ID1025429266147) yang mendukung seluruh bank dan e-wallet. Bukti pembayaran yang dilampirkan hanya digunakan oleh admin untuk keperluan verifikasi pesanan.</p>
                 </div>
                 <div>
                     <h2 class="text-sm font-semibold text-[#52311a]">4. Akses &amp; Kontak Pembaruan Data</h2>
