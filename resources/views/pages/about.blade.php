@@ -56,26 +56,26 @@
         </div>
     </section>
 
-    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - TANGGA NYATA & BACKGROUND LEBAR SESUAI FIGMA --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] pt-12 sm:pt-16 lg:pt-24 pb-32 sm:pb-40 lg:pb-52">
+    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - TANGGA ATAS & BAWAH NYATA SESUAI FIGMA --}}
+    <section class="relative overflow-hidden bg-[#fcf8f2] pt-12 sm:pt-16 lg:pt-20 pb-28 sm:pb-36 lg:pb-48">
         {{-- Latar belakang blok cokelat gelap (#53311a) LEBAR & TINGGI di bagian bawah foto dengan pita gelombang --}}
-        <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[35%] sm:top-[36%] lg:top-[38%] bg-[#53311a]">
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[38%] sm:top-[40%] lg:top-[42%] bg-[#53311a]">
             <img src="{{ asset('images/kelana/about-ngisoran.png') }}" alt=""
-                class="absolute bottom-0 left-0 w-full min-h-[200px] sm:min-h-[280px] lg:min-h-[360px] object-cover opacity-90">
+                class="absolute bottom-0 left-0 w-full min-h-[180px] sm:min-h-[250px] lg:min-h-[320px] object-cover opacity-90">
         </div>
 
         <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {{-- Grid 3 Kolom Bertangga Nyata (Step 1 -> Step 2 -> Step 3) --}}
+            {{-- Grid 3 Kolom Bertangga Nyata di Bagian Atas Maupun Bawah (Tangga Atas Bawahnya Sesuai Figma) --}}
             <div class="grid grid-cols-12 items-start gap-3 sm:gap-6 lg:gap-10">
-                {{-- Foto 1 (Kiri): culkle 1.png - TANGGA 1 (PALING TINGGI / ATAS) --}}
+                {{-- Foto 1 (Kiri): culkle 1.png - TANGGA 1 (ATAS PALING TINGGI, BAWAH PALING TINGGI) --}}
                 <div class="col-span-4 self-start">
                     <div class="overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-cukle.png') }}" alt="Brookies Brownies Kelana"
-                            class="h-60 sm:h-84 md:h-[400px] lg:h-[460px] w-full object-cover">
+                            class="h-56 sm:h-76 md:h-88 lg:h-[390px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Kolom Tengah: Judul "Temukan kebahagiaan di setiap Rasa" + Foto 2 senyum 1.png - TANGGA 2 (TENGAH / TINGGI) --}}
+                {{-- Kolom Tengah: Judul "Temukan kebahagiaan di setiap Rasa" + Foto 2 senyum 1.png - TANGGA 2 (TENGAH ATAS & TENGAH BAWAH) --}}
                 <div class="col-span-4 flex flex-col items-center text-center">
                     <div class="mb-4 sm:mb-6 flex justify-center">
                         <img src="{{ asset('images/kelana/about-heading-rasa.png') }}" alt="Temukan kebahagiaan di setiap Rasa"
@@ -83,15 +83,15 @@
                     </div>
                     <div class="w-full overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-senyum.png') }}" alt="Kebahagiaan Bersama Brownies Kelana"
-                            class="h-72 sm:h-96 md:h-[460px] lg:h-[540px] w-full object-cover">
+                            class="h-68 sm:h-88 md:h-[420px] lg:h-[460px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Foto 3 (Kanan): tepunglop 1.png - TANGGA 3 (PALING BAWAH / TURUN DALAM) --}}
-                <div class="col-span-4 self-start pt-28 sm:pt-44 lg:pt-60">
+                {{-- Foto 3 (Kanan): tepunglop 1.png - TANGGA 3 (ATAS PALING TURUN, BAWAH PALING TURUN / DEEP STEP) --}}
+                <div class="col-span-4 self-start pt-24 sm:pt-40 md:pt-52 lg:pt-64">
                     <div class="overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-tepunglop.png') }}" alt="Proses Adonan Penuh Cinta Brownies Kelana"
-                            class="h-60 sm:h-80 md:h-96 lg:h-[440px] w-full object-cover">
+                            class="h-56 sm:h-76 md:h-92 lg:h-[410px] w-full object-cover">
                     </div>
                 </div>
             </div>
