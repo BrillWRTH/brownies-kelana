@@ -3,83 +3,95 @@
 @section('title', 'Tentang Kami — Brownies Kelana')
 
 @section('content')
-    {{-- 1. Hero Cerita Brand Brownies Kelana (Caramel Bronze Banner #9b7643) --}}
-    <section class="relative overflow-hidden bg-[#9b7643] text-white">
-        <div class="mx-auto grid max-w-7xl items-center gap-6 px-4 py-10 sm:gap-8 sm:px-6 md:grid-cols-12 lg:gap-12 lg:px-8 lg:py-16">
-            <div class="md:col-span-6">
-                <h1 class="text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[40px]">
+    {{-- 1. Hero Cerita Brand Brownies Kelana (Caramel Bronze Banner #9b7643 - Luas, Dalam & Tidak Ceper) --}}
+    <section class="relative overflow-hidden bg-[#9b7643] text-white py-20 sm:py-28 lg:py-36 min-h-[520px] sm:min-h-[580px] lg:min-h-[660px] flex items-center">
+        <div class="mx-auto grid max-w-7xl w-full items-center gap-8 px-4 sm:px-6 md:grid-cols-12 lg:gap-14 lg:px-8">
+            <div class="md:col-span-5 lg:col-span-5">
+                <h1 class="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
                     Selamat Datang di {{ $storeSetting->store_name }}
                 </h1>
-                <p class="mt-4 text-xs leading-relaxed text-[#fcf5eb]/95 sm:mt-5 sm:text-sm lg:text-[15px]">
+                <p class="mt-6 text-sm leading-relaxed text-[#fcf5eb]/95 sm:text-base lg:text-lg max-w-xl">
                     {{ $storeSetting->about_story ?: 'Berdiri sejak tahun 2018, Brownies Kelana hadir untuk menemani setiap momen spesial Anda dengan aneka kue yang lezat dan berkualitas. Kami percaya bahwa setiap gigitan memiliki cerita dan setiap hidangan manis dapat menghadirkan kebahagiaan. Dengan beragam pilihan brownies dan kue yang menggugah selera, kami berusaha menghadirkan cita rasa istimewa untuk berbagai kesempatan, mulai dari camilan sehari-hari, hadiah untuk orang tersayang, hingga pelengkap perayaan spesial.' }}
                 </p>
                 {{-- Sesuai instruksi owner: Bagian Download E-Katalog tidak disertakan --}}
             </div>
-            <div class="md:col-span-6 flex justify-center md:justify-end">
+            <div class="md:col-span-7 lg:col-span-7 flex justify-center md:justify-end">
                 <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
-                    class="w-full max-w-[420px] sm:max-w-[500px] lg:max-w-[580px] object-contain drop-shadow-2xl">
+                    class="w-full max-w-[620px] lg:max-w-[760px] object-contain drop-shadow-2xl">
             </div>
         </div>
     </section>
 
-    {{-- 2. Bagian Fresh-Baked Pre-order & Whisk Cokelat Mentok Kiri Sesuai Figma --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] py-8 sm:py-12 lg:py-16">
-        <div class="mx-auto grid grid-cols-12 items-center gap-3 px-3 sm:gap-6 sm:px-6 md:gap-8 lg:gap-10 lg:px-8 max-w-7xl">
-            <div class="col-span-5 sm:col-span-5 -ml-3 sm:-ml-8 md:-ml-14 lg:-ml-20 flex justify-start">
-                <img src="{{ asset('images/kelana/whisk-glossy.png') }}" alt="Whisk Berlumur Cokelat Leleh"
-                    class="w-full max-w-[260px] sm:max-w-[380px] md:max-w-[460px] lg:max-w-[520px] object-contain object-left scale-105 origin-top-left">
-            </div>
-            <div class="col-span-7 sm:col-span-7 pl-1 sm:pl-0">
-                <h2 class="text-base font-bold leading-snug tracking-tight text-[#593822] sm:text-2xl md:text-3xl lg:text-4xl">
-                    Ingin Menikmati Kelezatan<br>Brownies Kelana?
-                </h2>
-                <div class="mt-2.5 space-y-2 text-xs leading-relaxed text-[#593822] sm:mt-5 sm:space-y-4 sm:text-sm md:text-base">
-                    <p>
-                        Kami selalu menyajikan kue yang baru dipanggang. Pastikan Kamu memesan minimal <strong>1 hari sebelumnya</strong> agar kami dapat menyiapkannya dengan sempurna.
-                    </p>
-                    <p>
-                        Untuk pengambilan mandiri di luar, Kamu bisa mengambil pesanan langsung di titik pengambilan resmi yang telah kami tentukan.
-                    </p>
+    {{-- 2. Bagian Fresh-Baked Pre-order & Whisk Cokelat Mepet Dinding Kiri Sesuai Figma --}}
+    <section class="relative overflow-hidden bg-[#fcf8f2] py-16 sm:py-24 lg:py-32 min-h-[440px] flex items-center">
+        {{-- Whisk Cokelat Desktop: Mepet Dinding Kiri Layar (Flush ke Tepi Kiri Viewport Tanpa Gap & Tanpa Garis) --}}
+        <div class="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 hidden md:block md:w-[440px] lg:w-[500px] xl:w-[560px]">
+            <img src="{{ asset('images/kelana/whisk-glossy.png') }}" alt="Whisk Berlumur Cokelat Leleh"
+                class="w-full object-contain object-left scale-105 origin-left">
+        </div>
+
+        <div class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-12 items-center gap-6">
+                {{-- Mobile Whisk (mepet tepi kiri layar di layar kecil) --}}
+                <div class="col-span-5 md:hidden -ml-4 flex justify-start">
+                    <img src="{{ asset('images/kelana/whisk-glossy.png') }}" alt="Whisk Berlumur Cokelat Leleh"
+                        class="w-full max-w-[280px] object-contain object-left scale-110 origin-left">
+                </div>
+
+                {{-- Teks Konten Menyesuaikan dengan Elegan di Sebelah Kanan --}}
+                <div class="col-span-7 md:col-start-6 md:col-span-7 lg:col-start-6 lg:col-span-7 md:pl-6 lg:pl-12">
+                    <h2 class="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-bold leading-snug tracking-tight text-[#593822]">
+                        Ingin Menikmati Kelezatan<br>Brownies Kelana?
+                    </h2>
+                    <div class="mt-5 sm:mt-7 lg:mt-9 space-y-3.5 sm:space-y-5 text-xs sm:text-base lg:text-lg leading-relaxed text-[#593822]">
+                        <p>
+                            Kami selalu menyajikan kue yang baru dipanggang. Pastikan Kamu memesan minimal <strong>1 hari sebelumnya</strong> agar kami dapat menyiapkannya dengan sempurna.
+                        </p>
+                        <p>
+                            Untuk pengambilan mandiri di luar, Kamu bisa mengambil pesanan langsung di titik pengambilan resmi yang telah kami tentukan.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" Bergelombang Sesuai Gambar 1 & asset 2.zip --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] pt-4 pb-12 sm:pb-16 lg:pb-20">
-        {{-- Latar belakang blok cokelat gelap (#53311a) di bagian bawah foto dengan pita gelombang --}}
-        <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[42%] bg-[#53311a]">
+    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - TANGGA NYATA & BACKGROUND LEBAR SESUAI FIGMA --}}
+    <section class="relative overflow-hidden bg-[#fcf8f2] pt-12 sm:pt-16 lg:pt-24 pb-32 sm:pb-40 lg:pb-52">
+        {{-- Latar belakang blok cokelat gelap (#53311a) LEBAR & TINGGI di bagian bawah foto dengan pita gelombang --}}
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[35%] sm:top-[36%] lg:top-[38%] bg-[#53311a]">
             <img src="{{ asset('images/kelana/about-ngisoran.png') }}" alt=""
-                class="absolute bottom-2 sm:bottom-4 left-0 w-full object-cover opacity-95">
+                class="absolute bottom-0 left-0 w-full min-h-[200px] sm:min-h-[280px] lg:min-h-[360px] object-cover opacity-90">
         </div>
 
-        <div class="relative z-10 mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-12 items-end gap-2 sm:gap-5 lg:gap-8">
-                {{-- Foto 1 (Kiri): culkle 1.png (Tangan mematahkan cookies/brownies) --}}
-                <div class="col-span-4 self-center pb-4 sm:pb-8 lg:pb-12">
-                    <div class="overflow-hidden shadow-xl sm:shadow-2xl">
+        <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {{-- Grid 3 Kolom Bertangga Nyata (Step 1 -> Step 2 -> Step 3) --}}
+            <div class="grid grid-cols-12 items-start gap-3 sm:gap-6 lg:gap-10">
+                {{-- Foto 1 (Kiri): culkle 1.png - TANGGA 1 (PALING TINGGI / ATAS) --}}
+                <div class="col-span-4 self-start">
+                    <div class="overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-cukle.png') }}" alt="Brookies Brownies Kelana"
-                            class="h-44 w-full object-cover sm:h-72 md:h-84 lg:h-96">
+                            class="h-60 sm:h-84 md:h-[400px] lg:h-[460px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Kolom Tengah: Judul "Temukan kebahagiaan di setiap Rasa" + Foto 2 senyum 1.png --}}
+                {{-- Kolom Tengah: Judul "Temukan kebahagiaan di setiap Rasa" + Foto 2 senyum 1.png - TANGGA 2 (TENGAH / TINGGI) --}}
                 <div class="col-span-4 flex flex-col items-center text-center">
-                    <div class="mb-3 sm:mb-5 flex justify-center">
+                    <div class="mb-4 sm:mb-6 flex justify-center">
                         <img src="{{ asset('images/kelana/about-heading-rasa.png') }}" alt="Temukan kebahagiaan di setiap Rasa"
-                            class="h-10 sm:h-16 md:h-20 lg:h-24 object-contain">
+                            class="h-12 sm:h-16 md:h-20 lg:h-24 object-contain">
                     </div>
-                    <div class="w-full overflow-hidden shadow-xl sm:shadow-2xl">
+                    <div class="w-full overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-senyum.png') }}" alt="Kebahagiaan Bersama Brownies Kelana"
-                            class="h-56 w-full object-cover sm:h-84 md:h-[400px] lg:h-[460px]">
+                            class="h-72 sm:h-96 md:h-[460px] lg:h-[540px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Foto 3 (Kanan): tepunglop 1.png (Tangan mengolah adonan tepung) --}}
-                <div class="col-span-4 self-end pt-6 sm:pt-12 md:pt-16 lg:pt-24">
-                    <div class="overflow-hidden shadow-xl sm:shadow-2xl">
+                {{-- Foto 3 (Kanan): tepunglop 1.png - TANGGA 3 (PALING BAWAH / TURUN DALAM) --}}
+                <div class="col-span-4 self-start pt-28 sm:pt-44 lg:pt-60">
+                    <div class="overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-tepunglop.png') }}" alt="Proses Adonan Penuh Cinta Brownies Kelana"
-                            class="h-40 w-full object-cover sm:h-64 md:h-72 lg:h-80">
+                            class="h-60 sm:h-80 md:h-96 lg:h-[440px] w-full object-cover">
                     </div>
                 </div>
             </div>
@@ -87,7 +99,7 @@
     </section>
 
     {{-- 4. Jam Operasional, Kontak WhatsApp & Peta Lokasi Toko + Titik Pickup --}}
-    <section class="bg-[#fcf8f2] py-10 sm:py-14">
+    <section class="bg-[#fcf8f2] py-14 sm:py-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-6 lg:grid-cols-12">
                 {{-- Jam Operasional Dinamis dari Database --}}
