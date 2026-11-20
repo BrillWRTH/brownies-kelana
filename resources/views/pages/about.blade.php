@@ -23,11 +23,11 @@
     </section>
 
     {{-- 2. Bagian Fresh-Baked Pre-order & Whisk Cokelat Mepet Dinding Kiri Sesuai Figma --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] py-16 sm:py-24 lg:py-32 min-h-[440px] flex items-center">
-        {{-- Whisk Cokelat Desktop: Mepet Dinding Kiri Layar (Flush ke Tepi Kiri Viewport Tanpa Gap & Tanpa Garis) --}}
-        <div class="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 hidden md:block md:w-[440px] lg:w-[500px] xl:w-[560px]">
+    <section class="relative overflow-hidden bg-[#f9eedd] py-14 sm:py-20 lg:py-24 min-h-[500px] lg:min-h-[600px] flex items-center">
+        {{-- Whisk Cokelat Desktop: Mepet Dinding Kiri & Masuk dari Sudut Kiri Atas Persis Figma --}}
+        <div class="pointer-events-none absolute left-0 top-0 hidden md:block">
             <img src="{{ asset('images/kelana/whisk-glossy.png') }}" alt="Whisk Berlumur Cokelat Leleh"
-                class="w-full object-contain object-left scale-105 origin-left">
+                class="h-[520px] lg:h-[590px] xl:h-[620px] w-auto object-contain object-left-top origin-top-left">
         </div>
 
         <div class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
@@ -35,21 +35,23 @@
                 {{-- Mobile Whisk (mepet tepi kiri layar di layar kecil) --}}
                 <div class="col-span-5 md:hidden -ml-4 flex justify-start">
                     <img src="{{ asset('images/kelana/whisk-glossy.png') }}" alt="Whisk Berlumur Cokelat Leleh"
-                        class="w-full max-w-[280px] object-contain object-left scale-110 origin-left">
+                        class="w-full max-w-[240px] object-contain object-left-top origin-top-left">
                 </div>
 
-                {{-- Teks Konten Menyesuaikan dengan Elegan di Sebelah Kanan --}}
-                <div class="col-span-7 md:col-start-6 md:col-span-7 lg:col-start-6 lg:col-span-7 md:pl-6 lg:pl-12">
-                    <h2 class="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-bold leading-snug tracking-tight text-[#593822]">
-                        Ingin Menikmati Kelezatan<br>Brownies Kelana?
-                    </h2>
-                    <div class="mt-5 sm:mt-7 lg:mt-9 space-y-3.5 sm:space-y-5 text-xs sm:text-base lg:text-lg leading-relaxed text-[#593822]">
-                        <p>
-                            Kami selalu menyajikan kue yang baru dipanggang. Pastikan Kamu memesan minimal <strong>1 hari sebelumnya</strong> agar kami dapat menyiapkannya dengan sempurna.
-                        </p>
-                        <p>
-                            Untuk pengambilan mandiri di luar, Kamu bisa mengambil pesanan langsung di titik pengambilan resmi yang telah kami tentukan.
-                        </p>
+                {{-- Teks Konten Sesuai Figma: Berjarak Harmonis di Sebelah Kanan Drip Cokelat --}}
+                <div class="col-span-7 md:col-start-6 md:col-span-7 lg:col-start-6 lg:col-span-6 md:pl-8 lg:pl-12">
+                    <div class="max-w-[430px]">
+                        <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-bold leading-snug tracking-tight text-[#593822]">
+                            Ingin Menikmati Kelezatan<br>Brownies Kelana?
+                        </h2>
+                        <div class="mt-5 sm:mt-6 space-y-4 text-xs sm:text-sm lg:text-[15px] leading-relaxed text-[#593822]">
+                            <p>
+                                Kami selalu menyajikan kue yang baru dipanggang. Pastikan Kamu memesan minimal 1 hari sebelumnya agar kami dapat menyiapkannya dengan sempurna.
+                            </p>
+                            <p>
+                                Untuk pengambilan mandiri di luar, Kamu bisa mengambil pesanan langsung di titik pengambilan resmi yang telah kami tentukan.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -57,7 +59,7 @@
     </section>
 
     {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - PERSIS FIGMA (TANGGA ATAS & BAWAH DENGAN PITA COKELAT HORIZONTAL) --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] pt-8 sm:pt-14 lg:pt-16 pb-20 sm:pb-28 lg:pb-36">
+    <section class="relative overflow-hidden bg-[#f9eedd] pt-8 sm:pt-14 lg:pt-16 pb-20 sm:pb-28 lg:pb-36">
         {{-- Pita Cokelat Horizontal (#54311a) di Bagian Tengah sesuai Figma (Atas Cream, Tengah Pita Cokelat, Bawah Cream) --}}
         <div class="pointer-events-none absolute inset-x-0 top-[210px] sm:top-[250px] md:top-[280px] lg:top-[310px] h-[260px] sm:h-[320px] md:h-[360px] lg:h-[400px] bg-[#54311a]">
             <img src="{{ asset('images/kelana/about-ngisoran.png') }}" alt=""
@@ -99,7 +101,7 @@
     </section>
 
     {{-- 4. Jam Operasional, Kontak WhatsApp & Peta Lokasi Toko + Titik Pickup --}}
-    <section class="bg-[#fcf8f2] py-14 sm:py-20">
+    <section class="bg-[#f9eedd] py-14 sm:py-20">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-6 lg:grid-cols-12">
                 {{-- Jam Operasional Dinamis dari Database --}}
