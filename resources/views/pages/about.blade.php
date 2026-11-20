@@ -16,8 +16,8 @@
                 </p>
             </div>
 
-            {{-- Bagian Bawah: Tombol di Kiri & Gambar Platter Lebar di Bawah Kanan Persis Figma --}}
-            <div class="mt-8 sm:mt-12 lg:mt-14 flex flex-col md:flex-row md:items-end md:justify-between gap-8 lg:gap-12">
+            {{-- Bagian Bawah: Tombol di Kiri & Gambar Platter Lebar di Bawah Kanan Berjarak Lega Persis Figma --}}
+            <div class="mt-10 sm:mt-14 lg:mt-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 lg:gap-12">
                 {{-- Tombol Kunjungi Katalog Produk --}}
                 <div class="shrink-0 pb-2 sm:pb-4">
                     <a href="{{ route('products.index') }}"
@@ -29,8 +29,8 @@
                     </a>
                 </div>
 
-                {{-- Gambar Platter Lebar di Bawah Kanan --}}
-                <div class="w-full max-w-[540px] sm:max-w-[620px] md:max-w-[560px] lg:max-w-[720px] xl:max-w-[820px] flex justify-center md:justify-end md:-mt-16 lg:-mt-24">
+                {{-- Gambar Platter Lebar di Bawah Kanan (Tanpa Negative Margin agar Tidak Dempet dengan Teks) --}}
+                <div class="w-full max-w-[520px] sm:max-w-[600px] md:max-w-[540px] lg:max-w-[680px] xl:max-w-[760px] flex justify-center md:justify-end">
                     <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
                         class="w-full object-contain drop-shadow-2xl">
                 </div>
