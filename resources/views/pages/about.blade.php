@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- 1. Hero Cerita Brand Brownies Kelana (Caramel Bronze Banner #9b7643 - Persis Figma: Luas, Lebar & Tulisan di Atas, Gambar di Bawah) --}}
-    <section class="relative overflow-hidden bg-[#9b7643] text-white pt-14 sm:pt-20 lg:pt-24 pb-20 sm:pb-28 lg:pb-36 min-h-[580px] sm:min-h-[640px] lg:min-h-[720px] flex flex-col justify-center">
+    <section class="relative overflow-hidden bg-[#9b7643] text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24 min-h-[500px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-center">
         <div class="mx-auto max-w-[1400px] w-full px-4 sm:px-8 lg:px-12">
             {{-- Bagian Atas: Tulisan Luas dan Terstruktur Sesuai Figma --}}
             <div class="max-w-2xl lg:max-w-3xl xl:max-w-4xl">
@@ -17,7 +17,7 @@
             </div>
 
             {{-- Bagian Bawah: Tombol di Kiri & Gambar Platter Lebar di Bawah Kanan Berjarak Lega Persis Figma --}}
-            <div class="mt-10 sm:mt-14 lg:mt-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 lg:gap-12">
+            <div class="mt-8 sm:mt-10 lg:mt-12 flex flex-col md:flex-row md:items-end md:justify-between gap-8 lg:gap-12">
                 {{-- Tombol Kunjungi Katalog Produk --}}
                 <div class="shrink-0 pb-2 sm:pb-4">
                     <a href="{{ route('products.index') }}"
@@ -29,8 +29,8 @@
                     </a>
                 </div>
 
-                {{-- Gambar Platter Lebar di Bawah Kanan (Urutan Kue Persis Figma & Ukuran Diperbesar Proporsional) --}}
-                <div class="w-full max-w-[600px] sm:max-w-[700px] md:max-w-[660px] lg:max-w-[800px] xl:max-w-[900px] flex justify-center md:justify-end">
+                {{-- Gambar Platter Lebar di Bawah Kanan (Urutan Kue Persis Figma & Ukuran Pas Proporsional) --}}
+                <div class="w-full max-w-[540px] sm:max-w-[620px] md:max-w-[560px] lg:max-w-[700px] xl:max-w-[760px] flex justify-center md:justify-end">
                     <img src="{{ asset('images/kelana/hero-about-platter-exact.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
                         class="w-full object-contain drop-shadow-2xl">
                 </div>

@@ -27,22 +27,22 @@
         ];
     @endphp
 
-    {{-- 1. Hero Banner Cokelat Tua dengan Carousel Brownies Panggang (Lebar & Tinggi Proporsional Sesuai Figma) --}}
-    <section class="relative bg-[#593822] pb-16 pt-8 text-white sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-12">
+    {{-- 1. Hero Banner Cokelat Tua dengan Carousel Brownies Panggang --}}
+    <section class="relative bg-[#593822] pb-12 pt-6 text-white sm:pb-16 sm:pt-8">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div id="hero-carousel-container" class="relative overflow-hidden rounded-[1.5rem] bg-[#492d1a] shadow-lg">
                 <div id="hero-slider-track" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
                     @foreach($heroSlides as $slideIndex => $slide)
                         <div class="relative w-full shrink-0">
                             <img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] }}"
-                                class="h-80 w-full object-cover sm:h-[480px] md:h-[540px] lg:h-[600px]">
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#28211c]/85 via-[#28211c]/35 to-transparent sm:h-52"></div>
-                            <div class="absolute bottom-6 left-6 right-6 flex flex-col items-start justify-between gap-4 sm:bottom-8 sm:left-8 sm:right-8 sm:flex-row sm:items-end">
+                                class="h-72 w-full object-cover sm:h-[400px] md:h-[450px]">
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#28211c]/80 via-[#28211c]/30 to-transparent sm:h-40"></div>
+                            <div class="absolute bottom-5 left-5 right-5 flex flex-col items-start justify-between gap-3 sm:bottom-6 sm:left-7 sm:right-7 sm:flex-row sm:items-end">
                                 <div>
                                     <span class="inline-block rounded-full bg-[#a67251]/95 px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-xs">
                                         {{ $slide['badge'] }}
                                     </span>
-                                    <h1 class="mt-2 max-w-lg text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl lg:text-4xl">
+                                    <h1 class="mt-2 max-w-lg text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl">
                                         {{ $slide['title'] }}
                                     </h1>
                                 </div>
