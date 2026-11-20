@@ -74,8 +74,38 @@
                             </p>
                         </div>
 
+                        {{-- Navigasi Breadcrumb Kartu: Menghemat Screen & Menghindari Scroll Panjang --}}
+                        <nav data-card-breadcrumbs data-default-tab="items"
+                            class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto rounded-2xl border border-[#d9c8b4] bg-white/95 p-2 shadow-xs scrollbar-none">
+                            <button type="button" data-card-tab="items"
+                                class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                                <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">1</span>
+                                <span>Rincian Produk</span>
+                            </button>
+
+                            <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+
+                            <button type="button" data-card-tab="recipient"
+                                class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                                <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">2</span>
+                                <span>Penerima &amp; Jadwal</span>
+                            </button>
+
+                            <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+
+                            <button type="button" data-card-tab="payment"
+                                class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                                <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">3</span>
+                                <span>Pembayaran</span>
+                            </button>
+                        </nav>
+
                         {{-- Kartu Detail Produk dengan Header Cokelat Tua --}}
-                        <div class="kelana-card">
+                        <div data-card-panel="items" class="kelana-card">
                             <div class="kelana-card-header">Detail Produk</div>
                             <div class="divide-y divide-[#efe2ce] p-5">
                                 @foreach($order->items as $item)
@@ -105,11 +135,18 @@
                                         <span>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
+
+                                <div class="mt-4 flex justify-end border-t border-[#efe2ce] pt-3">
+                                    <button type="button" onclick="switchCardBreadcrumb('recipient')"
+                                        class="text-xs font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
+                                        <span>Lanjut ke Info Penerima &amp; Jadwal</span> &rarr;
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         {{-- Informasi Penerima / Pickup --}}
-                        <div class="kelana-card p-5">
+                        <div data-card-panel="recipient" class="kelana-card p-5 hidden">
                             <h2 class="font-serif text-base font-semibold text-[#2f2118]">
                                 {{ $order->delivery_type === 'pickup' ? 'Informasi Pengambilan (Pick-up)' : 'Informasi Penerima' }}
                             </h2>
@@ -159,10 +196,21 @@
                             <p class="mt-4 border-t border-[#efe2ce] pt-3 text-[11px] text-[#8f7968]">
                                 Perubahan data penerima atau jadwal setelah checkout ditangani melalui WhatsApp CS Brownies Kelana.
                             </p>
+
+                            <div class="mt-4 flex items-center justify-between border-t border-[#efe2ce] pt-3">
+                                <button type="button" onclick="switchCardBreadcrumb('items')"
+                                    class="text-xs font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
+                                    &larr; <span>Kembali ke Rincian Produk</span>
+                                </button>
+                                <button type="button" onclick="switchCardBreadcrumb('payment')"
+                                    class="text-xs font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
+                                    <span>Lihat Status Pembayaran</span> &rarr;
+                                </button>
+                            </div>
                         </div>
 
                         {{-- Kartu Metode Pembayaran --}}
-                        <div class="kelana-card p-5">
+                        <div data-card-panel="payment" class="kelana-card p-5 hidden">
                             <h2 class="font-serif text-base font-semibold text-[#2f2118]">Metode Pembayaran</h2>
                             <p class="mt-2 text-xs font-bold text-[#593822]">{{ $order->latestPayment?->channel_label ?? 'QRIS Brownies Kelana' }}</p>
 
@@ -215,6 +263,13 @@
                                         Lihat Detail Pembayaran
                                     </a>
                                 @endif
+                            </div>
+
+                            <div class="mt-4 flex justify-start border-t border-[#efe2ce] pt-3">
+                                <button type="button" onclick="switchCardBreadcrumb('recipient')"
+                                    class="text-xs font-bold text-[#593822] hover:underline inline-flex items-center gap-1">
+                                    &larr; <span>Kembali ke Info Penerima</span>
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -60,10 +60,42 @@
         </div>
 
         <div class="grid gap-6 lg:grid-cols-12">
-            {{-- Kolom Kiri (8 kolom): Rincian Item, Pembayaran, Informasi Pengiriman/Pickup & Log --}}
-            <div class="space-y-6 lg:col-span-8">
-                {{-- Rincian Item & Tagihan --}}
-                <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
+            {{-- Kolom Kiri (8 kolom): Navigasi Breadcrumb Kartu, Rincian Item, Penerima & Log --}}
+            <div class="space-y-4 lg:col-span-8">
+
+                {{-- Navigasi Breadcrumb Kartu: Menghemat Screen & Menghindari Scroll Panjang --}}
+                <nav data-card-breadcrumbs data-default-tab="items"
+                    class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto rounded-2xl border border-[#d9c8b4] bg-white/95 p-2 shadow-xs scrollbar-none">
+                    <button type="button" data-card-tab="items"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">1</span>
+                        <span>Rincian Item &amp; Tagihan</span>
+                    </button>
+
+                    <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+
+                    <button type="button" data-card-tab="customer"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">2</span>
+                        <span>Data Pemesan &amp; Kirim</span>
+                    </button>
+
+                    <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+
+                    <button type="button" data-card-tab="logs"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">3</span>
+                        <span>Riwayat Log Aktivitas</span>
+                    </button>
+                </nav>
+
+                {{-- Panel 1: Rincian Item & Tagihan --}}
+                <div data-card-panel="items" class="space-y-4">
+                    <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <h2 class="text-sm font-semibold text-[#52311a]">Rincian Item &amp; Pembayaran</h2>
                     <div class="mt-4 divide-y divide-[#efe7dc]">
                         @foreach($order->items as $item)
@@ -181,9 +213,18 @@
                             @endif
                         </div>
                     @endif
-                </div>
 
-                {{-- Data Pelanggan & Penerimaan --}}
+                    <div class="mt-4 flex justify-end border-t border-[#efe7dc] pt-3">
+                        <button type="button" onclick="switchCardBreadcrumb('customer')"
+                            class="text-xs font-bold text-[#52311a] hover:underline inline-flex items-center gap-1">
+                            <span>Lanjut ke Data Pemesan &amp; Kirim</span> &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Panel 2: Data Pelanggan & Penerimaan --}}
+            <div data-card-panel="customer" class="space-y-4 hidden">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <h2 class="text-sm font-semibold text-[#52311a]">Pemesan &amp; Informasi Penerimaan</h2>
@@ -308,7 +349,20 @@
                     </div>
                 @endif
 
-                {{-- Riwayat Log Aktivitas Pesanan --}}
+                <div class="flex items-center justify-between rounded-xl border border-[#e8dfd3] bg-white p-3.5 shadow-2xs">
+                    <button type="button" onclick="switchCardBreadcrumb('items')"
+                        class="text-xs font-bold text-[#52311a] hover:underline inline-flex items-center gap-1">
+                        &larr; <span>Kembali ke Rincian Item</span>
+                    </button>
+                    <button type="button" onclick="switchCardBreadcrumb('logs')"
+                        class="text-xs font-bold text-[#52311a] hover:underline inline-flex items-center gap-1">
+                        <span>Lihat Log Riwayat Pesanan</span> &rarr;
+                    </button>
+                </div>
+            </div>
+
+            {{-- Panel 3: Riwayat Log Aktivitas Pesanan --}}
+            <div data-card-panel="logs" class="space-y-4 hidden">
                 <div class="rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs">
                     <h2 class="text-sm font-semibold text-[#52311a]">Riwayat Aktivitas &amp; Audit Pesanan</h2>
                     <div class="mt-4 space-y-3">
@@ -327,8 +381,16 @@
                             <p class="text-xs text-[#796b62]">Belum ada catatan riwayat.</p>
                         @endforelse
                     </div>
+
+                    <div class="mt-4 flex justify-start border-t border-[#efe7dc] pt-3">
+                        <button type="button" onclick="switchCardBreadcrumb('customer')"
+                            class="text-xs font-bold text-[#52311a] hover:underline inline-flex items-center gap-1">
+                            &larr; <span>Kembali ke Data Pemesan</span>
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
 
             {{-- Kolom Kanan (4 kolom): Kontrol Status, Pelunasan Manual, Pembatalan & Ulasan --}}
             <div class="space-y-5 lg:col-span-4">

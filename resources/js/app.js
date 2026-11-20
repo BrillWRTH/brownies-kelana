@@ -350,6 +350,63 @@ document.addEventListener('DOMContentLoaded', () => {
         startReviewAuto();
     }
 
+    // Navigasi Breadcrumb untuk beralih antar Card agar tidak panjang ke bawah
+    function initCardBreadcrumbs() {
+        document.querySelectorAll('[data-card-breadcrumbs]').forEach((nav) => {
+            const container = nav.closest('.card-breadcrumb-scope') || nav.parentElement;
+            if (!container) return;
+
+            const tabButtons = nav.querySelectorAll('[data-card-tab]');
+            const panels = container.querySelectorAll('[data-card-panel]');
+
+            const activateTab = (tabName) => {
+                tabButtons.forEach((btn) => {
+                    const isActive = btn.getAttribute('data-card-tab') === tabName;
+                    btn.classList.toggle('bg-[#593822]', isActive);
+                    btn.classList.toggle('text-white', isActive);
+                    btn.classList.toggle('shadow-xs', isActive);
+                    btn.classList.toggle('text-[#593822]', !isActive);
+                    btn.classList.toggle('hover:bg-[#f7ebd5]', !isActive);
+
+                    const numBadge = btn.querySelector('.step-num');
+                    if (numBadge) {
+                        numBadge.className = `step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-[#e8decb] text-[#593822]'}`;
+                    }
+                });
+
+                panels.forEach((panel) => {
+                    const isMatch = panel.getAttribute('data-card-panel') === tabName;
+                    if (isMatch) {
+                        panel.classList.remove('hidden');
+                    } else {
+                        panel.classList.add('hidden');
+                    }
+                });
+            };
+
+            // Global helper untuk tombol navigasi di dalam card
+            window.switchCardBreadcrumb = (targetName) => {
+                activateTab(targetName);
+            };
+
+            tabButtons.forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = btn.getAttribute('data-card-tab');
+                    activateTab(target);
+                });
+            });
+
+            // Tentukan card awal berdasarkan attribute data-default-tab
+            const initialTab = nav.getAttribute('data-default-tab') || tabButtons[0]?.getAttribute('data-card-tab');
+            if (initialTab) {
+                activateTab(initialTab);
+            }
+        });
+    }
+
+    initCardBreadcrumbs();
+
     // Cegah lompat ke atas halaman saat beralih tab atau klik anchor in-page
     if (window.location.hash) {
         const targetEl = document.querySelector(window.location.hash);

@@ -63,8 +63,8 @@
         </div>
 
         <div class="grid gap-6 lg:grid-cols-12">
-            {{-- Kolom Kiri: QRIS Resmi, Form Lampirkan Bukti Bayar & Hubungi Penjual --}}
-            <div class="space-y-6 lg:col-span-7">
+            {{-- Kolom Kiri: Navigasi Breadcrumb Kartu, Scan QRIS, Upload Bukti & Panduan --}}
+            <div class="space-y-4 lg:col-span-7">
 
                 {{-- Notifikasi Bukti Ditolak oleh Admin --}}
                 @if($payment?->rejection_reason)
@@ -85,8 +85,41 @@
                     </div>
                 @endif
 
+                {{-- Navigasi Breadcrumb Langkah Pembayaran: Menghemat Screen & Tidak Perlu Scroll Jauh --}}
+                <nav data-card-breadcrumbs data-default-tab="{{ $isWaitingVerification || $payment?->proof_path ? 'proof' : 'qris' }}"
+                    class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto rounded-2xl border border-[#d9c8b4] bg-white/95 p-2 shadow-xs scrollbar-none">
+                    <button type="button" data-card-tab="qris"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">1</span>
+                        <span>Scan QRIS</span>
+                    </button>
+
+                    <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+
+                    <button type="button" data-card-tab="proof"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">2</span>
+                        <span>Lampirkan Bukti</span>
+                        @if($payment?->proof_path)
+                            <span class="h-2 w-2 rounded-full bg-emerald-500" title="Sudah dilampirkan"></span>
+                        @endif
+                    </button>
+
+                    <svg class="h-4 w-4 shrink-0 text-[#8f7968]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+
+                    <button type="button" data-card-tab="guide"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 sm:px-3.5 py-2 text-xs font-bold transition">
+                        <span class="step-num flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold">3</span>
+                        <span>Panduan Bayar</span>
+                    </button>
+                </nav>
+
                 {{-- Kartu 1: Scan QRIS Brownies Kelana --}}
-                <div class="kelana-card p-6">
+                <div data-card-panel="qris" class="kelana-card p-6">
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe2ce] pb-4">
                         <div>
                             <span class="rounded-full bg-[#e8decb] px-3 py-0.5 text-[11px] font-bold text-[#593822]">
@@ -153,10 +186,19 @@
                             </p>
                         @endif
                     </div>
+
+                    {{-- Navigasi Langkah Bawah --}}
+                    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#efe2ce] pt-4">
+                        <span class="text-xs text-[#796b62]">Langkah 1 dari 3: Selesaikan pembayaran</span>
+                        <button type="button" onclick="switchCardBreadcrumb('proof')"
+                            class="btn-kelana-primary inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold shadow-xs">
+                            <span>Sudah Bayar? Unggah Bukti Bayar</span> &rarr;
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Kartu 2: Lampirkan Bukti Bayar --}}
-                <div class="kelana-card" id="bukti-bayar">
+                <div data-card-panel="proof" class="kelana-card hidden" id="bukti-bayar">
                     <div class="kelana-card-header flex items-center justify-between">
                         <span>Lampirkan Bukti Pembayaran</span>
                         @if($payment?->proof_path)
@@ -241,11 +283,23 @@
                                 </a>
                             </div>
                         </form>
+
+                        {{-- Navigasi Langkah Bawah --}}
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#efe2ce] pt-4">
+                            <button type="button" onclick="switchCardBreadcrumb('qris')"
+                                class="btn-kelana-outline inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold">
+                                &larr; <span>Lihat Gambar QRIS</span>
+                            </button>
+                            <button type="button" onclick="switchCardBreadcrumb('guide')"
+                                class="text-xs font-bold text-[#593822] hover:underline">
+                                <span>Lihat Panduan &amp; Cara Bayar</span> &rarr;
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {{-- Kartu 3: Panduan Singkat Pembayaran QRIS --}}
-                <div class="kelana-card">
+                <div data-card-panel="guide" class="kelana-card hidden">
                     <div class="kelana-card-header">Cara Bayar &amp; Konfirmasi QRIS</div>
                     <div class="space-y-3 p-6 text-xs leading-relaxed text-[#5e4d3e]">
                         <ol class="list-decimal space-y-1.5 pl-4">
@@ -257,12 +311,18 @@
                         </ol>
 
                         <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[#efe2ce] pt-4">
-                            <form method="POST" action="{{ route('payments.check-status', $order) }}">
-                                @csrf
-                                <button type="submit" class="btn-kelana-outline rounded-lg px-4 py-2 text-xs font-bold">
-                                    Cek Status Verifikasi
+                            <div class="flex items-center gap-2">
+                                <form method="POST" action="{{ route('payments.check-status', $order) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-kelana-outline rounded-lg px-4 py-2 text-xs font-bold">
+                                        Cek Status Verifikasi
+                                    </button>
+                                </form>
+                                <button type="button" onclick="switchCardBreadcrumb('proof')"
+                                    class="rounded-lg bg-[#593822] px-4 py-2 text-xs font-bold text-white hover:bg-[#432917] transition">
+                                    Ke Upload Bukti &rarr;
                                 </button>
-                            </form>
+                            </div>
                             <a href="{{ route('orders.show', $order->order_number) }}" class="text-xs font-semibold text-[#6f5a4a] hover:text-[#593822] hover:underline">
                                 Kembali ke Detail Pesanan
                             </a>
