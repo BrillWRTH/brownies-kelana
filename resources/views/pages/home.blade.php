@@ -27,22 +27,22 @@
         ];
     @endphp
 
-    {{-- 1. Hero Banner Cokelat Tua dengan Carousel Brownies Panggang --}}
-    <section class="relative bg-[#593822] pb-12 pt-6 text-white sm:pb-16 sm:pt-8">
+    {{-- 1. Hero Banner Cokelat Tua dengan Carousel Brownies Panggang (Lebar & Tinggi Proporsional Sesuai Figma) --}}
+    <section class="relative bg-[#593822] pb-16 pt-8 text-white sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-12">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div id="hero-carousel-container" class="relative overflow-hidden rounded-[1.5rem] bg-[#492d1a] shadow-lg">
                 <div id="hero-slider-track" class="flex transition-transform duration-700 ease-in-out" style="transform: translateX(0%);">
                     @foreach($heroSlides as $slideIndex => $slide)
                         <div class="relative w-full shrink-0">
                             <img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] }}"
-                                class="h-64 w-full object-cover sm:h-96 md:h-[430px]">
-                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#28211c]/80 via-[#28211c]/30 to-transparent"></div>
-                            <div class="absolute bottom-5 left-5 right-5 flex flex-col items-start justify-between gap-3 sm:bottom-6 sm:left-7 sm:right-7 sm:flex-row sm:items-end">
+                                class="h-80 w-full object-cover sm:h-[480px] md:h-[540px] lg:h-[600px]">
+                            <div class="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#28211c]/85 via-[#28211c]/35 to-transparent sm:h-52"></div>
+                            <div class="absolute bottom-6 left-6 right-6 flex flex-col items-start justify-between gap-4 sm:bottom-8 sm:left-8 sm:right-8 sm:flex-row sm:items-end">
                                 <div>
                                     <span class="inline-block rounded-full bg-[#a67251]/95 px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-xs">
                                         {{ $slide['badge'] }}
                                     </span>
-                                    <h1 class="mt-2 max-w-lg text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl">
+                                    <h1 class="mt-2 max-w-lg text-xl font-bold leading-snug text-white drop-shadow sm:text-3xl lg:text-4xl">
                                         {{ $slide['title'] }}
                                     </h1>
                                 </div>
@@ -79,26 +79,44 @@
         </div>
     </section>
 
-    {{-- 2. Bagian PRODUK KAMI (Kategori Utama + Menu Favorit Pelanggan) --}}
+    {{-- 2. Bagian PRODUK KAMI (Kategori Produk Slider Interaktif + Menu Favorit Pelanggan) --}}
     <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div>
-            <h2 class="font-serif text-2xl font-bold text-[#2f2118] uppercase sm:text-3xl">PRODUK KAMI</h2>
-            <p class="mt-1 text-sm text-[#5e4d3e]">Temukan Rasa Yang Kamu Sukai</p>
-            <div class="mt-4">
-                <a href="{{ route('products.index') }}"
-                    class="inline-flex items-center gap-2 rounded-md bg-[#593822] px-5 py-2.5 text-xs font-bold text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
-                    &rarr; Jelajahi Koleksi
-                </a>
+        <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+                <h2 class="font-serif text-2xl font-bold text-[#2f2118] uppercase sm:text-3xl">PRODUK KAMI</h2>
+                <p class="mt-1 text-sm text-[#5e4d3e]">Temukan Rasa Yang Kamu Sukai</p>
+                <div class="mt-4">
+                    <a href="{{ route('products.index') }}"
+                        class="inline-flex items-center gap-2 rounded-md bg-[#593822] px-5 py-2.5 text-xs font-bold text-white uppercase shadow-xs transition hover:bg-[#492d1a]">
+                        &rarr; Jelajahi Koleksi
+                    </a>
+                </div>
+            </div>
+
+            {{-- Tombol Navigasi Slider Kategori --}}
+            <div class="flex items-center gap-2 self-start sm:self-end">
+                <button type="button" id="cat-prev-btn" aria-label="Kategori sebelumnya"
+                    class="flex h-10 w-10 items-center justify-center rounded-full border border-[#8f6743]/40 bg-white text-[#593822] shadow-xs transition hover:bg-[#593822] hover:text-white">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+                <button type="button" id="cat-next-btn" aria-label="Kategori berikutnya"
+                    class="flex h-10 w-10 items-center justify-center rounded-full border border-[#8f6743]/40 bg-white text-[#593822] shadow-xs transition hover:bg-[#593822] hover:text-white">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
             </div>
         </div>
 
         <hr class="my-7 border-[#8f6743]/50">
 
-        {{-- Kartu Showcase Kategori Bergaya Frame Karamel --}}
-        <div class="grid gap-6 sm:grid-cols-3">
+        {{-- Slider Showcase Kategori (Bisa di-slide ke kanan/kiri untuk melihat seluruh varian kue) --}}
+        <div id="category-slider-track" class="flex gap-5 overflow-x-auto scroll-smooth pb-4 no-scrollbar snap-x snap-mandatory">
             @foreach($categories as $category)
                 <a href="{{ route('products.index', ['kategori' => $category->slug]) }}"
-                    class="group relative block overflow-hidden rounded-xl bg-[#a67251] p-4 pb-6 shadow-xs transition hover:-translate-y-1 hover:shadow-md">
+                    class="group relative block w-[260px] shrink-0 snap-start overflow-hidden rounded-xl bg-[#a67251] p-4 pb-6 shadow-xs transition hover:-translate-y-1 hover:shadow-md sm:w-[300px] md:w-[340px]">
                     <div class="relative aspect-square overflow-hidden rounded-lg bg-[#593822]">
                         <img src="{{ asset($category->image ?: 'images/kelana/prod-brownies-panggang.png') }}"
                             alt="{{ $category->name }}"

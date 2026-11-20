@@ -30,7 +30,7 @@
             </svg>
         </div>
 
-        <div class="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+        <div class="relative mx-auto flex max-w-7xl items-center justify-between px-4 pt-3.5 pb-6 sm:px-6 sm:pt-4 sm:pb-7 lg:px-8 lg:pb-8">
             {{-- Logo Circular + Wordmark --}}
             <a href="{{ route('home') }}" class="group relative z-10 flex items-center gap-3 pl-12 sm:pl-16">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[#a4804f] bg-white p-0.5 shadow-sm transition group-hover:scale-105 sm:h-11 sm:w-11">
@@ -224,11 +224,11 @@
         @yield('content')
     </main>
 
-    {{-- Footer Brand Brownies Kelana dengan Kurva Gelombang Cocoa Proporsional --}}
-    <footer class="relative mt-10 text-[#f7ebd5] sm:mt-12">
+    {{-- Footer Brand Brownies Kelana dengan Kurva Gelombang Cocoa Melengkung Sesuai Figma --}}
+    <footer class="relative mt-12 text-[#f7ebd5] sm:mt-16">
         <div class="overflow-hidden leading-none text-[#593822]">
-            <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="block h-7 w-full sm:h-9">
-                <path fill="currentColor" d="M0,30 C240,0 480,0 740,26 C1000,52 1240,46 1440,15 L1440,60 L0,60 Z"></path>
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" class="block h-12 w-full sm:h-16 lg:h-20 text-[#593822]">
+                <path fill="currentColor" d="M0,50 C320,115 540,110 780,50 C1020,-10 1240,10 1440,60 L1440,120 L0,120 Z"></path>
             </svg>
         </div>
 

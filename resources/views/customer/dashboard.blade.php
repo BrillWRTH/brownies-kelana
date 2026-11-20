@@ -8,24 +8,23 @@
             @include('partials.customer-sidebar')
 
             <div class="min-w-0 flex-1 space-y-6">
-                {{-- Banner Sapaan Pelanggan Emas Karamel --}}
+                {{-- Banner Sapaan Pelanggan Emas Karamel Persis Figma --}}
                 <div class="relative overflow-hidden rounded-2xl bg-[#a4804f] px-6 py-6 text-white shadow-xs sm:px-8">
-                    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                        <div>
-                            <h1 class="font-serif text-3xl font-bold sm:text-4xl">
-                                Halo, {{ explode(' ', $user->name)[0] }}
-                            </h1>
-                            <p class="mt-2 max-w-md text-xs leading-relaxed text-[#fcf3e3]">
-                                Selamat datang di dashboard kamu. Pantau pesanan dan notifikasi terbaru di sini.
-                            </p>
-                            @if($user->customer_code)
-                                <span class="mt-3 inline-block rounded-full bg-[#593822]/85 px-3 py-0.5 text-[10px] font-bold text-white uppercase">
-                                    {{ $user->customer_code }}
-                                </span>
-                            @endif
-                        </div>
-                        <img src="{{ asset('images/kelana/brownie-fork.png') }}" alt="Brownies Kelana" class="hidden h-28 w-auto shrink-0 object-contain sm:block">
+                    <div class="relative z-10 max-w-md">
+                        <h1 class="font-serif text-3xl font-bold sm:text-4xl">
+                            Halo, {{ explode(' ', $user->name)[0] }}
+                        </h1>
+                        <p class="mt-2 max-w-md text-xs leading-relaxed text-[#fcf3e3]">
+                            Selamat datang di dashboard kamu. Pantau pesanan dan notifikasi terbaru di sini.
+                        </p>
+                        @if($user->customer_code)
+                            <span class="mt-3 inline-block rounded-full bg-[#593822]/85 px-3 py-0.5 text-[10px] font-bold text-white uppercase">
+                                {{ $user->customer_code }}
+                            </span>
+                        @endif
                     </div>
+                    <img src="{{ asset('images/kelana/brownie-fork.png') }}" alt="Brownies Kelana"
+                        class="pointer-events-none absolute bottom-0 right-8 sm:right-16 md:right-24 lg:right-28 h-32 sm:h-36 md:h-40 w-auto object-contain object-bottom drop-shadow-md">
                 </div>
 
                 {{-- Banner Jika Email Belum Terverifikasi --}}

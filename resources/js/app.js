@@ -190,4 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mulai auto slide 5 detik pertama
         startAutoSlide();
     }
+
+    // Slider Kategori Produk Landing Page (Slide ke kanan & kiri)
+    const catTrack = document.getElementById('category-slider-track');
+    const catPrevBtn = document.getElementById('cat-prev-btn');
+    const catNextBtn = document.getElementById('cat-next-btn');
+
+    if (catTrack) {
+        catPrevBtn?.addEventListener('click', () => {
+            catTrack.scrollBy({ left: -340, behavior: 'smooth' });
+        });
+        catNextBtn?.addEventListener('click', () => {
+            catTrack.scrollBy({ left: 340, behavior: 'smooth' });
+        });
+    }
 });

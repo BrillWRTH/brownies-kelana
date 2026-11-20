@@ -17,11 +17,10 @@ class HomeController extends Controller
      */
     public function index(): View
     {
-        // 1. Ambil kategori utama yang aktif untuk etalase Produk Kami
+        // 1. Ambil kategori utama yang aktif untuk etalase Produk Kami (tampil semua untuk slider landing page)
         $categories = Category::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
-            ->take(3)
             ->get();
 
         // 2. Ambil produk unggulan yang tersedia di katalog utama

@@ -29,9 +29,9 @@
                     </a>
                 </div>
 
-                {{-- Gambar Platter Lebar di Bawah Kanan (Tanpa Negative Margin agar Tidak Dempet dengan Teks) --}}
-                <div class="w-full max-w-[520px] sm:max-w-[600px] md:max-w-[540px] lg:max-w-[680px] xl:max-w-[760px] flex justify-center md:justify-end">
-                    <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
+                {{-- Gambar Platter Lebar di Bawah Kanan (Urutan Kue Persis Figma & Ukuran Diperbesar Proporsional) --}}
+                <div class="w-full max-w-[600px] sm:max-w-[700px] md:max-w-[660px] lg:max-w-[800px] xl:max-w-[900px] flex justify-center md:justify-end">
+                    <img src="{{ asset('images/kelana/hero-about-platter-exact.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
                         class="w-full object-contain drop-shadow-2xl">
                 </div>
             </div>

@@ -93,6 +93,15 @@
     @apply bg-[#593822] px-5 py-3.5 text-sm font-bold text-white;
 }
 
+/* Utilitas sembunyikan scrollbar untuk slider horizontal */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
 @media print {
     .no-print {
         display: none !important;
