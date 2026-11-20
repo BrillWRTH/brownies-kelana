@@ -13,7 +13,15 @@
                 <p class="mt-6 text-sm leading-relaxed text-[#fcf5eb]/95 sm:text-base lg:text-lg max-w-xl">
                     {{ $storeSetting->about_story ?: 'Berdiri sejak tahun 2018, Brownies Kelana hadir untuk menemani setiap momen spesial Anda dengan aneka kue yang lezat dan berkualitas. Kami percaya bahwa setiap gigitan memiliki cerita dan setiap hidangan manis dapat menghadirkan kebahagiaan. Dengan beragam pilihan brownies dan kue yang menggugah selera, kami berusaha menghadirkan cita rasa istimewa untuk berbagai kesempatan, mulai dari camilan sehari-hari, hadiah untuk orang tersayang, hingga pelengkap perayaan spesial.' }}
                 </p>
-                {{-- Sesuai instruksi owner: Bagian Download E-Katalog tidak disertakan --}}
+                <div class="mt-7 sm:mt-9">
+                    <a href="{{ route('products.index') }}"
+                        class="inline-flex items-center gap-2.5 rounded-lg bg-[#2b201a] px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-[#1a130f] hover:shadow-lg hover:-translate-y-0.5">
+                        <svg class="h-4 w-4 shrink-0 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span>Kunjungi Katalog Produk</span>
+                    </a>
+                </div>
             </div>
             <div class="md:col-span-7 lg:col-span-7 flex justify-center md:justify-end">
                 <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
