@@ -8,6 +8,32 @@
     @endphp
 
     <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        {{-- Breadcrumb Navigasi Halaman Pembayaran --}}
+        @include('partials.breadcrumb', ['items' => ['Dashboard' => route('dashboard'), 'Pembayaran' => null, $order->order_number => null]])
+
+        {{-- Kejelasan Pengecekan Manual & WhatsApp Sesuai Permintaan --}}
+        <div class="mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 sm:p-5 text-amber-900 shadow-xs">
+            <div class="flex items-start gap-3">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white font-bold text-sm">!</span>
+                <div class="flex-1 text-xs">
+                    <p class="font-bold text-sm text-amber-950">Pengecekan Pembayaran Dilakukan Secara Manual</p>
+                    <p class="mt-1 leading-relaxed text-amber-900">
+                        Pengecekan bukti pembayaran dilakukan secara manual oleh tim Brownies Kelana. <strong>Mohon bersabar</strong>, atau silakan hubungi nomor WhatsApp yang tercantum jika membutuhkan konfirmasi segera.
+                    </p>
+                    <div class="mt-3 flex flex-wrap items-center gap-2.5">
+                        <a href="{{ $sellerWhatsappUrl }}" target="_blank" rel="noopener"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition">
+                            <span>Hubungi WhatsApp Penjual ({{ $storeSetting->whatsapp_number }})</span> &rarr;
+                        </a>
+                        <a href="{{ route('dashboard') }}#riwayat-pesanan"
+                            class="inline-flex items-center gap-1 rounded-lg border border-amber-600/40 bg-white px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100/50 transition">
+                            <span>Cek di Dashboard Saya</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
                 <a href="{{ route('orders.show', $order->order_number) }}" aria-label="Kembali ke Detail Pesanan"

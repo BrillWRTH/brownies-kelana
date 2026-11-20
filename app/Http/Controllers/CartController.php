@@ -15,8 +15,12 @@ class CartController extends Controller
     /**
      * Menampilkan halaman penuh keranjang belanja beserta ringkasan dan catatan pesanan.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard')->with('error', 'Akun admin tidak memiliki akses untuk berbelanja.');
+        }
+
         // 1. Ambil atau buat keranjang sesuai pengguna login atau session tamu
         $cart = $this->resolveCurrentCart($request);
         $cart->load(['items.product.images', 'items.variant']);
@@ -38,6 +42,10 @@ class CartController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('admin.dashboard')->with('error', 'Akun admin tidak memiliki akses untuk berbelanja.');
+        }
+
         // 1. Validasi data input produk, varian, kuantitas, dan catatan khusus
         $validated = $request->validate([
             'product_id' => ['required', 'integer', 'exists:products,id'],

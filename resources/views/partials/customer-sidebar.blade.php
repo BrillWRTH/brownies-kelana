@@ -16,11 +16,19 @@
 
         <nav class="mt-4 space-y-1.5 text-xs font-semibold">
             <a href="{{ route('dashboard') }}"
-                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('dashboard') || request()->routeIs('orders.*') ? 'bg-[#593822] text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
+                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition {{ request()->routeIs('dashboard') && !request()->has('cek') ? 'bg-[#593822] text-white shadow-xs' : 'text-[#593822] hover:bg-[#e3d2b8]' }}">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/>
                 </svg>
                 <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('dashboard') }}#cek-pembayaran"
+                class="flex items-center gap-2.5 rounded-full px-4 py-2.5 transition text-[#593822] hover:bg-[#e3d2b8]">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                </svg>
+                <span>Cek Pembayaran</span>
             </a>
 
             <a href="{{ route('notifications.index') }}"

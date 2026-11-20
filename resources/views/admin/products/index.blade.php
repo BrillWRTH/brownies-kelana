@@ -5,6 +5,9 @@
 
 @section('content')
     <div class="space-y-5">
+        {{-- Breadcrumb Navigasi Admin Produk --}}
+        @include('partials.breadcrumb', ['items' => ['Panel Admin' => route('admin.dashboard'), 'Katalog Produk' => null]])
+
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="font-serif text-xl font-bold text-[#28211c]">Daftar Produk Brownies Kelana</h1>

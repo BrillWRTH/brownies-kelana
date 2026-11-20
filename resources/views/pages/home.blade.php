@@ -217,7 +217,7 @@
         </div>
     </section>
 
-    {{-- 4. Bagian Apa Kata Mereka ? (Testimoni Pelanggan) --}}
+    {{-- 4. Bagian Apa Kata Mereka ? (Testimoni Pelanggan - Auto-slider Interaktif Sesuai Point 9) --}}
     <section class="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <div class="text-center">
             <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center text-[#593822]">
@@ -231,47 +231,67 @@
             </p>
         </div>
 
-        <div class="mt-10 flex flex-wrap justify-center gap-6">
-            @forelse($homeReviews as $review)
-                <article class="flex w-full flex-col rounded-xl border border-[#593822] bg-white p-4 shadow-xs md:w-[calc((100%-3rem)/3)]">
-                    <div class="overflow-hidden rounded-lg bg-[#fcf8f2] border border-[#efe2ce]">
-                        <img src="{{ asset('images/kelana/testimonial-ig.png') }}" alt="Testimoni Pelanggan Brownies Kelana"
-                            class="h-56 w-full object-contain p-1">
-                    </div>
-
-                    <div class="mt-3 flex justify-center gap-1 text-[#d4ad37]">
-                        @for($star = 1; $star <= 5; $star++)
-                            <span class="text-lg leading-none">{{ $star <= $review->rating ? '★' : '☆' }}</span>
-                        @endfor
-                    </div>
-
-                    <p class="mt-3 flex-1 text-center text-xs leading-relaxed text-[#2f2118]">
-                        “{{ $review->comment }}”
-                    </p>
-
-                    <div class="mt-3 border-t border-[#efe2ce] pt-2.5 text-center">
-                        <p class="text-[11px] font-bold text-[#593822]">{{ $review->user?->name ?? 'Pelanggan Kelana' }}</p>
-                        <p class="text-[10px] text-[#8f6743]">{{ $review->product?->name ?? 'Produk Brownies Kelana' }}</p>
-                    </div>
-
-                    @if($review->admin_reply)
-                        <div class="mt-2.5 rounded-lg bg-[#f7ebd5] p-2.5 text-[11px] text-[#593822]">
-                            <span class="font-bold">Balasan Brownies Kelana:</span> {{ $review->admin_reply }}
-                        </div>
-                    @endif
-                </article>
-            @empty
-                <div class="col-span-3 rounded-2xl border border-[#8f6743]/40 bg-[#f7ebd5] p-8 text-center">
-                    <p class="text-sm font-semibold text-[#593822]">Jadilah yang pertama berbagi cerita manis tentang Brownies Kelana!</p>
-                </div>
-            @endforelse
-        </div>
-
         @if($homeReviews->isNotEmpty())
-            <div class="mt-7 flex justify-center gap-2">
-                <span class="h-2.5 w-2.5 rounded-full bg-[#593822]"></span>
-                <span class="h-2.5 w-2.5 rounded-full border border-[#593822] bg-transparent"></span>
-                <span class="h-2.5 w-2.5 rounded-full border border-[#593822] bg-transparent"></span>
+            <div id="reviews-carousel-container" class="relative mt-10">
+                {{-- Tombol Navigasi Kiri / Kanan --}}
+                <button type="button" id="review-prev-btn" aria-label="Ulasan Sebelumnya"
+                    class="absolute -left-3 sm:-left-5 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#8f6743]/50 bg-white/95 text-[#593822] shadow-md transition hover:bg-[#593822] hover:text-white hover:scale-105">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                    </svg>
+                </button>
+                <button type="button" id="review-next-btn" aria-label="Ulasan Berikutnya"
+                    class="absolute -right-3 sm:-right-5 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#8f6743]/50 bg-white/95 text-[#593822] shadow-md transition hover:bg-[#593822] hover:text-white hover:scale-105">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                    </svg>
+                </button>
+
+                {{-- Track Slider Horizontal dengan Snap & Auto-scroll --}}
+                <div id="reviews-slider-track"
+                    class="flex gap-6 overflow-x-auto scroll-smooth pb-4 pt-1 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2">
+                    @foreach($homeReviews as $index => $review)
+                        <article class="review-slide-card flex w-[85%] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] shrink-0 snap-start flex-col rounded-2xl border border-[#593822]/40 bg-white p-4 sm:p-5 shadow-xs transition hover:shadow-md">
+                            <div class="overflow-hidden rounded-xl bg-[#fcf8f2] border border-[#efe2ce]">
+                                <img src="{{ asset('images/kelana/testimonial-ig.png') }}" alt="Testimoni Pelanggan Brownies Kelana"
+                                    class="h-52 sm:h-56 w-full object-contain p-1">
+                            </div>
+
+                            <div class="mt-3.5 flex justify-center gap-1 text-[#d4ad37]">
+                                @for($star = 1; $star <= 5; $star++)
+                                    <span class="text-lg leading-none">{{ $star <= $review->rating ? '★' : '☆' }}</span>
+                                @endfor
+                            </div>
+
+                            <p class="mt-3 flex-1 text-center text-xs leading-relaxed text-[#2f2118]">
+                                “{{ $review->comment }}”
+                            </p>
+
+                            <div class="mt-3 border-t border-[#efe2ce] pt-2.5 text-center">
+                                <p class="text-[11px] font-bold text-[#593822]">{{ $review->user?->name ?? 'Pelanggan Kelana' }}</p>
+                                <p class="text-[10px] text-[#8f6743]">{{ $review->product?->name ?? 'Produk Brownies Kelana' }}</p>
+                            </div>
+
+                            @if($review->admin_reply)
+                                <div class="mt-2.5 rounded-lg bg-[#f7ebd5] p-2.5 text-[11px] text-[#593822]">
+                                    <span class="font-bold">Balasan Brownies Kelana:</span> {{ $review->admin_reply }}
+                                </div>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+
+                {{-- Indikator Dots --}}
+                <div class="mt-6 flex items-center justify-center gap-2">
+                    @foreach($homeReviews as $index => $review)
+                        <button type="button" data-review-dot-index="{{ $index }}" aria-label="Beralih ke ulasan {{ $index + 1 }}"
+                            class="{{ $index === 0 ? 'h-2.5 w-7 rounded-full bg-[#593822]' : 'h-2.5 w-2.5 rounded-full border border-[#593822] bg-transparent' }} transition-all duration-300 hover:bg-[#593822]/40"></button>
+                    @endforeach
+                </div>
+            </div>
+        @else
+            <div class="mt-10 rounded-2xl border border-[#8f6743]/40 bg-[#f7ebd5] p-8 text-center">
+                <p class="text-sm font-semibold text-[#593822]">Jadilah yang pertama berbagi cerita manis tentang Brownies Kelana!</p>
             </div>
         @endif
     </section>

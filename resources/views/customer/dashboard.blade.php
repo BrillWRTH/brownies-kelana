@@ -4,6 +4,9 @@
 
 @section('content')
     <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {{-- Breadcrumb Navigasi Dashboard --}}
+        @include('partials.breadcrumb', ['items' => ['Dashboard Pelanggan' => null]])
+
         <div class="flex flex-col gap-6 lg:flex-row">
             @include('partials.customer-sidebar')
 
@@ -25,6 +28,71 @@
                     </div>
                     <img src="{{ asset('images/kelana/brownie-fork.png') }}" alt="Brownies Kelana"
                         class="pointer-events-none absolute bottom-0 right-8 sm:right-16 md:right-24 lg:right-28 h-32 sm:h-36 md:h-40 w-auto object-contain object-bottom drop-shadow-md">
+                </div>
+
+                {{-- Kartu Khusus: Cek Status Pembayaran (Point 2 & 1) --}}
+                <div id="cek-pembayaran" class="rounded-2xl border border-[#d9c8b4] bg-white p-5 shadow-xs sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#efe2ce] pb-3.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-[#593822] text-white">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 class="font-serif text-base sm:text-lg font-bold text-[#2f2118]">Cek Status Pembayaran</h2>
+                                <p class="text-xs text-[#796b62]">Pantau status verifikasi mutasi QRIS pesanan Anda di sini.</p>
+                            </div>
+                        </div>
+                        @php
+                            $pendingOrder = $activeOrder && in_array($activeOrder->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true)
+                                ? $activeOrder
+                                : $orders->first(fn($o) => in_array($o->payment_status, ['belum_dibayar', 'menunggu_verifikasi'], true));
+                        @endphp
+                        @if($pendingOrder)
+                            <span class="inline-flex items-center self-start sm:self-auto rounded-full px-3 py-1 text-xs font-bold {{ $pendingOrder->payment_status === 'menunggu_verifikasi' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800' }}">
+                                {{ $pendingOrder->paymentStatusLabel() }} ({{ $pendingOrder->order_number }})
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($pendingOrder)
+                        <div class="mt-4 rounded-xl border border-amber-200/80 bg-amber-50/60 p-4">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div class="text-xs space-y-1">
+                                    <p class="font-bold text-[#593822] text-sm">
+                                        Pesanan #{{ $pendingOrder->order_number }} &middot; Tagihan: Rp {{ number_format($pendingOrder->total_amount, 0, ',', '.') }}
+                                    </p>
+                                    <p class="text-[#6f5a4a] leading-relaxed">
+                                        {{ $pendingOrder->payment_status === 'menunggu_verifikasi'
+                                            ? 'Bukti bayar Anda sedang diverifikasi. Pengecekan bukti bayar dilakukan manual oleh tim kami, mohon bersabar.'
+                                            : 'Pesanan menunggu pembayaran via QRIS Brownies Kelana. Segera selesaikan sebelum batas waktu habis.' }}
+                                    </p>
+                                    <p class="text-[11px] text-[#8f7968]">
+                                        Butuh konfirmasi kilat? Hubungi admin via WhatsApp di <strong class="text-[#593822]">0812-3185-8544</strong>.
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                                    <a href="{{ route('payments.show', $pendingOrder) }}"
+                                        class="btn-kelana-primary inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-xs font-bold shadow-xs">
+                                        {{ $pendingOrder->payment_status === 'menunggu_verifikasi' ? 'Cek Bukti Bayar' : 'Bayar via QRIS' }}
+                                    </a>
+                                    <a href="https://wa.me/6281231858544?text=Halo%20Brownies%20Kelana,%20saya%20ingin%20cek%20pembayaran%20untuk%20pesanan%20{{ $pendingOrder->order_number }}"
+                                        target="_blank" rel="noopener"
+                                        class="btn-kelana-outline inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-xs font-bold">
+                                        Hubungi WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-4 rounded-xl bg-[#fcf8f2] p-4 text-xs text-[#6f5a4a] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <p>Saat ini tidak ada pesanan aktif yang menunggu pembayaran atau verifikasi manual.</p>
+                            <a href="#riwayat-pesanan" class="text-xs font-bold text-[#593822] hover:underline">
+                                Lihat Semua Riwayat Transaksi &darr;
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Banner Jika Email Belum Terverifikasi --}}
@@ -193,8 +261,8 @@
                     </div>
                 </div>
 
-                {{-- Riwayat Pesanan + Filter Tab --}}
-                <div class="rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
+                {{-- Riwayat Pesanan + Filter Tab (dengan fragment id #riwayat-pesanan agar tidak lompat ke atas) --}}
+                <div id="riwayat-pesanan" class="scroll-mt-24 rounded-2xl border border-[#8f6743] bg-white p-5 shadow-xs sm:p-6">
                     <h2 class="font-serif text-lg font-bold text-[#2f2118]">Riwayat Pesanan</h2>
 
                     @php
@@ -211,7 +279,7 @@
 
                     <div class="mt-4 flex flex-wrap gap-2">
                         @foreach($filterTabs as $tabKey => $tabLabel)
-                            <a href="{{ route('dashboard', $tabKey === 'semua' ? [] : ['status' => $tabKey]) }}"
+                            <a href="{{ route('dashboard', $tabKey === 'semua' ? [] : ['status' => $tabKey]) . '#riwayat-pesanan' }}"
                                 class="rounded-full border px-3.5 py-1 text-xs font-semibold transition {{ $statusFilter === $tabKey ? 'border-[#593822] bg-[#593822] text-white' : 'border-[#8f6743] bg-white text-[#593822] hover:bg-[#f7ebd5]' }}">
                                 {{ $tabLabel }}
                             </a>
@@ -276,7 +344,7 @@
                         </div>
 
                         <div class="mt-6">
-                            {{ $orders->links() }}
+                            {{ $orders->fragment('riwayat-pesanan')->links() }}
                         </div>
                     @endif
                 </div>

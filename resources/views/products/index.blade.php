@@ -3,7 +3,10 @@
 @section('title', 'Katalog Produk — Brownies Kelana')
 
 @section('content')
-    <section class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        {{-- Breadcrumb Navigasi Katalog Produk --}}
+        @include('partials.breadcrumb', ['items' => ['Katalog Produk' => null]])
+
         <div class="grid gap-8 lg:grid-cols-12">
             {{-- Sidebar Filter Kategori Tanpa Kotak + Kartu K3Mart --}}
             <aside class="lg:col-span-3 lg:pt-14">
@@ -118,7 +121,13 @@
                                     <div class="mt-auto flex items-center justify-between pt-4">
                                         <span class="text-sm font-semibold text-[#2f2118]">Rp {{ number_format($product->base_price, 0, ',', '.') }}</span>
 
-                                        @if($product->is_available)
+                                        @if(auth()->check() && auth()->user()->isAdmin())
+                                            <a href="{{ route('admin.products.edit', $product) }}"
+                                                class="rounded-full bg-[#f7ebd5] px-2.5 py-1 text-[11px] font-bold text-[#593822] hover:bg-[#ebdcc3] transition"
+                                                title="Mode Admin: Kelola Produk">
+                                                Kelola
+                                            </a>
+                                        @elseif($product->is_available)
                                             <form method="POST" action="{{ route('cart.items.store') }}">
                                                 @csrf
                                                 <input type="hidden" name="product_id" value="{{ $product->id }}">

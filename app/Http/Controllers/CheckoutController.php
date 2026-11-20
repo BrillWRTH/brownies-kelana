@@ -33,8 +33,12 @@ class CheckoutController extends Controller
      */
     public function index(Request $request, OpenRouteService $ors): View|RedirectResponse
     {
-        // 1. Ambil keranjang pengguna dan pastikan tidak kosong serta item masih tersedia
         $user = Auth::user();
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard')->with('error', 'Akun admin tidak memiliki akses untuk checkout berbelanja.');
+        }
+
+        // 1. Ambil keranjang pengguna dan pastikan tidak kosong serta item masih tersedia
         $cart = Cart::query()
             ->with(['items.product.images', 'items.variant'])
             ->where('user_id', $user->id)
@@ -284,6 +288,10 @@ class CheckoutController extends Controller
     public function store(Request $request, OpenRouteService $ors): RedirectResponse
     {
         $user = Auth::user();
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard')->with('error', 'Akun admin tidak memiliki akses untuk melakukan pemesanan belanja.');
+        }
+
         $storeSetting = StoreSetting::current();
 
         // 1. Pastikan keranjang belanja memiliki item

@@ -1,12 +1,13 @@
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-// Toast SweetAlert2 Pop Up Pojok Kanan Atas
+// Toast SweetAlert2 Pop Up Pojok Kanan Atas dengan Tombol Close
 const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
-    timer: 4000,
+    showCloseButton: true,
+    timer: 4500,
     timerProgressBar: true,
     didOpen: (toast) => {
         toast.onmouseenter = Swal.stopTimer;
@@ -17,12 +18,43 @@ const Toast = Swal.mixin({
 window.Swal = Swal;
 window.Toast = Toast;
 
-window.showToast = (icon, title, html = null, timer = 4000) => {
+window.showToast = (icon, title, html = null, timer = 4500) => {
     return Toast.fire({
         icon,
         title,
         html,
+        showCloseButton: true,
         timer,
+    });
+};
+
+// Pop-up SweetAlert untuk Melihat Bukti Pembayaran Tanpa Pindah Halaman
+window.viewPaymentProof = (imageUrl, orderNumber, amount, date) => {
+    Swal.fire({
+        title: `Bukti Pembayaran ${orderNumber}`,
+        html: `
+            <div class="text-xs text-[#593822] mb-3">
+                <span>Nominal: <strong>${amount}</strong></span>
+                ${date ? '<span class="mx-1.5">&middot;</span><span>Waktu: ' + date + '</span>' : ''}
+            </div>
+            <div class="overflow-hidden rounded-xl border border-[#d9c8b4] bg-[#fcf3e3] p-1 shadow-inner">
+                <img src="${imageUrl}" alt="Bukti Pembayaran ${orderNumber}" class="max-h-[60vh] w-auto mx-auto rounded-lg object-contain">
+            </div>
+            <div class="mt-3 flex justify-center">
+                <a href="${imageUrl}" target="_blank" rel="noopener" class="text-[11px] font-bold text-[#8f6743] hover:text-[#593822] hover:underline">
+                    Buka Gambar Penuh di Tab Baru &rarr;
+                </a>
+            </div>
+        `,
+        showCloseButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'Tutup',
+        confirmButtonColor: '#593822',
+        customClass: {
+            popup: 'rounded-2xl border border-[#d9c8b4] max-w-lg p-5',
+            title: 'font-serif text-lg font-bold text-[#593822]',
+            confirmButton: 'rounded-xl px-6 py-2 text-xs font-bold'
+        }
     });
 };
 
@@ -239,5 +271,92 @@ document.addEventListener('DOMContentLoaded', () => {
         catNextBtn?.addEventListener('click', () => {
             catTrack.scrollBy({ left: 340, behavior: 'smooth' });
         });
+    }
+
+    // Slider Ulasan / Testimoni Landing Page (Auto-slide + Tombol Manual + Swipe)
+    const reviewTrack = document.getElementById('reviews-slider-track');
+    const reviewPrevBtn = document.getElementById('review-prev-btn');
+    const reviewNextBtn = document.getElementById('review-next-btn');
+    const reviewDots = Array.from(document.querySelectorAll('[data-review-dot-index]'));
+    const reviewContainer = document.getElementById('reviews-carousel-container');
+
+    if (reviewTrack) {
+        let reviewAutoTimer = null;
+        const cardWidth = 350;
+
+        const scrollReview = (direction) => {
+            const maxScroll = reviewTrack.scrollWidth - reviewTrack.clientWidth;
+            if (direction === 'next') {
+                if (reviewTrack.scrollLeft >= maxScroll - 15) {
+                    reviewTrack.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    reviewTrack.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                }
+            } else {
+                if (reviewTrack.scrollLeft <= 15) {
+                    reviewTrack.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                } else {
+                    reviewTrack.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+                }
+            }
+        };
+
+        const startReviewAuto = () => {
+            stopReviewAuto();
+            reviewAutoTimer = setInterval(() => scrollReview('next'), 4000);
+        };
+
+        const stopReviewAuto = () => {
+            if (reviewAutoTimer) {
+                clearInterval(reviewAutoTimer);
+                reviewAutoTimer = null;
+            }
+        };
+
+        reviewNextBtn?.addEventListener('click', () => {
+            scrollReview('next');
+            startReviewAuto();
+        });
+        reviewPrevBtn?.addEventListener('click', () => {
+            scrollReview('prev');
+            startReviewAuto();
+        });
+
+        reviewDots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+                reviewTrack.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
+                startReviewAuto();
+            });
+        });
+
+        reviewContainer?.addEventListener('mouseenter', stopReviewAuto);
+        reviewContainer?.addEventListener('mouseleave', startReviewAuto);
+
+        // Update dots saat scroll
+        reviewTrack.addEventListener('scroll', () => {
+            const activeIdx = Math.min(
+                reviewDots.length - 1,
+                Math.round(reviewTrack.scrollLeft / cardWidth)
+            );
+            reviewDots.forEach((dot, i) => {
+                if (i === activeIdx) {
+                    dot.className = 'h-2.5 w-7 rounded-full bg-[#593822] transition-all duration-300';
+                } else {
+                    dot.className = 'h-2.5 w-2.5 rounded-full border border-[#593822] bg-transparent transition-all duration-300 hover:bg-[#593822]/40';
+                }
+            });
+        }, { passive: true });
+
+        startReviewAuto();
+    }
+
+    // Cegah lompat ke atas halaman saat beralih tab atau klik anchor in-page
+    if (window.location.hash) {
+        const targetEl = document.querySelector(window.location.hash);
+        if (targetEl) {
+            setTimeout(() => {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 80);
+        }
     }
 });

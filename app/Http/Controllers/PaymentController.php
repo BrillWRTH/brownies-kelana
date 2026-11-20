@@ -192,7 +192,7 @@ class PaymentController extends Controller
         });
 
         return redirect()->route('payments.show', $order)
-            ->with('success', 'Bukti pembayaran QRIS berhasil dilampirkan! Admin Brownies Kelana akan segera memverifikasi pembayaranmu secara manual.');
+            ->with('success', 'Bukti pembayaran QRIS berhasil dilampirkan! Pengecekan bukti bayar dilakukan secara manual oleh tim kami, mohon bersabar atau silakan hubungi nomor WhatsApp yang tercantum jika butuh konfirmasi segera.');
     }
 
     /**
@@ -213,7 +213,7 @@ class PaymentController extends Controller
 
         if ($order->payment_status === 'menunggu_verifikasi') {
             return redirect()->route('payments.show', $order)
-                ->with('success', 'Bukti pembayaranmu sudah diterima dan sedang menunggu verifikasi manual oleh Admin Brownies Kelana.');
+                ->with('info', 'Bukti pembayaranmu sudah diterima. Pengecekan bukti bayar dilakukan secara manual oleh tim kami, mohon bersabar atau silakan hubungi nomor WhatsApp yang tercantum.');
         }
 
         if ($order->payment_status === 'belum_dibayar') {

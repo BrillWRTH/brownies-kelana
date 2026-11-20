@@ -21,6 +21,9 @@
     @endphp
 
     <div class="space-y-6">
+        {{-- Breadcrumb Navigasi Admin Pesanan --}}
+        @include('partials.breadcrumb', ['items' => ['Panel Admin' => route('admin.dashboard'), 'Pesanan' => route('admin.orders.index'), $order->order_number => null]])
+
         {{-- Header Order & Aksi Utama --}}
         <div class="flex flex-col gap-4 rounded-2xl border border-[#e8dfd3] bg-white p-5 shadow-xs lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -145,16 +148,29 @@
                                 <div class="border-t border-[#efe7dc] pt-3">
                                     <p class="mb-2 text-[11px] font-bold text-[#52311a]">Lampiran Bukti Pembayaran QRIS:</p>
                                     <div class="flex flex-wrap items-start gap-4">
-                                        <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener" class="block shrink-0">
+                                        <button type="button"
+                                            onclick="viewPaymentProof('{{ asset($payment->proof_path) }}', '{{ $order->order_number }}', 'Rp {{ number_format($order->total_amount, 0, ',', '.') }}', '{{ $payment->proof_uploaded_at?->format('d M Y H:i') ?? '-' }} WIB')"
+                                            class="block shrink-0 text-left group">
                                             <img src="{{ asset($payment->proof_path) }}" alt="Bukti Pembayaran QRIS {{ $order->order_number }}"
-                                                class="h-44 w-44 rounded-xl border border-[#d6c5b3] bg-white object-cover shadow-xs transition hover:opacity-90">
-                                        </a>
-                                        <div class="space-y-2 text-[11px] text-[#5e524a]">
-                                            <p>Klik gambar di samping untuk melihat bukti transfer dalam ukuran penuh sebelum memverifikasi.</p>
-                                            <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener"
-                                                class="inline-flex items-center gap-1 rounded-lg border border-[#8f6743] bg-white px-3 py-1.5 font-bold text-[#52311a] hover:bg-[#f7ebd5]">
-                                                <span>Buka Gambar Ukuran Penuh</span> &nearr;
-                                            </a>
+                                                class="h-44 w-44 rounded-xl border border-[#d6c5b3] bg-white object-cover shadow-xs transition group-hover:scale-[1.02] group-hover:shadow-md cursor-pointer">
+                                        </button>
+                                        <div class="space-y-2.5 text-[11px] text-[#5e524a]">
+                                            <p>Lihat bukti transfer secara instan melalui pop-up modal tanpa perlu berpindah atau meninggalkan halaman ini.</p>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <button type="button"
+                                                    onclick="viewPaymentProof('{{ asset($payment->proof_path) }}', '{{ $order->order_number }}', 'Rp {{ number_format($order->total_amount, 0, ',', '.') }}', '{{ $payment->proof_uploaded_at?->format('d M Y H:i') ?? '-' }} WIB')"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-[#8f6743] bg-white px-3.5 py-2 font-bold text-[#52311a] hover:bg-[#f7ebd5] transition shadow-2xs">
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span>Lihat Bukti Bayar (Pop-up)</span>
+                                                </button>
+                                                <a href="{{ asset($payment->proof_path) }}" target="_blank" rel="noopener"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-[#d6c5b3] bg-[#fdfbf6] px-3 py-2 text-[#796b62] hover:bg-[#efe7dc] transition">
+                                                    <span>Buka di Tab Baru</span> &nearr;
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

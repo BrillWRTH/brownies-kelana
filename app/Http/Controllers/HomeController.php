@@ -15,8 +15,13 @@ class HomeController extends Controller
     /**
      * Menampilkan halaman utama (Landing Page) Brownies Kelana.
      */
-    public function index(): View
+    public function index(): View|\Illuminate\Http\RedirectResponse
     {
+        // Admin diarahkan langsung ke Panel Admin dan tidak mengakses etalase belanja pelanggan
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         // 1. Ambil kategori utama yang aktif untuk etalase Produk Kami (tampil semua untuk slider landing page)
         $categories = Category::query()
             ->where('is_active', true)

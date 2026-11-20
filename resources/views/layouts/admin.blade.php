@@ -66,9 +66,9 @@
             </nav>
 
             <div class="border-t border-[#7d563c]/60 p-4 space-y-2">
-                <a href="{{ route('home') }}" target="_blank"
+                <a href="{{ route('products.index') }}" target="_blank"
                     class="flex items-center justify-center gap-1.5 rounded-xl border border-[#8f6743] bg-[#593822]/60 px-3 py-2 text-xs font-bold text-[#fcf3e3] transition hover:bg-[#492d1a]">
-                    <span>Lihat Storefront</span>
+                    <span>Lihat Katalog Produk</span>
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
                     </svg>

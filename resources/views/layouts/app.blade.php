@@ -186,10 +186,16 @@
 
         {{-- Navigasi Mobile Sederhana --}}
         <div class="flex items-center justify-center gap-6 border-t border-[#e9d9c2] bg-[#f7ebd5] py-2 text-[11px] font-semibold uppercase md:hidden">
-            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Home</a>
-            <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Produk</a>
-            <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Tentang Kami</a>
-            <a href="{{ route('cart.index') }}" class="text-[#6f5d50]">Keranjang</a>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="font-bold text-[#593822]">Panel Admin</a>
+                <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Katalog</a>
+                <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Tentang Kami</a>
+            @else
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Home</a>
+                <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Produk</a>
+                <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'text-[#593822]' : 'text-[#6f5d50]' }}">Tentang Kami</a>
+                <a href="{{ route('cart.index') }}" class="text-[#6f5d50]">Keranjang</a>
+            @endif
         </div>
     </header>
 

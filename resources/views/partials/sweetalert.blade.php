@@ -3,23 +3,23 @@
     $swalType = null;
     $swalTitle = null;
     $swalHtml = null;
-    $swalTimer = 4000;
+    $swalTimer = 4500;
 
     if (session('success')) {
         $swalType = 'success';
         $swalTitle = session('success');
         if (session('wa_launch_url')) {
-            $swalHtml = '<div class="mt-2"><a href="' . e(session('wa_launch_url')) . '" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition"><span>Buka Chat WhatsApp Sekarang</span> &rarr;</a></div>';
+            $swalHtml = '<div class="mt-2.5"><a href="' . e(session('wa_launch_url')) . '" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition"><span>Buka Chat WhatsApp Sekarang</span> &rarr;</a></div>';
             $swalTimer = 9000;
         }
     } elseif (session('error')) {
         $swalType = 'error';
         $swalTitle = session('error');
-        $swalTimer = 5000;
+        $swalTimer = 5500;
     } elseif (session('warning')) {
         $swalType = 'warning';
         $swalTitle = session('warning');
-        $swalTimer = 5000;
+        $swalTimer = 5500;
     } elseif (session('info')) {
         $swalType = 'info';
         $swalTitle = session('info');
@@ -35,7 +35,7 @@
         }
         $errList .= '</ul>';
         $swalHtml = $errList;
-        $swalTimer = 6500;
+        $swalTimer = 7000;
     }
 @endphp
 
@@ -47,6 +47,7 @@
                     window.Toast.fire({
                         icon: @json($swalType),
                         title: @json($swalTitle),
+                        showCloseButton: true,
                         @if($swalHtml)
                             html: {!! json_encode($swalHtml) !!},
                         @endif
