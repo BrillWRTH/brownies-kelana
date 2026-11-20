@@ -20,7 +20,7 @@
     @endphp
 
     {{-- Navigasi Utama Pelanggan sesuai UI/UX Brownies Kelana --}}
-    <header class="sticky top-0 z-40 border-b border-[#e5d5bf] bg-[#fcf3e3]/95 backdrop-blur-sm">
+    <header class="sticky top-0 z-40 bg-[#fcf3e3]/95 backdrop-blur-sm">
         {{-- Ornamen Pita Sudut Cokelat-Emas di Kiri Atas sesuai Figma --}}
         <div class="pointer-events-none absolute left-0 top-0 bottom-0 h-full w-[95px] overflow-hidden sm:w-[115px]">
             <svg viewBox="0 0 118 148" preserveAspectRatio="none" fill="none" class="h-full w-full">
