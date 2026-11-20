@@ -112,6 +112,7 @@ class CheckoutController extends Controller
             'delivery_type' => ['required', 'in:delivery,pickup'],
             'pickup_location_id' => ['nullable', 'integer'],
             'shipping_zone_id' => ['nullable', 'integer'],
+            'maps_url' => ['nullable', 'string', 'max:1000'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'distance_km' => ['nullable', 'numeric', 'min:0'],
@@ -150,13 +151,25 @@ class CheckoutController extends Controller
             ];
         } else {
             // Delivery
+            $destLat = $validated['latitude'] ?? null;
+            $destLng = $validated['longitude'] ?? null;
+
+            // Jika koordinat belum terisi, coba ekstrak dari link Google Maps
+            if ((empty($destLat) || empty($destLng)) && ! empty($validated['maps_url'])) {
+                if (preg_match('/(?:@|q=|\?ll=)(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $validated['maps_url'], $matches)) {
+                    $destLat = (float) $matches[1];
+                    $destLng = (float) $matches[2];
+                }
+            }
+
             if (
-                isset($validated['latitude'], $validated['longitude'])
-                && $validated['latitude'] !== ''
-                && $validated['longitude'] !== ''
+                $destLat !== null
+                && $destLng !== null
+                && $destLat !== ''
+                && $destLng !== ''
             ) {
-                $destLat = (float) $validated['latitude'];
-                $destLng = (float) $validated['longitude'];
+                $destLat = (float) $destLat;
+                $destLng = (float) $destLng;
                 $originLat = (float) $storeSetting->store_latitude;
                 $originLng = (float) $storeSetting->store_longitude;
 
@@ -247,6 +260,7 @@ class CheckoutController extends Controller
             'postal_code' => ['nullable', 'string', 'max:20'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'maps_url' => ['nullable', 'string', 'max:1000'],
             'location_notes' => ['nullable', 'string', 'max:500'],
             'is_default' => ['nullable', 'boolean'],
         ]);
@@ -296,6 +310,7 @@ class CheckoutController extends Controller
             'recipient_secondary_phone' => ['nullable', 'string', 'max:25'],
             'delivery_address' => ['required_if:delivery_type,delivery', 'nullable', 'string', 'max:1000'],
             'delivery_address_detail' => ['nullable', 'string', 'max:500'],
+            'maps_url' => ['nullable', 'string', 'max:1000'],
             'delivery_latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'delivery_longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'shipping_zone_id' => ['nullable', 'exists:shipping_zones,id'],
@@ -369,25 +384,31 @@ class CheckoutController extends Controller
 
         if ($validated['delivery_type'] === 'delivery') {
             if ($storeSetting->shipping_method === 'distance' || $storeSetting->shipping_method === 'internal_estimator') {
-                if (
-                    ! isset($validated['delivery_latitude'], $validated['delivery_longitude'])
-                    || $validated['delivery_latitude'] === ''
-                    || $validated['delivery_longitude'] === ''
-                ) {
-                    return back()->withInput()->withErrors([
-                        'delivery_address' => 'Tentukan titik koordinat alamat di peta terlebih dahulu untuk menghitung ongkir jarak.',
-                    ]);
+                $destLat = $validated['delivery_latitude'] ?? null;
+                $destLng = $validated['delivery_longitude'] ?? null;
+
+                // Jika koordinat belum terisi, coba ekstrak dari link Google Maps jika ada
+                if ((empty($destLat) || empty($destLng)) && ! empty($validated['maps_url'])) {
+                    if (preg_match('/(?:@|q=|\?ll=)(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $validated['maps_url'], $matches)) {
+                        $destLat = (float) $matches[1];
+                        $destLng = (float) $matches[2];
+                    }
                 }
 
-                $destLat = (float) $validated['delivery_latitude'];
-                $destLng = (float) $validated['delivery_longitude'];
-                $originLat = (float) $storeSetting->store_latitude;
-                $originLng = (float) $storeSetting->store_longitude;
+                if (
+                    $destLat !== null
+                    && $destLng !== null
+                    && $destLat !== ''
+                    && $destLng !== ''
+                ) {
+                    $originLat = (float) $storeSetting->store_latitude;
+                    $originLng = (float) $storeSetting->store_longitude;
 
-                $route = $ors->getDrivingRoute($originLat, $originLng, $destLat, $destLng);
-                $distanceKm = $route['distance_km'];
-                $durationMinutes = $route['duration_minutes'];
-                $routeSource = $route['source'];
+                    $route = $ors->getDrivingRoute($originLat, $originLng, (float) $destLat, (float) $destLng);
+                    $distanceKm = $route['distance_km'];
+                    $durationMinutes = $route['duration_minutes'];
+                    $routeSource = $route['source'];
+                }
             }
         }
 
@@ -421,6 +442,8 @@ class CheckoutController extends Controller
         $mapsUrl = null;
         if ($validated['delivery_type'] === 'pickup' && $pickupLocation) {
             $mapsUrl = $pickupLocation->maps_url;
+        } elseif (! empty($validated['maps_url'])) {
+            $mapsUrl = trim($validated['maps_url']);
         } elseif (! empty($validated['delivery_latitude']) && ! empty($validated['delivery_longitude'])) {
             $mapsUrl = 'https://maps.google.com/?q='.$validated['delivery_latitude'].','.$validated['delivery_longitude'];
         } elseif (! empty($validated['delivery_address'])) {
@@ -626,6 +649,7 @@ class CheckoutController extends Controller
                 $user->update([
                     'saved_address' => $order->delivery_address,
                     'saved_address_detail' => $order->delivery_address_detail,
+                    'saved_maps_url' => $order->maps_url,
                     'saved_latitude' => $order->delivery_latitude,
                     'saved_longitude' => $order->delivery_longitude,
                 ]);

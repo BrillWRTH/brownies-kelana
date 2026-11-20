@@ -28,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'secondary_phone',
         'saved_address',
         'saved_address_detail',
+        'saved_maps_url',
         'saved_latitude',
         'saved_longitude',
         'role',

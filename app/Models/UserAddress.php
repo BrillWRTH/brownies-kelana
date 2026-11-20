@@ -31,6 +31,7 @@ class UserAddress extends Model
         'postal_code',
         'latitude',
         'longitude',
+        'maps_url',
         'location_notes',
         'is_default',
     ];
