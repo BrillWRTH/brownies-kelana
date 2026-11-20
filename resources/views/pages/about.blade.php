@@ -3,17 +3,23 @@
 @section('title', 'Tentang Kami — Brownies Kelana')
 
 @section('content')
-    {{-- 1. Hero Cerita Brand Brownies Kelana (Caramel Bronze Banner #9b7643 - Luas, Dalam & Tidak Ceper) --}}
-    <section class="relative overflow-hidden bg-[#9b7643] text-white py-20 sm:py-28 lg:py-36 min-h-[520px] sm:min-h-[580px] lg:min-h-[660px] flex items-center">
-        <div class="mx-auto grid max-w-7xl w-full items-center gap-8 px-4 sm:px-6 md:grid-cols-12 lg:gap-14 lg:px-8">
-            <div class="md:col-span-5 lg:col-span-5">
-                <h1 class="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+    {{-- 1. Hero Cerita Brand Brownies Kelana (Caramel Bronze Banner #9b7643 - Persis Figma: Tulisan di Atas, Gambar di Bawah) --}}
+    <section class="relative overflow-hidden bg-[#9b7643] text-white pt-10 sm:pt-14 lg:pt-16 pb-12 sm:pb-16 lg:pb-20">
+        <div class="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+            {{-- Bagian Atas: Tulisan Luas dan Terstruktur Sesuai Figma --}}
+            <div class="max-w-2xl lg:max-w-3xl">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-bold leading-tight tracking-tight text-white">
                     Selamat Datang di {{ $storeSetting->store_name }}
                 </h1>
-                <p class="mt-6 text-sm leading-relaxed text-[#fcf5eb]/95 sm:text-base lg:text-lg max-w-xl">
+                <p class="mt-4 sm:mt-5 text-xs sm:text-sm lg:text-[15px] leading-relaxed text-[#fcf5eb]/95 max-w-xl lg:max-w-2xl">
                     {{ $storeSetting->about_story ?: 'Berdiri sejak tahun 2018, Brownies Kelana hadir untuk menemani setiap momen spesial Anda dengan aneka kue yang lezat dan berkualitas. Kami percaya bahwa setiap gigitan memiliki cerita dan setiap hidangan manis dapat menghadirkan kebahagiaan. Dengan beragam pilihan brownies dan kue yang menggugah selera, kami berusaha menghadirkan cita rasa istimewa untuk berbagai kesempatan, mulai dari camilan sehari-hari, hadiah untuk orang tersayang, hingga pelengkap perayaan spesial.' }}
                 </p>
-                <div class="mt-7 sm:mt-9">
+            </div>
+
+            {{-- Bagian Bawah: Tombol di Kiri & Gambar Platter di Bawah Kanan Persis Figma --}}
+            <div class="mt-6 sm:mt-8 flex flex-col md:flex-row md:items-end md:justify-between gap-6 lg:gap-8">
+                {{-- Tombol Kunjungi Katalog Produk --}}
+                <div class="shrink-0 pb-1 sm:pb-2">
                     <a href="{{ route('products.index') }}"
                         class="inline-flex items-center gap-2.5 rounded-lg bg-[#2b201a] px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-[#1a130f] hover:shadow-lg hover:-translate-y-0.5">
                         <svg class="h-4 w-4 shrink-0 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -22,10 +28,12 @@
                         <span>Kunjungi Katalog Produk</span>
                     </a>
                 </div>
-            </div>
-            <div class="md:col-span-7 lg:col-span-7 flex justify-center md:justify-end">
-                <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
-                    class="w-full max-w-[620px] lg:max-w-[760px] object-contain drop-shadow-2xl">
+
+                {{-- Gambar Platter di Bawah Kanan --}}
+                <div class="w-full max-w-[480px] sm:max-w-[540px] md:max-w-[480px] lg:max-w-[620px] xl:max-w-[680px] flex justify-center md:justify-end md:-mt-12 lg:-mt-20">
+                    <img src="{{ asset('images/kelana/hero-about-platter.png') }}" alt="Aneka Kue Brownies Kelana di atas Platter"
+                        class="w-full object-contain drop-shadow-2xl">
+                </div>
             </div>
         </div>
     </section>
