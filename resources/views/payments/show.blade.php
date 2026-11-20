@@ -360,6 +360,10 @@
                         navigator.clipboard?.writeText(amount).then(() => {
                             const original = copyAmountBtn.textContent;
                             copyAmountBtn.textContent = 'Nominal Tersalin ✓';
+                            window.Toast?.fire({
+                                icon: 'success',
+                                title: 'Nominal pembayaran berhasil disalin!'
+                            });
                             setTimeout(() => copyAmountBtn.textContent = original, 1800);
                         });
                     });

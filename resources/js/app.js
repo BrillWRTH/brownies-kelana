@@ -1,3 +1,39 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
+// Toast SweetAlert2 Pop Up Pojok Kanan Atas
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 4000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
+});
+
+window.Swal = Swal;
+window.Toast = Toast;
+
+window.showToast = (icon, title, html = null, timer = 4000) => {
+    return Toast.fire({
+        icon,
+        title,
+        html,
+        timer,
+    });
+};
+
+// Override native alert() agar selalu menggunakan SweetAlert toast di pojok kanan atas
+window.alert = (message) => {
+    Toast.fire({
+        icon: 'info',
+        title: message,
+    });
+};
+
 // Interaktivitas global Brownies Kelana (Drawer Keranjang, Dropdown, Modal, Hero Carousel, Toggle Sandi)
 document.addEventListener('DOMContentLoaded', () => {
     const cartDrawer = document.getElementById('kelana-cart-drawer');

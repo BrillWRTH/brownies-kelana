@@ -116,37 +116,8 @@
                 <a href="{{ route('admin.notifications.index') }}" class="shrink-0 rounded-lg px-3 py-1.5 {{ request()->routeIs('admin.notifications.*') ? 'bg-[#593822] text-white' : 'bg-white text-[#593822]' }}">Notifikasi</a>
             </nav>
 
-            {{-- Flash Notifications Admin --}}
-            <div class="no-print px-4 pt-4 sm:px-8">
-                @if(session('success'))
-                    <div class="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">
-                        {{ session('success') }}
-                        @if(session('wa_launch_url'))
-                            <a href="{{ session('wa_launch_url') }}" target="_blank" rel="noopener" class="ml-3 inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-800">
-                                <span>Buka Chat WhatsApp Sekarang</span>
-                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
-                                </svg>
-                            </a>
-                        @endif
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div class="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                @if($errors->any())
-                    <div class="mb-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-                        <p class="font-bold">Terjadi kesalahan validasi:</p>
-                        <ul class="mt-1 list-disc pl-4">
-                            @foreach($errors->all() as $err)
-                                <li>{{ $err }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-            </div>
+            {{-- Notifikasi Pop-up SweetAlert Pojok Kanan Atas --}}
+            @include('partials.sweetalert')
 
             <main class="flex-1 p-4 pb-16 sm:px-8 sm:py-6 sm:pb-20">
                 @yield('content')

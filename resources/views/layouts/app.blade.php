@@ -193,31 +193,8 @@
         </div>
     </header>
 
-    {{-- Notifikasi Flash Session --}}
-    @if(session('success') || session('error') || $errors->any())
-        <div class="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 shadow-xs">
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="mt-2 flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900 shadow-xs">
-                    <span>{{ session('error') }}</span>
-                </div>
-            @endif
-            @if($errors->any())
-                <div class="mt-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-900">
-                    <p class="font-bold">Periksa kembali input Anda:</p>
-                    <ul class="mt-1 list-disc pl-4">
-                        @foreach($errors->all() as $errorMessage)
-                            <li>{{ $errorMessage }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
-    @endif
+    {{-- Notifikasi Pop-up SweetAlert Pojok Kanan Atas --}}
+    @include('partials.sweetalert')
 
     {{-- Konten Utama Halaman --}}
     <main class="flex-1">

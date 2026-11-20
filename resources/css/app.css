@@ -102,6 +102,39 @@
     scrollbar-width: none;
 }
 
+/* SweetAlert2 Toast Pop-up Pojok Kanan Atas */
+.swal2-container.swal2-top-end,
+.swal2-container.swal2-top-right {
+    z-index: 99999 !important;
+}
+.swal2-popup.swal2-toast {
+    font-family: 'Lato', sans-serif !important;
+    background: #ffffff !important;
+    border-radius: 1rem !important;
+    padding: 0.85rem 1.15rem !important;
+    box-shadow: 0 10px 25px -5px rgba(40, 33, 28, 0.18), 0 8px 10px -6px rgba(40, 33, 28, 0.12) !important;
+    border: 1px solid #e8decb !important;
+}
+.swal2-popup.swal2-toast .swal2-title {
+    font-family: 'Lato', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    color: #2f2118 !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+}
+.swal2-popup.swal2-toast .swal2-html-container {
+    font-family: 'Lato', sans-serif !important;
+    font-size: 0.8125rem !important;
+    color: #593822 !important;
+    line-height: 1.4 !important;
+    margin: 0.25rem 0 0 0 !important;
+}
+.swal2-popup.swal2-toast .swal2-timer-progress-bar {
+    background: #a67251 !important;
+    height: 3px !important;
+}
+
 @media print {
     .no-print {
         display: none !important;

@@ -54,16 +54,7 @@
                     Masuk dengan akun admin UMKM Kelana. Halaman ini terpisah dari login pelanggan.
                 </p>
 
-                @if(session('success'))
-                    <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs font-medium text-emerald-900">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-900">
-                        {{ session('error') }}
-                    </div>
-                @endif
+                @include('partials.sweetalert')
 
                 <form method="POST" action="{{ route('admin.login.attempt') }}" class="mt-6 space-y-4">
                     @csrf
