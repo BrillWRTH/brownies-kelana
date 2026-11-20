@@ -56,42 +56,42 @@
         </div>
     </section>
 
-    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - TANGGA ATAS & BAWAH NYATA SESUAI FIGMA --}}
-    <section class="relative overflow-hidden bg-[#fcf8f2] pt-12 sm:pt-16 lg:pt-20 pb-28 sm:pb-36 lg:pb-48">
-        {{-- Latar belakang blok cokelat gelap (#53311a) LEBAR & TINGGI di bagian bawah foto dengan pita gelombang --}}
-        <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[38%] sm:top-[40%] lg:top-[42%] bg-[#53311a]">
+    {{-- 3. Kolase 3 Foto "Temukan kebahagiaan di setiap Rasa" - PERSIS FIGMA (TANGGA ATAS & BAWAH DENGAN PITA COKELAT HORIZONTAL) --}}
+    <section class="relative overflow-hidden bg-[#fcf8f2] pt-8 sm:pt-14 lg:pt-16 pb-20 sm:pb-28 lg:pb-36">
+        {{-- Pita Cokelat Horizontal (#54311a) di Bagian Tengah sesuai Figma (Atas Cream, Tengah Pita Cokelat, Bawah Cream) --}}
+        <div class="pointer-events-none absolute inset-x-0 top-[210px] sm:top-[250px] md:top-[280px] lg:top-[310px] h-[260px] sm:h-[320px] md:h-[360px] lg:h-[400px] bg-[#54311a]">
             <img src="{{ asset('images/kelana/about-ngisoran.png') }}" alt=""
-                class="absolute bottom-0 left-0 w-full min-h-[180px] sm:min-h-[250px] lg:min-h-[320px] object-cover opacity-90">
+                class="absolute bottom-0 left-0 w-full min-h-[140px] sm:min-h-[180px] lg:min-h-[240px] object-cover opacity-90">
         </div>
 
         <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {{-- Grid 3 Kolom Bertangga Nyata di Bagian Atas Maupun Bawah (Tangga Atas Bawahnya Sesuai Figma) --}}
-            <div class="grid grid-cols-12 items-start gap-3 sm:gap-6 lg:gap-10">
-                {{-- Foto 1 (Kiri): culkle 1.png - TANGGA 1 (ATAS PALING TINGGI, BAWAH PALING TINGGI) --}}
+            {{-- Grid 3 Kolom Bertangga Nyata di Atas & Bawah (Tangga Atas & Bawahnya Sesuai Gambar Referensi) --}}
+            <div class="grid grid-cols-12 items-start gap-4 sm:gap-6 lg:gap-10">
+                {{-- Foto 1 (Kiri): culkle 1.png - TANGGA 1 (Atas Tinggi, Bawah Berhenti di Paruh Atas Pita Cokelat) --}}
                 <div class="col-span-4 self-start">
                     <div class="overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-cukle.png') }}" alt="Brookies Brownies Kelana"
-                            class="h-56 sm:h-76 md:h-88 lg:h-[390px] w-full object-cover">
+                            class="h-56 sm:h-76 md:h-88 lg:h-[400px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Kolom Tengah: Judul "Temukan kebahagiaan di setiap Rasa" + Foto 2 senyum 1.png - TANGGA 2 (TENGAH ATAS & TENGAH BAWAH) --}}
-                <div class="col-span-4 flex flex-col items-center text-center">
-                    <div class="mb-4 sm:mb-6 flex justify-center">
+                {{-- Kolom Tengah: Judul Left-Aligned + Foto 2 senyum 1.png - TANGGA 2 (Tengah Atas & Bawah Mencapai Ujung Bawah Pita Cokelat) --}}
+                <div class="col-span-4 flex flex-col items-start">
+                    <div class="mb-4 sm:mb-6 w-full flex justify-start">
                         <img src="{{ asset('images/kelana/about-heading-rasa.png') }}" alt="Temukan kebahagiaan di setiap Rasa"
-                            class="h-12 sm:h-16 md:h-20 lg:h-24 object-contain">
+                            class="h-12 sm:h-16 md:h-20 lg:h-24 object-contain object-left">
                     </div>
                     <div class="w-full overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-senyum.png') }}" alt="Kebahagiaan Bersama Brownies Kelana"
-                            class="h-68 sm:h-88 md:h-[420px] lg:h-[460px] w-full object-cover">
+                            class="h-68 sm:h-88 md:h-[430px] lg:h-[490px] w-full object-cover">
                     </div>
                 </div>
 
-                {{-- Foto 3 (Kanan): tepunglop 1.png - TANGGA 3 (ATAS PALING TURUN, BAWAH PALING TURUN / DEEP STEP) --}}
-                <div class="col-span-4 self-start pt-24 sm:pt-40 md:pt-52 lg:pt-64">
-                    <div class="overflow-hidden shadow-2xl">
+                {{-- Foto 3 (Kanan): tepunglop 1.png - TANGGA 3 (Atas Paling Turun, Bawah Paling Turun Menembus Pita Cokelat ke Area Cream Bawah) --}}
+                <div class="col-span-4 self-start pt-32 sm:pt-52 md:pt-64 lg:pt-80 flex justify-end">
+                    <div class="w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] overflow-hidden shadow-2xl">
                         <img src="{{ asset('images/kelana/about-tepunglop.png') }}" alt="Proses Adonan Penuh Cinta Brownies Kelana"
-                            class="h-56 sm:h-76 md:h-92 lg:h-[410px] w-full object-cover">
+                            class="h-56 sm:h-76 md:h-88 lg:h-[420px] w-full object-cover">
                     </div>
                 </div>
             </div>
